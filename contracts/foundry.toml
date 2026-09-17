@@ -1,0 +1,52 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+test = "test"
+script = "script"
+# Pinned toolchain (SPEC section 12): never rely on Foundry defaults.
+solc_version = "0.8.28"
+evm_version = "paris"          # conservative target until the BSC hardfork in force is confirmed at deployment
+optimizer = true
+optimizer_runs = 600           # with via_ir; CI enforces the EIP-170 runtime size limit
+via_ir = true
+bytecode_hash = "none"
+cbor_metadata = false
+verbosity = 2
+fs_permissions = [{ access = "read", path = "./out" }, { access = "read", path = "./test/vectors" }, { access = "read", path = "./script/templates" }, { access = "read", path = "./broadcast" }, { access = "read", path = "../config" }, { access = "read-write", path = "../config/deployments" }, { access = "read-write", path = "./test/script/tmp" }]
+remappings = [
+  "forge-std/=lib/forge-std/src/",
+  "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+  "@chainlink/contracts/=lib/chainlink-brownie-contracts/contracts/",
+]
+
+[fuzz]
+runs = 512
+seed = "0x20260911"
+
+[invariant]
+runs = 64
+depth = 128
+fail_on_revert = false
+call_override = false
+dictionary_weight = 60
+
+[profile.ci]
+fuzz = { runs = 2048, seed = "0x20260911" }
+invariant = { runs = 256, depth = 256 }
+
+[profile.scale]
+# Settlement evidence at 100,000 real ranges (test/unit/LuckyDrawScale.t.sol): appending the entries through
+# `buy` costs about 6.8e9 gas in one test transaction, above the default 1,073,741,824 limit. Compiler
+# settings, remappings and fuzz configuration are inherited from [profile.default].
+gas_limit = 40000000000
+
+[profile.campaign]
+# Recorded stateful campaign (SPEC section 11.2 "Stateful", ACCEPTANCE evidence ledger): one long generated
+# sequence per invocation. Vary FOUNDRY_FUZZ_SEED per invocation and sum the LDCSV_* lines the suite prints.
+invariant = { runs = 1, depth = 3000, fail_on_revert = false, call_override = false, dictionary_weight = 60 }
+
+[fmt]
+line_length = 120
+tab_width = 4
+bracket_spacing = false

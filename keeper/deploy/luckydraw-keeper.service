@@ -1,0 +1,109 @@
+; LuckyDraw keeper as a systemd service (SPEC §10.3, §12; wave 7 brief item 5).
+;
+; Install and operating instructions are in ../README.md, "Running it under systemd". Nothing in this file
+; is a secret: the signing key arrives through LoadCredential= below, and the RPC, heartbeat and alert URLs
+; through an EnvironmentFile that is root-owned 0600.
+;
+; Copy to /etc/systemd/system/luckydraw-keeper.service and edit only the three paths marked EDIT.
+
+[Unit]
+Description=LuckyDraw keeper (SPEC 6.2 round lifecycle)
+Documentation=file:/opt/luckydraw/keeper/README.md
+After=network-online.target
+Wants=network-online.target
+; Deliberately no start rate limit. The keeper exits non-zero after ten consecutive failed cycles, which is
+; usually an RPC outage that outlasts five minutes; with a burst limit systemd would give up permanently and
+; the rounds would stop, which is worse than restarting every 30 s until the endpoint comes back. A refusal
+; to start (a bad manifest, a wrong chain) also loops, and is visible as a repeating refused_to_start line.
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+; EDIT: the checkout. It must contain config/deployments/<chainId>/<draw>.json, because that is where the
+; keeper looks for the manifest unless KEEPER_DEPLOYMENTS_DIR says otherwise.
+WorkingDirectory=/opt/luckydraw/keeper
+; EDIT: node 24 or newer. The keeper runs its TypeScript sources directly under Node's type stripping.
+ExecStart=/usr/bin/node src/main.ts
+
+; --- identity -------------------------------------------------------------------------------------------
+; EDIT if you named the account differently. Create it with:
+;   useradd --system --no-create-home --shell /usr/sbin/nologin luckydraw-keeper
+; It owns nothing, needs no home and must not be able to log in.
+User=luckydraw-keeper
+Group=luckydraw-keeper
+
+; --- the signing key ------------------------------------------------------------------------------------
+; systemd reads /etc/luckydraw/keeper-private-key (root:root, 0600, one hex key, no trailing spaces) and
+; places a copy in a per-invocation tmpfs readable only by User=, exporting the directory as
+; $CREDENTIALS_DIRECTORY. src/credentials.ts reads $CREDENTIALS_DIRECTORY/keeper-private-key.
+;
+; This is the whole point of the unit: the key is in no process argument (ps), no environment
+; (/proc/<pid>/environ, systemctl show -p Environment), no shell history and no log line. Do NOT put
+; KEEPER_PRIVATE_KEY in the EnvironmentFile instead - it would defeat every one of those.
+LoadCredential=keeper-private-key:/etc/luckydraw/keeper-private-key
+
+; --- configuration --------------------------------------------------------------------------------------
+; Root-owned 0600. Copy from luckydraw-keeper.env.example and fill in. It holds the RPC URL and the optional
+; heartbeat and alert URLs, all three of which are credentials, and never the signing key.
+EnvironmentFile=/etc/luckydraw/keeper.env
+
+; --- restart policy -------------------------------------------------------------------------------------
+; Restarting resets the keeper's in-memory alert limiter, which is one alert per cause per hour *per
+; process*. A cause that keeps failing cycles therefore pages about every three minutes, not every hour:
+; ten failed cycles at the 15-second interval take ~2.5 minutes, then the exit, then RestartSec. That is the
+; deliberate trade - never giving up on the rounds - so a paging policy has to treat a repeating
+; consecutive_cycle_failures as one incident (keeper/README.md, "Heartbeat and alerts").
+Restart=on-failure
+RestartSec=30
+; SIGTERM finishes the cycle in flight, flushes a pending heartbeat and exits cleanly (src/main.ts).
+KillSignal=SIGTERM
+TimeoutStopSec=60
+
+; --- hardening ------------------------------------------------------------------------------------------
+; The keeper writes no file at all: it reads the manifest and its own sources, and logs to stdout.
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectProc=invisible
+ProcSubset=pid
+ProtectClock=yes
+ProtectHostname=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+RemoveIPC=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+; Outbound HTTPS to the RPC endpoint and, when configured, to the heartbeat and alert endpoints. No listening
+; socket is opened and no private network namespace is used; AF_NETLINK is what glibc's resolver needs to
+; enumerate interfaces before a DNS lookup.
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX AF_NETLINK
+; NOT set: MemoryDenyWriteExecute=yes. V8 maps its JIT pages writable and then executable, so it would kill
+; the process at startup. Everything above is compatible with Node; this one is not.
+
+; --- resources ------------------------------------------------------------------------------------------
+; The keeper holds the tracked round ids, one buyer list per refunding round and the per-round cost totals.
+; A steady state is tens of megabytes; this is a ceiling that turns a leak into a restart rather than into
+; an OOM on the host.
+MemoryHigh=384M
+MemoryMax=512M
+TasksMax=64
+
+; --- logging --------------------------------------------------------------------------------------------
+; One key=value line per decision on stdout; journalctl -u luckydraw-keeper -f reads it.
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=luckydraw-keeper
+
+[Install]
+WantedBy=multi-user.target

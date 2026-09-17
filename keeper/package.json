@@ -1,0 +1,25 @@
+{
+  "name": "@luckydraw/keeper",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Minimal single-process LuckyDraw keeper for the testnet interest test: one loop over the SPEC section 6.2 state table, simulate-before-send, no database (SPEC sections 6.2, 10.2, 12.1).",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node src/main.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test \"src/**/*.test.ts\"",
+    "build": "tsc -p tsconfig.build.json"
+  },
+  "dependencies": {
+    "@luckydraw/client": "workspace:*",
+    "ethers": "6.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.4",
+    "typescript": "5.9.3"
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "name": "first-testnet",
+  "environment": "testnet",
+  "notes": "Synthetic test fixture, not an operator plan. Every address is a repeated-nibble placeholder; a real plan carries the coordinator, key hash and feed proxy the operator verified against BSC testnet.",
+  "chain": {
+    "chainId": 97,
+    "name": "bsc-testnet",
+    "nativeSymbol": "BNB",
+    "explorerUrl": "https://testnet.bscscan.com",
+    "confirmationDepth": 200,
+    "rpcEnvVars": {
+      "public": "LUCKYDRAW_RPC_URL",
+      "operational": "LUCKYDRAW_OPS_RPC_URL"
+    }
+  },
+  "toolchain": {
+    "foundry": "1.8.1",
+    "solc": "0.8.28",
+    "evmVersion": "paris",
+    "optimizer": true,
+    "optimizerRuns": 600,
+    "viaIr": true,
+    "bytecodeHash": "none"
+  },
+  "vrf": {
+    "coordinator": "0xcccccccccccccccccccccccccccccccccccccccc",
+    "coordinatorIsMock": false,
+    "subscriptionId": "7",
+    "keyHash": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "nativeBilling": true,
+    "requestConfirmations": 200,
+    "numWords": 2,
+    "callbackGasLimit": 300000,
+    "maxRequestCostNative": "3000000000000000",
+    "maxRequestCostDerivation": {
+      "maxGasPriceWei": "5000000000",
+      "verificationGasOverhead": 100000,
+      "premiumPercentage": 25,
+      "flatFeeNativeWei": "0",
+      "note": "Synthetic fixture values, re-derived against the deployed coordinator before the deployment runs."
+    },
+    "keyHashGetter": "s_provingKeys(bytes32)",
+    "lowFundingThresholdNative": "30000000000000000",
+    "measuredCallbackGasUsed": null,
+    "source": { "url": "https://docs.chain.link/vrf/v2-5/supported-networks", "date": "2026-09-11" }
+  },
+  "ownership": {
+    "finalOwner": "0x2020202020202020202020202020202020202020",
+    "feeAccount": "0x2020202020202020202020202020202020202020",
+    "seedAccount": "0x2020202020202020202020202020202020202020",
+    "note": "SPEC 12.1 allows one operator Safe for owner, treasury and seed on testnet; mainnet requires three."
+  },
+  "assets": [
+    {
+      "asset": "0x0000000000000000000000000000000000000000",
+      "native": true,
+      "symbol": "BNB",
+      "name": "BNB",
+      "decimals": 18,
+      "isMock": false,
+      "depositsEnabled": true,
+      "exactTransferEvidence": "Native path: the Vault credits exactly msg.value and checks the exact debit on withdrawal.",
+      "status": "approved",
+      "source": { "url": "https://docs.chain.link/data-feeds/price-feeds/addresses", "date": "2026-09-11" },
+      "price": {
+        "feed": "0xdddddddddddddddddddddddddddddddddddddddd",
+        "feedIsMock": false,
+        "feedDecimals": 8,
+        "baseQuote": "BNB/USD",
+        "heartbeatSeconds": 1800,
+        "observedP999IntervalSeconds": null,
+        "maxPriceAge": 3600,
+        "minAnswer": "100000000",
+        "maxAnswer": "1000000000000",
+        "answerBoundsConfirmedAbsent": false,
+        "referenceKind": "ExactToken",
+        "displayLabel": null,
+        "pegAssumption": null,
+        "verifiedOn": "2026-09-11",
+        "source": { "url": "https://docs.chain.link/data-feeds/price-feeds/addresses", "date": "2026-09-11" }
+      },
+      "pool": {
+        "enabled": true,
+        "seedAmount": "5000000000000000",
+        "targetsUsd": { "Day100": 100, "Day1k": 1000, "Day10k": 10000, "Week1k": 1000, "Week10k": 10000, "Week100k": 100000, "Month100k": 100000 }
+      }
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "name": "luckydraw",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "LuckyDraw workspace root: configuration records, JSON schemas, the configuration validator and the shared TypeScript packages (SPEC sections 10.1, 12 and 15).",
+  "license": "MIT",
+  "packageManager": "pnpm@12.3.4",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "validate:config": "node scripts/validate_config.ts",
+    "test:config": "node --test scripts/validate_config.test.ts",
+    "observe:feed": "node scripts/observe_feed.ts",
+    "check:chain": "node scripts/check_chain_record.ts",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "build": "pnpm -r build",
+    "abi:check": "pnpm -r abi:check"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.13",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1"
+  }
+}

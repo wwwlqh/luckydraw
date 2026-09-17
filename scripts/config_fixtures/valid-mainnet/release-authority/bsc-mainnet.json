@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "deploymentId": "56:0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "environment": "mainnet",
+  "custody": {
+    "separateSafes": true,
+    "recoveryDrill": {
+      "performed": true,
+      "date": "2026-09-10",
+      "chainId": 56,
+      "safes": {
+        "owner": "0x2020202020202020202020202020202020202020",
+        "treasury": "0x3030303030303030303030303030303030303030",
+        "seed": "0x4040404040404040404040404040404040404040"
+      },
+      "unavailableSignerPassed": true,
+      "compromisedSignerBlocked": true,
+      "signerReplacementPassed": true,
+      "treasuryWithdrawalProven": true,
+      "receiptRefs": [
+        "restricted: recovery-drill (four Safe transactions, dated in this record)"
+      ]
+    }
+  },
+  "review": {
+    "reviewerDistinctFromAuthor": true,
+    "selfApprovalDisabled": true,
+    "adminBypassDisabled": true,
+    "untrustedPullRequestsIsolated": true,
+    "actionsPinnedToCommitSha": true
+  },
+  "notes": "Synthetic test fixture, not a release. The drill was performed on the same three Safes the manifest gives the owner, treasury and seed roles to, on the chain the release deploys to, and before the manifest's createdAtUtc as SPEC 10.5 requires."
+}

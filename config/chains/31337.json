@@ -1,0 +1,19 @@
+{
+  "chainId": 31337,
+  "name": "anvil-local",
+  "displayName": "Local anvil",
+  "nativeSymbol": "BNB",
+  "explorerUrl": null,
+  "confirmationDepth": 200,
+  "startBlock": null,
+  "networkIdentity": {
+    "genesisHash": null,
+    "multicall3": null,
+    "source": { "url": null, "date": null }
+  },
+  "rpcEnvVars": {
+    "public": "LUCKYDRAW_RPC_URL",
+    "operational": "LUCKYDRAW_OPS_RPC_URL"
+  },
+  "notes": "Local anvil development chain. Everything it holds is a labeled mock: mock tokens, a mock aggregator and a mock VRF coordinator, none of which may appear in a testnet or mainnet manifest. anvil's native coin has no protocol-level name; it is labeled BNB here so that local runs model BSC. Multicall3 and the genesis hash stay null because nothing has been verified against a running node; a local deployment records its own addresses in its manifest, not here."
+}

@@ -1,0 +1,54 @@
+{
+  "chainId": 97,
+  "asset": "0x337610d27c682e347c9cd60bd4b3b107c9d34ddd",
+  "native": false,
+  "symbol": "USDT",
+  "name": "USDT Token",
+  "decimals": 18,
+  "isMock": false,
+  "depositsEnabled": true,
+  "exactTransferEvidence": null,
+  "requiresZeroReset": false,
+  "issuerReview": {
+    "upgradeable": false,
+    "freezeOrBlocklist": false,
+    "mintAuthority": "A single externally owned account, 0x082a2027dc16f42d6e69be8fa13c94c17c910ebe, which has no code on chain 97 (checked 2026-09-17) and is returned by both owner() and getOwner(). It can mint(uint256) without limit to its own balance and can transferOwnership/renounceOwnership; it cannot move, freeze or destroy anyone else's balance, and there is no pause. An eth_call of mint(1) succeeds from that address and reverts with \"Ownable: caller is not the owner\" from any other, so the restriction was confirmed rather than assumed. This is the anonymous operator of a BSC testnet faucet token, not the Binance-Peg custodian: the token has no issuer, no reserves and no value, and unlimited minting is a property of the test token rather than a risk anyone carries.",
+    "rebasing": false,
+    "reviewedOn": "2026-09-17",
+    "source": {
+      "url": "https://testnet.bscscan.com/token/0x337610d27c682e347c9cd60bd4b3b107c9d34ddd",
+      "date": "2026-09-17"
+    }
+  },
+  "status": "candidate",
+  "source": {
+    "url": "https://testnet.bscscan.com/token/0x337610d27c682e347c9cd60bd4b3b107c9d34ddd",
+    "date": "2026-09-17"
+  },
+  "price": {
+    "feed": "0xeca2605f0bcf2ba5966372c99837b1f182d3d620",
+    "feedIsMock": false,
+    "feedDecimals": 8,
+    "baseQuote": "USDT/USD",
+    "heartbeatSeconds": 86400,
+    "observedP999IntervalSeconds": 86487,
+    "observationWindow": {
+      "fromBlock": 128670804,
+      "toBlock": 131455471,
+      "samples": 19
+    },
+    "maxPriceAge": 172800,
+    "minAnswer": "0",
+    "maxAnswer": "99999999999999999999999999999",
+    "answerBoundsConfirmedAbsent": false,
+    "referenceKind": "ExactToken",
+    "displayLabel": "USDT/USD",
+    "pegAssumption": null,
+    "verifiedOn": "2026-09-17",
+    "source": {
+      "url": "https://docs.chain.link/data-feeds/price-feeds/addresses",
+      "date": "2026-09-17"
+    }
+  },
+  "notes": "ADR 038 (reopening the last clause of ADR 037). Candidate, not approved: this record holds what was verified read-only against chain 97 on 2026-09-17 and names what is still missing, so nothing here should be read as a completed admission. THIS IS NOT BINANCE-PEG USDT. It is a faucet test token on BSC testnet with no issuer, no reserves and no value; the mainnet asset of ADR 037 is a different contract (0x55d398326f99059ff775485246999027b3197955 on chain 56) and nothing measured here transfers to it. The only purpose of this record is the chain 97 rehearsal of the ERC-20 path (approve, deposit, the Vault's exact-receipt and exact-debit checks, withdraw, and the zero-reset allowance handling) before that path is used with real money. VERIFIED ON CHAIN (cast, public RPC https://bsc-testnet-rpc.publicnode.com, eth_chainId 97): symbol() \"USDT\", name() \"USDT Token\", decimals() 18, totalSupply() 100000000000000000000000000 (1e26). Both EIP-1967 storage slots (implementation 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc and admin 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103) read zero and the runtime code is a single 3,969-byte contract, so this is not a proxy and issuerReview.upgradeable is false. SELECTOR SCAN of that runtime: approve, increaseAllowance, decreaseAllowance, mint(uint256), owner, getOwner, transferOwnership and renounceOwnership are present; burn(uint256), pause, paused, unpause, isBlackListed, addBlackList, blacklist, destroyBlackFunds, freeze, rebase, setBalance and permit are all absent, so freezeOrBlocklist is false and rebasing is false for this contract. MINT AUTHORITY, checked rather than assumed: owner() and getOwner() both return 0x082a2027dc16f42d6e69be8fa13c94c17c910ebe, which has no code on chain 97 (an externally owned account) and holds 50000000000000000000000000 (5e25) of the supply. An eth_call of mint(1) from that address succeeds; the same call from 0x1111111111111111111111111111111111111111 reverts with \"Ownable: caller is not the owner\". So the mint authority is a single anonymous faucet EOA that can mint without limit to its own balance. That is acceptable for a test token and would be disqualifying on mainnet; it is recorded here so nobody mistakes this contract for an admitted asset. FEED: Chainlink USDT/USD proxy 0xeca2605f0bcf2ba5966372c99837b1f182d3d620, the address ADR 037 recorded, re-verified on chain: decimals() 8, description() \"USDT / USD\", version() 4, phaseId() 2, aggregator() 0xb7e02fd09871db96c13a8ee02331ec4031027050, whose minAnswer is 0 and maxAnswer is 99999999999999999999999999999 - the wide-open sentinel bounds this testnet aggregator carries, the same pair the chain 97 BNB feed reports, so the bounds are recorded as read and answerBoundsConfirmedAbsent stays false because they are present rather than absent. latestRoundData at read time answered 99919000 (USD 0.99919000) with updatedAt 1789601625 (2026-09-16T23:33:45Z), 25,014 seconds old at 2026-09-17T06:30:39Z, well inside the 86,400-second heartbeat. maxPriceAge is max(2 x 86400, 3600) = 172800 (ADR 020), which is exactly the upper bound Types.sol allows: a feed with a slower heartbeat than this one could not be admitted at all. OBSERVED INTERVAL: measured, not assumed. node scripts/observe_feed.ts --feed 0xeca2605f0bcf2ba5966372c99837b1f182d3d620 --days 14 --heartbeat 86400 walked phase 2 rounds 1650 to 1668 and reported p50 86402 s, p99 86487 s, p99.9 86487 s, min 94 s, max 86487 s over 19 samples in blocks 128670804 to 131455471, answers between 0.99919000 and 1.00008000, with no missing and no non-monotonic rounds. The full 14-day window the rules ask for was available on chain and was used; 19 samples is simply what a heartbeat-only testnet feed produces in 14 days, and the number is small because the feed is slow, not because the window was shortened. p99.9 86487 s is inside maxPriceAge 172800 s, so the feed is eligible under ADR 020. Rules P6 to P8 are mainnet-only and do not gate this record; the measurement is recorded anyway because an unmeasured number would be a guess. ZERO RESET: requiresZeroReset is false because it was checked, not because it was skipped. 0xb4e425c2577f598f4523237a2efd963c6647f622 holds a live nonzero allowance of 954814254000000000000 to 0x93ab524b77c49e210ce02bc3be5bbc91c2be9e6d on this token (read with allowance(), and found from this token's own Approval logs); an eth_call of approve(that spender, 123456789) from that owner returned true without reverting, so this contract has no nonzero-to-nonzero approval guard. web/src/components/wallet/zeroReset.ts lists no chain 97 token in its fallback map, so with this flag false the app presents a single approve(amount), which is what the rehearsal should exercise against a token that accepts it. STILL MISSING before this record could be called anything more than a candidate: exactTransferEvidence is null, because what has been read is bytecode (a plain ERC-20 with no fee hook and no rebase or elastic-supply selector) and not an observed transfer. The chain 97 rehearsal is exactly what fills it: an exact receipt into the Vault and an exact debit out of it, observed. status stays \"candidate\" until then. This asset is never admissible on mainnet under any circumstances; it exists on a chain whose money is free."
+}

@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://luckydraw.invalid/schema/vrf.schema.json",
+  "title": "VRF record (SPEC section 15, row 'VRF')",
+  "description": "Every VRF parameter is constructor-fixed (SPEC section 7.1): coordinator, subscription id and its multisig owner, key hash, native billing, requestConfirmations=200, numWords=2, callbackGasLimit=300,000, the maxRequestCostNative derivation, the consumer registration receipt and the key-hash getter confirmed against the coordinator ABI.",
+  "$defs": {
+    "costDerivation": {
+      "type": "object",
+      "description": "maxRequestCostNative = maxGasPrice x (callbackGasLimit + verificationGasOverhead) x (1 + premium%) + flat native premium (SPEC section 7.1). Recorded so the number can be rechecked, not trusted.",
+      "properties": {
+        "maxGasPriceWei": { "$ref": "common.schema.json#/$defs/positiveUint256String" },
+        "verificationGasOverhead": { "type": "integer", "minimum": 0, "maximum": 10000000 },
+        "premiumPercentage": { "type": "number", "minimum": 0, "maximum": 1000 },
+        "flatFeeNativeWei": { "$ref": "common.schema.json#/$defs/uint256String" },
+        "note": { "$ref": "common.schema.json#/$defs/nonEmptyString" }
+      },
+      "required": ["maxGasPriceWei", "verificationGasOverhead", "premiumPercentage", "flatFeeNativeWei", "note"],
+      "additionalProperties": false
+    },
+    "vrfCommon": {
+      "type": "object",
+      "properties": {
+        "coordinator": {
+          "$ref": "common.schema.json#/$defs/address",
+          "description": "Immutable coordinator address held by ImmutableVRFConsumer. There is no migration setter."
+        },
+        "coordinatorIsMock": {
+          "type": "boolean",
+          "description": "True only for a labeled local mock coordinator. Must be false outside the local environment."
+        },
+        "subscriptionId": { "$ref": "common.schema.json#/$defs/uint256String" },
+        "subscriptionOwner": {
+          "$ref": "common.schema.json#/$defs/address",
+          "description": "The multisig that owns the subscription. A deployed fact, so it is absent from a plan."
+        },
+        "keyHash": {
+          "$ref": "common.schema.json#/$defs/bytes32",
+          "description": "Supported key hash, lowest gas lane. requestDraw pre-checks that the coordinator still reports it as registered (SPEC sections 6.2 and 7.1)."
+        },
+        "nativeBilling": {
+          "type": "boolean",
+          "description": "SPEC section 7.1: native BNB billing from the operator subscription.",
+          "const": true
+        },
+        "requestConfirmations": { "type": "integer", "const": 200 },
+        "numWords": { "type": "integer", "const": 2 },
+        "callbackGasLimit": { "type": "integer", "const": 300000 },
+        "maxRequestCostNative": { "$ref": "common.schema.json#/$defs/positiveUint256String" },
+        "maxRequestCostDerivation": { "$ref": "#/$defs/costDerivation" },
+        "consumerRegistered": {
+          "type": "boolean",
+          "description": "The Draw address is a registered consumer of the subscription. A deployed fact, so it is absent from a plan."
+        },
+        "consumerRegistrationTx": {
+          "anyOf": [{ "$ref": "common.schema.json#/$defs/txHash" }, { "type": "null" }],
+          "description": "Registration receipt required by section 15."
+        },
+        "keyHashGetter": {
+          "type": "string",
+          "description": "The getter the deploy script asserts on the coordinator so the section 6.2 pre-check can never become a permanent revert (SPEC section 15).",
+          "enum": ["s_provingKeys(bytes32)"]
+        },
+        "lowFundingThresholdNative": {
+          "$ref": "common.schema.json#/$defs/uint256String",
+          "description": "Subscription low-balance alert threshold (SPEC sections 10.2 and 15)."
+        },
+        "measuredCallbackGasUsed": {
+          "anyOf": [{ "type": "integer", "minimum": 0, "maximum": 150000 }, { "type": "null" }],
+          "description": "Measured consumer gas for the worst valid callback; section 11.2 requires <= 150,000 against the 300,000 budget. Null until measured."
+        },
+        "source": { "$ref": "common.schema.json#/$defs/sourceRef" }
+      },
+      "required": [
+        "coordinator",
+        "coordinatorIsMock",
+        "subscriptionId",
+        "keyHash",
+        "requestConfirmations",
+        "numWords",
+        "callbackGasLimit",
+        "maxRequestCostNative",
+        "maxRequestCostDerivation",
+        "lowFundingThresholdNative",
+        "source"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "allOf": [{ "$ref": "#/$defs/vrfCommon" }],
+  "properties": {
+    "subscriptionOwner": { "$comment": "Constrained in $defs/vrfCommon; named here only so \"required\" refers to a defined property." },
+    "consumerRegistered": { "$comment": "Constrained in $defs/vrfCommon; named here only so \"required\" refers to a defined property." }
+  },
+  "required": ["subscriptionOwner", "consumerRegistered"]
+}

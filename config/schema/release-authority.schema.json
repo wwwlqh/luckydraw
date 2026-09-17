@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://luckydraw.invalid/schema/release-authority.schema.json",
+  "title": "Release authority record (SPEC section 15, row 'Release authority')",
+  "description": "Who may approve a release and what binds an approval: Safe configuration and recovery receipts, reviewer and deployment policy, the approved source commit and artifact digest, provenance identity and the independent rebuild result. Restricted material (account recovery, canary trust) is referenced by pointer only. Never publish seeds, backup locations or private inventory.",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "deploymentId": {
+      "type": "string",
+      "description": "`${chainId}:${lowercase Draw address}` (SPEC section 10.3).",
+      "pattern": "^[1-9][0-9]{0,18}:0x[0-9a-f]{40}$"
+    },
+    "environment": { "$ref": "common.schema.json#/$defs/environment" },
+    "custody": {
+      "type": "object",
+      "description": "SPEC section 10.5. Separate Safes are a mainnet requirement; section 12.1 allows one operator Safe on testnet.",
+      "properties": {
+        "separateSafes": { "type": "boolean" },
+        "recoveryDrill": {
+          "type": "object",
+          "properties": {
+            "performed": { "type": "boolean" },
+            "date": {
+              "anyOf": [{ "$ref": "common.schema.json#/$defs/isoDate" }, { "type": "null" }]
+            },
+            "chainId": {
+              "anyOf": [{ "$ref": "common.schema.json#/$defs/chainId" }, { "type": "null" }],
+              "description": "Chain whose Safes the drill was performed on. It must equal the chain of this record's deploymentId: a drill on some other chain's Safes proves nothing about the ones that hold the money (SPEC section 10.5). Null until the drill is performed.",
+              "$comment": "SPEC section 14: the drill is performed on the mainnet Safes, before the contracts are deployed."
+            },
+            "safes": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "description": "The three Safe addresses the drill was actually performed on. They must equal the manifest's ownership.finalOwner, feeAccount and seedAccount.",
+                  "properties": {
+                    "owner": { "$ref": "common.schema.json#/$defs/address" },
+                    "treasury": { "$ref": "common.schema.json#/$defs/address" },
+                    "seed": { "$ref": "common.schema.json#/$defs/address" }
+                  },
+                  "required": ["owner", "treasury", "seed"],
+                  "additionalProperties": false
+                },
+                { "type": "null" }
+              ]
+            },
+            "unavailableSignerPassed": { "type": "boolean" },
+            "compromisedSignerBlocked": { "type": "boolean" },
+            "signerReplacementPassed": { "type": "boolean" },
+            "treasuryWithdrawalProven": { "type": "boolean" },
+            "receiptRefs": {
+              "type": "array",
+              "description": "Pointers to receipts, not the receipts themselves.",
+              "items": { "$ref": "common.schema.json#/$defs/nonEmptyString" }
+            }
+          },
+          "required": ["performed", "date", "chainId", "safes"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["separateSafes", "recoveryDrill"],
+      "additionalProperties": false
+    },
+    "review": {
+      "type": "object",
+      "description": "Production source, workflow and deployment-policy changes require a reviewer other than the author (SPEC section 10.5).",
+      "properties": {
+        "reviewerDistinctFromAuthor": { "type": "boolean" },
+        "selfApprovalDisabled": { "type": "boolean" },
+        "adminBypassDisabled": { "type": "boolean" },
+        "untrustedPullRequestsIsolated": { "type": "boolean" },
+        "actionsPinnedToCommitSha": { "type": "boolean" },
+        "policyRef": { "$ref": "common.schema.json#/$defs/nonEmptyString" }
+      },
+      "required": [
+        "reviewerDistinctFromAuthor",
+        "selfApprovalDisabled",
+        "adminBypassDisabled",
+        "untrustedPullRequestsIsolated",
+        "actionsPinnedToCommitSha"
+      ],
+      "additionalProperties": false
+    },
+    "approval": {
+      "type": "object",
+      "description": "An approval binds the exact source commit, artifact digest and destination; a changed digest invalidates it.",
+      "properties": {
+        "sourceCommit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "artifactDigest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+        "destination": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+        "approvedOn": { "$ref": "common.schema.json#/$defs/isoDate" }
+      },
+      "required": ["sourceCommit", "artifactDigest", "destination", "approvedOn"],
+      "additionalProperties": false
+    },
+    "provenance": {
+      "type": "object",
+      "description": "Verification must check the expected repository, workflow, commit and builder identity, not merely a valid signature.",
+      "properties": {
+        "builderIdentity": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+        "workflowRef": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+        "repository": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+        "identitiesChecked": { "type": "boolean" },
+        "promotedWithoutRebuild": { "type": "boolean" }
+      },
+      "required": ["builderIdentity", "workflowRef", "repository", "identitiesChecked", "promotedWithoutRebuild"],
+      "additionalProperties": false
+    },
+    "independentRebuild": {
+      "type": "object",
+      "properties": {
+        "performed": { "type": "boolean" },
+        "digestMatched": { "type": "boolean" },
+        "nondeterministicMetadata": {
+          "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+        }
+      },
+      "required": ["performed", "digestMatched", "nondeterministicMetadata"],
+      "additionalProperties": false
+    },
+    "restrictedReferences": {
+      "type": "array",
+      "description": "Pointers to material held outside source control (account recovery, canary trust record). Pointers only; a value that looks like a credential, seed phrase or private path is rejected.",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "allOf": [
+          {
+            "not": { "pattern": "://[^/@\\s]*:[^/@\\s]*@" },
+            "$comment": "credentials embedded in a URL"
+          },
+          {
+            "not": { "pattern": "([A-Za-z]+\\s+){11,}[A-Za-z]+" },
+            "$comment": "twelve or more bare words, the shape of a seed phrase"
+          },
+          {
+            "not": { "pattern": "^0x[0-9a-fA-F]{64}$" },
+            "$comment": "raw 32-byte secret"
+          }
+        ]
+      }
+    },
+    "notes": { "$ref": "common.schema.json#/$defs/publicSafeText" }
+  },
+  "required": ["schemaVersion", "deploymentId", "environment", "custody", "review"],
+  "additionalProperties": false
+}

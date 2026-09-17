@@ -1,0 +1,245 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://luckydraw.invalid/schema/deployment.schema.json",
+  "title": "Deployment manifest (SPEC section 12)",
+  "description": "Versioned JSON at config/deployments/<chainId>/<lowercase draw address>.json, composing the section 15 Chain, Asset, Price, VRF and Ownership records with the deployed facts. A mainnet manifest may reference no mock artifact. Addresses are lowercase, uint256 values are decimal strings and every hash is 0x-prefixed lowercase hex.",
+  "$defs": {
+    "contractRecord": {
+      "type": "object",
+      "properties": {
+        "address": { "$ref": "common.schema.json#/$defs/address" },
+        "codeHash": {
+          "$ref": "common.schema.json#/$defs/bytes32",
+          "description": "keccak256 of the deployed runtime code. Writes are blocked on missing or mismatched deployment code (ACCEPTANCE U15)."
+        },
+        "deployBlock": { "$ref": "common.schema.json#/$defs/blockNumber" },
+        "deployTx": {
+          "anyOf": [{ "$ref": "common.schema.json#/$defs/txHash" }, { "type": "null" }],
+          "description": "Null when the deployment transaction hash is not recoverable, as with some local broadcast modes."
+        },
+        "owner": { "$ref": "common.schema.json#/$defs/address" },
+        "pendingOwner": {
+          "$ref": "common.schema.json#/$defs/address",
+          "description": "Ownable2Step pending owner; the zero address when no transfer is pending."
+        },
+        "constructorArgs": {
+          "$ref": "#/$defs/drawConstructor",
+          "description": "Declared here because a subschema's additionalProperties cannot see a property added by the schema that references it. Only the Draw record carries it; the Vault record forbids it."
+        }
+      },
+      "required": ["address", "codeHash", "deployBlock", "deployTx", "owner", "pendingOwner"],
+      "additionalProperties": false
+    },
+    "drawConstructor": {
+      "type": "object",
+      "description": "The exact LuckyDraw constructor arguments (contracts/src/LuckyDraw.sol). Every VRF parameter is constructor-fixed; the validator checks each against the vrf record.",
+      "properties": {
+        "vault": { "$ref": "common.schema.json#/$defs/address" },
+        "coordinator": { "$ref": "common.schema.json#/$defs/address" },
+        "subscriptionId": { "$ref": "common.schema.json#/$defs/uint256String" },
+        "keyHash": { "$ref": "common.schema.json#/$defs/bytes32" },
+        "requestConfirmations": { "type": "integer", "const": 200 },
+        "callbackGasLimit": { "type": "integer", "const": 300000 },
+        "maxRequestCostNative": { "$ref": "common.schema.json#/$defs/positiveUint256String" },
+        "feeAccount": { "$ref": "common.schema.json#/$defs/address" },
+        "initialOwner": {
+          "$ref": "common.schema.json#/$defs/address",
+          "description": "Owner at construction, usually the deployer. The final owner is reached through the two-step transfer, so this need not equal ownership.finalOwner."
+        }
+      },
+      "required": [
+        "vault",
+        "coordinator",
+        "subscriptionId",
+        "keyHash",
+        "requestConfirmations",
+        "callbackGasLimit",
+        "maxRequestCostNative",
+        "feeAccount",
+        "initialOwner"
+      ],
+      "additionalProperties": false
+    },
+    "toolchain": {
+      "type": "object",
+      "description": "The pins from contracts/foundry.toml (SPEC section 12). The validator checks these against the committed foundry.toml.",
+      "properties": {
+        "foundry": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "solc": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "evmVersion": { "type": "string", "pattern": "^[a-z][a-z0-9]{2,19}$" },
+        "optimizer": { "type": "boolean" },
+        "optimizerRuns": { "type": "integer", "minimum": 0 },
+        "viaIr": { "type": "boolean" },
+        "bytecodeHash": { "type": "string", "enum": ["none", "ipfs", "bzzr1"] }
+      },
+      "required": ["foundry", "solc", "evmVersion", "optimizer", "optimizerRuns", "viaIr", "bytecodeHash"],
+      "additionalProperties": false
+    },
+    "manifestAsset": {
+      "type": "object",
+      "allOf": [{ "$ref": "asset.schema.json#/$defs/assetCommon" }],
+      "required": ["listed", "pool"],
+      "properties": {
+        "listed": { "$comment": "Constrained in asset.schema.json#/$defs/assetCommon; named here only so \"required\" refers to a defined property." },
+        "chainId": false,
+        "asset": { "$ref": "common.schema.json#/$defs/address" },
+        "price": {
+          "type": "object",
+          "properties": {
+            "feed": { "$ref": "common.schema.json#/$defs/address" }
+          }
+        },
+        "pool": {
+          "type": "object",
+          "allOf": [{ "$ref": "asset.schema.json#/$defs/poolConfig" }],
+          "properties": {
+            "poolId": { "$comment": "Constrained in asset.schema.json#/$defs/poolConfig; named here only so \"required\" refers to a defined property." },
+            "firstRoundIds": { "$comment": "Constrained in asset.schema.json#/$defs/poolConfig; named here only so \"required\" refers to a defined property." }
+          },
+          "required": ["poolId", "firstRoundIds"]
+        }
+      }
+    }
+  },
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "deploymentId": {
+      "type": "string",
+      "description": "`${chainId}:${lowercase Draw address}` everywhere: API, caches, keeper and manifest (SPEC section 10.3).",
+      "pattern": "^[1-9][0-9]{0,18}:0x[0-9a-f]{40}$"
+    },
+    "environment": { "$ref": "common.schema.json#/$defs/environment" },
+    "createdAtUtc": { "$ref": "common.schema.json#/$defs/isoDateTime" },
+    "chain": {
+      "type": "object",
+      "allOf": [{ "$ref": "chain.schema.json#/$defs/chainCommon" }],
+      "required": ["startBlock"],
+      "properties": {
+        "startBlock": { "$ref": "common.schema.json#/$defs/blockNumber" }
+      }
+    },
+    "toolchain": { "$ref": "#/$defs/toolchain" },
+    "contracts": {
+      "type": "object",
+      "properties": {
+        "vault": {
+          "type": "object",
+          "allOf": [{ "$ref": "#/$defs/contractRecord" }],
+          "properties": {
+            "constructorArgs": false
+          }
+        },
+        "draw": {
+          "type": "object",
+          "allOf": [{ "$ref": "#/$defs/contractRecord" }],
+          "required": ["constructorArgs"],
+          "properties": {
+            "constructorArgs": { "$comment": "Constrained in $defs/contractRecord; named here only so \"required\" refers to a defined property." }
+          }
+        }
+      },
+      "required": ["vault", "draw"],
+      "additionalProperties": false
+    },
+    "vrf": { "$ref": "vrf.schema.json" },
+    "ownership": { "$ref": "ownership.schema.json" },
+    "assets": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/manifestAsset" },
+      "minItems": 1
+    },
+    "release": {
+      "type": "object",
+      "description": "Whether this deployment is open to customers, and the private mainnet shakedown that is the only thing allowed to open it (SPEC section 14). Optional: an absent release object means customerLaunch false.",
+      "properties": {
+        "customerLaunch": {
+          "type": "boolean",
+          "description": "True once the operator has played the shakedown and is ready to share the link. The Pages build refuses to publish a mainnet manifest with this false."
+        },
+        "shakedown": {
+          "anyOf": [
+            {
+              "type": "object",
+              "description": "The private mainnet shakedown: the operator alone plays one daily round end to end and one refund path, and records the measured numbers here.",
+              "properties": {
+                "performed": { "type": "boolean" },
+                "date": {
+                  "anyOf": [{ "$ref": "common.schema.json#/$defs/isoDate" }, { "type": "null" }]
+                },
+                "roundIds": {
+                  "type": "array",
+                  "description": "Round ids the shakedown played, in the order they were played.",
+                  "items": { "type": "integer", "minimum": 1 },
+                  "uniqueItems": true
+                },
+                "callbackGasUsed": {
+                  "anyOf": [{ "type": "integer", "minimum": 1 }, { "type": "null" }],
+                  "description": "Callback gas measured on mainnet. The pre-deploy vrf.measuredCallbackGasUsed is the Foundry number; this one is the observed one. Zero is not a measurement: a callback that ran wrote storage and emitted. The validator additionally rejects a value above vrf.callbackGasLimit (rule D27)."
+                },
+                "requestToFulfilmentSeconds": {
+                  "anyOf": [{ "type": "integer", "minimum": 1 }, { "type": "null" }],
+                  "description": "Seconds from requestDraw to fulfilment, measured on mainnet. The fulfilment lands whole confirmations later, so zero is not a measurement."
+                },
+                "costPerDrawNativeWei": {
+                  "anyOf": [
+                    { "$ref": "common.schema.json#/$defs/positiveUint256String" },
+                    { "type": "null" }
+                  ],
+                  "description": "Native wei spent per draw, keeper gas plus the payment in the coordinator's RandomWordsFulfilled event. Never \"0\": a draw pays the coordinator's premium and the keeper's gas."
+                }
+              },
+              "required": [
+                "performed",
+                "date",
+                "roundIds",
+                "callbackGasUsed",
+                "requestToFulfilmentSeconds",
+                "costPerDrawNativeWei"
+              ],
+              "additionalProperties": false
+            },
+            { "type": "null" }
+          ],
+          "description": "Null until the shakedown is played."
+        }
+      },
+      "required": ["customerLaunch", "shakedown"],
+      "additionalProperties": false
+    },
+    "mocks": {
+      "type": "array",
+      "description": "Artifact names of the labeled mocks this deployment uses. Must be empty outside the local environment: a mainnet manifest may reference no mock artifact (SPEC section 12).",
+      "items": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$" },
+      "uniqueItems": true
+    },
+    "notes": { "$ref": "common.schema.json#/$defs/publicSafeText" }
+  },
+  "required": [
+    "schemaVersion",
+    "deploymentId",
+    "environment",
+    "createdAtUtc",
+    "chain",
+    "toolchain",
+    "contracts",
+    "vrf",
+    "ownership",
+    "assets",
+    "mocks"
+  ],
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "type": "object",
+        "properties": { "environment": { "enum": ["testnet", "mainnet"] } },
+        "required": ["environment"]
+      },
+      "then": {
+        "type": "object",
+        "properties": { "mocks": { "type": "array", "maxItems": 0 } }
+      }
+    }
+  ]
+}

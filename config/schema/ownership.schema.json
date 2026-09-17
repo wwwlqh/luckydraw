@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://luckydraw.invalid/schema/ownership.schema.json",
+  "title": "Ownership record (SPEC section 15, row 'Ownership')",
+  "description": "The three authority accounts and their Safe configurations. SPEC section 10.5 requires separate owner, treasury and seed Safes before mainnet; section 12.1 allows one operator Safe for all three on testnet. Signer identities, seeds and backup locations are never recorded here.",
+  "$defs": {
+    "safeConfig": {
+      "type": "object",
+      "description": "Sanitised Safe configuration: pinned implementation, owner count and threshold, fallback handler code hash. No signer addresses, no seeds, no backup locations (SPEC sections 10.5 and 15).",
+      "properties": {
+        "role": { "type": "string", "enum": ["owner", "treasury", "seed"] },
+        "threshold": { "type": "integer", "minimum": 1, "maximum": 20 },
+        "signerCount": { "type": "integer", "minimum": 1, "maximum": 20 },
+        "hardwareKeys": { "type": "boolean" },
+        "distinctKeyHolders": {
+          "type": "boolean",
+          "description": "Whether distinct people control the keys. One person holding every key is not protection (SPEC section 10.5)."
+        },
+        "implementation": {
+          "anyOf": [{ "$ref": "common.schema.json#/$defs/address" }, { "type": "null" }]
+        },
+        "fallbackHandlerCodeHash": {
+          "anyOf": [{ "$ref": "common.schema.json#/$defs/bytes32" }, { "type": "null" }]
+        },
+        "modulesEnabled": {
+          "type": "boolean",
+          "description": "Must be false in this baseline: modules can bypass normal signature verification (SPEC section 10.5)."
+        },
+        "guardEnabled": { "type": "boolean" },
+        "withdrawalSchedule": {
+          "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }],
+          "description": "Treasury withdrawal schedule (SPEC section 15). Null for the owner and seed roles."
+        },
+        "calldataDecodingPolicy": {
+          "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }],
+          "description": "The signer calldata-decoding policy required by section 15. Never approve blind data."
+        },
+        "source": { "$ref": "common.schema.json#/$defs/sourceRef" }
+      },
+      "required": ["role", "threshold", "signerCount", "hardwareKeys", "modulesEnabled", "guardEnabled"],
+      "additionalProperties": false
+    },
+    "ownershipCommon": {
+      "type": "object",
+      "properties": {
+        "finalOwner": {
+          "$ref": "common.schema.json#/$defs/address",
+          "description": "Operator-controlled multisig that owns Vault and Draw after the two-step transfer is accepted."
+        },
+        "feeAccount": {
+          "$ref": "common.schema.json#/$defs/address",
+          "description": "Dedicated treasury Safe that receives the 3% fee. Never the Vault or the Draw."
+        },
+        "seedAccount": {
+          "$ref": "common.schema.json#/$defs/address",
+          "description": "Dedicated operator Safe holding an ordinary Vault balance, never the keeper key (SPEC section 5.4)."
+        },
+        "ownershipAccepted": {
+          "type": "boolean",
+          "description": "Both Ownable2Step transfers have been accepted. A deployed fact, so it is absent from a plan."
+        },
+        "makeWholeReserve": {
+          "anyOf": [{ "$ref": "common.schema.json#/$defs/uint256String" }, { "type": "null" }],
+          "description": "Make-whole reserve (SPEC sections 7.3 and 15) in wei of the chain's native coin, held in the treasury Safe; null until funded. The web app displays it in the native symbol with 18 decimals."
+        },
+        "makeWholeCap": {
+          "anyOf": [{ "$ref": "common.schema.json#/$defs/uint256String" }, { "type": "null" }],
+          "description": "Per-incident make-whole cap, in wei of the chain's native coin like the reserve; null until published."
+        },
+        "safes": {
+          "type": "array",
+          "description": "Sanitised Safe configurations, at most one per role.",
+          "items": { "$ref": "#/$defs/safeConfig" },
+          "maxItems": 3
+        },
+        "note": { "type": "string" }
+      },
+      "required": ["finalOwner", "feeAccount", "seedAccount"],
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "allOf": [{ "$ref": "#/$defs/ownershipCommon" }],
+  "properties": {
+    "ownershipAccepted": { "$comment": "Constrained in $defs/ownershipCommon; named here only so \"required\" refers to a defined property." }
+  },
+  "required": ["ownershipAccepted"]
+}

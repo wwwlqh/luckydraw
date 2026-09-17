@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://luckydraw.invalid/schema/deployment-plan.schema.json",
+  "title": "Deployment plan (operator input for a deployment)",
+  "description": "config/deployments/<chainId>/<name>.plan.json. The same document as a manifest minus every deployed fact: no deploymentId, no createdAtUtc, no contracts, no mocks, no start block, no subscription owner, no consumer registration, no listing flag, no pool id and no first round ids. A plan carrying \"template\": true is a blank form and is always rejected by the validator; fill it in and drop the flag.",
+  "$defs": {
+    "planAsset": {
+      "type": "object",
+      "allOf": [{ "$ref": "asset.schema.json#/$defs/assetCommon" }],
+      "required": ["pool"],
+      "properties": {
+        "chainId": false,
+        "listed": false,
+        "pool": {
+          "type": "object",
+          "allOf": [{ "$ref": "asset.schema.json#/$defs/poolConfig" }],
+          "properties": {
+            "poolId": false,
+            "firstRoundIds": false
+          }
+        }
+      }
+    }
+  },
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "template": {
+      "type": "boolean",
+      "description": "Marks a blank form that must never be deployed from. The validator rejects any document where this is true."
+    },
+    "name": {
+      "type": "string",
+      "description": "Human label for the plan; the file name is authoritative.",
+      "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+    },
+    "environment": { "$ref": "common.schema.json#/$defs/environment" },
+    "chain": {
+      "type": "object",
+      "allOf": [{ "$ref": "chain.schema.json#/$defs/chainCommon" }],
+      "properties": {
+        "startBlock": false
+      }
+    },
+    "toolchain": { "$ref": "deployment.schema.json#/$defs/toolchain" },
+    "vrf": {
+      "type": "object",
+      "allOf": [{ "$ref": "vrf.schema.json#/$defs/vrfCommon" }],
+      "properties": {
+        "subscriptionOwner": false,
+        "consumerRegistered": false,
+        "consumerRegistrationTx": false
+      }
+    },
+    "ownership": {
+      "type": "object",
+      "allOf": [{ "$ref": "ownership.schema.json#/$defs/ownershipCommon" }],
+      "properties": {
+        "ownershipAccepted": false
+      }
+    },
+    "assets": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/planAsset" },
+      "minItems": 1
+    },
+    "deploymentId": false,
+    "createdAtUtc": false,
+    "contracts": false,
+    "mocks": false,
+    "notes": { "type": "string" }
+  },
+  "required": ["schemaVersion", "environment", "chain", "vrf", "ownership", "assets"],
+  "additionalProperties": false
+}

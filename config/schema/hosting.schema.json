@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://luckydraw.invalid/schema/hosting.schema.json",
+  "title": "Hosting record (SPEC section 15, row 'Hosting')",
+  "description": "Logical roles and sanitised configuration only. The host inventory is private: no IP, region or instance identifiers may appear in a published spec or build (SPEC sections 10.4, 10.5 and 15). Every free-text field is a publicSafeText, which rejects IP literals, cloud region codes, OCIDs and provider host names by pattern.",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "deploymentId": { "type": "string", "pattern": "^[1-9][0-9]{0,18}:0x[0-9a-f]{40}$" },
+    "environment": { "$ref": "common.schema.json#/$defs/environment" },
+    "roles": {
+      "type": "array",
+      "description": "One entry per logical service. Binding is loopback, private or reached only through an authenticated outbound tunnel (SPEC sections 10.3 and 10.4).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": ["web-origin", "api", "database", "indexer", "keeper", "canary", "tunnel-edge", "admin"]
+          },
+          "binding": { "type": "string", "enum": ["loopback", "private", "tunnel"] },
+          "publicIngress": {
+            "type": "boolean",
+            "description": "Zero public-origin ingress is required for IPv4 and IPv6 alike.",
+            "const": false
+          },
+          "unprivilegedService": { "type": "boolean" },
+          "notes": { "$ref": "common.schema.json#/$defs/publicSafeText" }
+        },
+        "required": ["role", "binding", "publicIngress", "unprivilegedService"],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "tunnels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "$ref": "common.schema.json#/$defs/publicSafeText" },
+          "direction": { "type": "string", "const": "outbound" },
+          "authenticated": { "type": "boolean", "const": true },
+          "purpose": { "type": "string", "enum": ["api-edge", "admin"] }
+        },
+        "required": ["name", "direction", "authenticated", "purpose"],
+        "additionalProperties": false
+      }
+    },
+    "publicIngressIpv4": { "type": "boolean", "const": false },
+    "publicIngressIpv6": { "type": "boolean", "const": false },
+    "vpnFailClosed": { "type": "boolean" },
+    "sshPolicy": {
+      "type": "object",
+      "properties": {
+        "keyOnly": { "type": "boolean" },
+        "publicPort22Closed": { "type": "boolean" },
+        "restrictedSourceRange": {
+          "type": "boolean",
+          "description": "Whether a restricted source range is configured. The range itself is private inventory and is never recorded here."
+        }
+      },
+      "required": ["keyOnly", "publicPort22Closed", "restrictedSourceRange"],
+      "additionalProperties": false
+    },
+    "patchStatus": {
+      "type": "object",
+      "properties": {
+        "policy": { "$ref": "common.schema.json#/$defs/publicSafeText" },
+        "lastVerified": {
+          "anyOf": [{ "$ref": "common.schema.json#/$defs/isoDate" }, { "type": "null" }]
+        }
+      },
+      "required": ["policy", "lastVerified"],
+      "additionalProperties": false
+    },
+    "domainControls": {
+      "type": "object",
+      "properties": {
+        "registrarMfaHardwareKey": { "type": "boolean" },
+        "dnssec": { "type": "boolean" },
+        "publishingCredentialScopedToSite": { "type": "boolean" },
+        "offHostChangeAlerts": { "type": "boolean" }
+      },
+      "required": ["registrarMfaHardwareKey", "dnssec", "publishingCredentialScopedToSite", "offHostChangeAlerts"],
+      "additionalProperties": false
+    },
+    "independentRecovery": {
+      "type": "boolean",
+      "description": "Recovery does not depend on the host or on the publishing credential."
+    },
+    "privateEvidenceRef": {
+      "type": "string",
+      "description": "Pointer to the private inventory, which is not in source control (for example a path under the ignored /.private/ directory). Never the inventory itself.",
+      "minLength": 1,
+      "allOf": [
+        { "not": { "pattern": "\\b[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\b" } },
+        { "not": { "pattern": "\\b[Oo][Cc][Ii][Dd]1\\." } }
+      ]
+    },
+    "notes": { "$ref": "common.schema.json#/$defs/publicSafeText" }
+  },
+  "required": [
+    "schemaVersion",
+    "deploymentId",
+    "environment",
+    "roles",
+    "publicIngressIpv4",
+    "publicIngressIpv6",
+    "vpnFailClosed",
+    "sshPolicy"
+  ],
+  "additionalProperties": false
+}

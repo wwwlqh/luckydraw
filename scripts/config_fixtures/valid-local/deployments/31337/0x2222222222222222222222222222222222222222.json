@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 1,
+  "deploymentId": "31337:0x2222222222222222222222222222222222222222",
+  "environment": "local",
+  "createdAtUtc": "2026-09-11T00:00:00Z",
+  "notes": "Synthetic test fixture, not a deployment. Every address is a repeated-nibble placeholder.",
+  "chain": {
+    "chainId": 31337,
+    "name": "anvil-local",
+    "explorerUrl": null,
+    "confirmationDepth": 200,
+    "startBlock": 1,
+    "rpcEnvVars": {
+      "public": "LUCKYDRAW_RPC_URL",
+      "operational": "LUCKYDRAW_OPS_RPC_URL"
+    }
+  },
+  "toolchain": {
+    "foundry": "1.8.1",
+    "solc": "0.8.28",
+    "evmVersion": "paris",
+    "optimizer": true,
+    "optimizerRuns": 600,
+    "viaIr": true,
+    "bytecodeHash": "none"
+  },
+  "contracts": {
+    "vault": {
+      "address": "0x1111111111111111111111111111111111111111",
+      "codeHash": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "deployBlock": 2,
+      "deployTx": "0xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "owner": "0x6666666666666666666666666666666666666666",
+      "pendingOwner": "0x7777777777777777777777777777777777777777"
+    },
+    "draw": {
+      "address": "0x2222222222222222222222222222222222222222",
+      "codeHash": "0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "deployBlock": 3,
+      "deployTx": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "owner": "0x6666666666666666666666666666666666666666",
+      "pendingOwner": "0x7777777777777777777777777777777777777777",
+      "constructorArgs": {
+        "vault": "0x1111111111111111111111111111111111111111",
+        "coordinator": "0x3333333333333333333333333333333333333333",
+        "subscriptionId": "1",
+        "keyHash": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "requestConfirmations": 200,
+        "callbackGasLimit": 300000,
+        "maxRequestCostNative": "3000000000000000",
+        "feeAccount": "0x8888888888888888888888888888888888888888",
+        "initialOwner": "0x6666666666666666666666666666666666666666"
+      }
+    }
+  },
+  "vrf": {
+    "coordinator": "0x3333333333333333333333333333333333333333",
+    "coordinatorIsMock": true,
+    "subscriptionId": "1",
+    "subscriptionOwner": "0x7777777777777777777777777777777777777777",
+    "keyHash": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "nativeBilling": true,
+    "requestConfirmations": 200,
+    "numWords": 2,
+    "callbackGasLimit": 300000,
+    "maxRequestCostNative": "3000000000000000",
+    "maxRequestCostDerivation": {
+      "maxGasPriceWei": "5000000000",
+      "verificationGasOverhead": 100000,
+      "premiumPercentage": 25,
+      "flatFeeNativeWei": "0",
+      "note": "Synthetic fixture values. A real deployment records the lane's documented maximum gas price, verification overhead and premium, verified against the deployed coordinator."
+    },
+    "consumerRegistered": true,
+    "consumerRegistrationTx": null,
+    "keyHashGetter": "s_provingKeys(bytes32)",
+    "lowFundingThresholdNative": "30000000000000000",
+    "measuredCallbackGasUsed": null,
+    "source": { "url": null, "date": null }
+  },
+  "ownership": {
+    "finalOwner": "0x7777777777777777777777777777777777777777",
+    "feeAccount": "0x8888888888888888888888888888888888888888",
+    "seedAccount": "0x9999999999999999999999999999999999999999",
+    "ownershipAccepted": false,
+    "makeWholeReserve": null,
+    "makeWholeCap": null,
+    "note": "Local run: the two-step transfer to finalOwner is pending, so both contracts still report the deployer as owner."
+  },
+  "assets": [
+    {
+      "asset": "0x0000000000000000000000000000000000000000",
+      "native": true,
+      "symbol": "BNB",
+      "name": "Local mock native BNB",
+      "decimals": 18,
+      "isMock": true,
+      "listed": true,
+      "depositsEnabled": true,
+      "exactTransferEvidence": "Native path: the Vault credits exactly msg.value and checks the exact debit on withdrawal.",
+      "status": "mock-local",
+      "source": { "url": null, "date": null },
+      "price": {
+        "feed": "0x4444444444444444444444444444444444444444",
+        "feedIsMock": true,
+        "feedDecimals": 8,
+        "baseQuote": "BNB/USD",
+        "heartbeatSeconds": null,
+        "observedP999IntervalSeconds": null,
+        "maxPriceAge": 3600,
+        "minAnswer": "0",
+        "maxAnswer": "0",
+        "answerBoundsConfirmedAbsent": true,
+        "referenceKind": "ExactToken",
+        "displayLabel": null,
+        "pegAssumption": null,
+        "verifiedOn": null,
+        "source": { "url": null, "date": null }
+      },
+      "pool": {
+        "poolId": "1",
+        "enabled": true,
+        "seedAmount": "5000000000000000",
+        "seedAuthorizedMaxPerRound": "10000000000000000",
+        "targetsUsd": { "Day100": 100, "Day1k": 1000, "Day10k": 10000, "Week1k": 1000, "Week10k": 10000, "Week100k": 100000, "Month100k": 100000 },
+        "firstRoundIds": ["1", "2", "3", "4", "5", "6", "7"]
+      }
+    },
+    {
+      "asset": "0x5555555555555555555555555555555555555555",
+      "native": false,
+      "symbol": "TEST2",
+      "name": "Local mock ERC-20 for the second pool",
+      "decimals": 18,
+      "isMock": true,
+      "listed": true,
+      "depositsEnabled": true,
+      "exactTransferEvidence": "Mock token transfers the exact amount and does not rebase.",
+      "status": "mock-local",
+      "source": { "url": null, "date": null },
+      "price": {
+        "feed": "0x4444444444444444444444444444444444444444",
+        "feedIsMock": true,
+        "feedDecimals": 8,
+        "baseQuote": "TEST2/USD",
+        "heartbeatSeconds": 1800,
+        "observedP999IntervalSeconds": null,
+        "maxPriceAge": 3600,
+        "minAnswer": "0",
+        "maxAnswer": "0",
+        "answerBoundsConfirmedAbsent": true,
+        "referenceKind": "ExactToken",
+        "displayLabel": null,
+        "pegAssumption": null,
+        "verifiedOn": null,
+        "source": { "url": null, "date": null }
+      },
+      "pool": {
+        "poolId": "2",
+        "enabled": true,
+        "seedAmount": "5000000000000000000",
+        "seedAuthorizedMaxPerRound": "10000000000000000000",
+        "targetsUsd": { "Day100": 100, "Day1k": 1000, "Day10k": 10000, "Week1k": 1000, "Week10k": 10000, "Week100k": 100000, "Month100k": 100000 },
+        "firstRoundIds": ["8", "9", "10", "11", "12", "13", "14"]
+      }
+    }
+  ],
+  "mocks": ["MockVRFCoordinatorV2Plus", "MockAggregatorV3", "MockERC20"]
+}

@@ -1,0 +1,152 @@
+name: ci
+on:
+  push:
+  pull_request:
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install markdown==3.7
+      - name: Generated artifacts are fresh (excluding check time)
+        run: python scripts/check_generated.py
+      - run: python -m unittest discover -s scripts -p 'test_*.py'
+      - run: python scripts/trace_check.py
+      # Config schema validation (SPEC section 11.2 "Static/mutation", section 15).
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm validate:config
+      - run: pnpm test:config
+  contracts:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contracts
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.1
+      - run: forge --version
+      - run: forge fmt --check
+      - run: forge build
+      - run: forge build --sizes --skip test script   # fails if a deployable contract exceeds EIP-170
+      - run: FOUNDRY_PROFILE=ci forge test -vv
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+        working-directory: .
+      - name: Deploy, finalize and verify against isolated Anvil
+        run: python ../scripts/test_deployment_live.py
+      - run: LUCKYDRAW_SCALE=true FOUNDRY_PROFILE=scale forge test --match-path "test/unit/LuckyDrawScale.t.sol" -vv   # 100,000-range settlement evidence
+  slither:
+    # Static analysis of the contracts (SPEC section 11.2 "Static/mutation"; docs/REVIEW.md carries the triage of
+    # every finding). Linux only: Slither needs a solc binary, and the Windows build of solc 0.8.28 is what the
+    # builder had locally, so the authoritative run is this one.
+    #
+    # NON-BLOCKING FOR NOW. `continue-on-error` and `fail_on: none` in contracts/slither.config.json come off
+    # together, and this job becomes required, once BOTH hold:
+    #   (a) the two aliased error imports in src/LuckyDraw.sol and src/LuckyVault.sol are gone, so the
+    #       "no parser errors" step below passes on the real tree (see docs/REVIEW.md, 2026-09-16 section), and
+    #   (b) every Medium finding in that triage is fixed or accepted with a named owner.
+    # Target: before the operator signs Deploy for BSC mainnet (SPEC section 14 gate).
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contracts
+    env:
+      # Keep the analyser's artifacts out of the way of any other Foundry work in the same checkout.
+      FOUNDRY_OUT: out/slither
+      FOUNDRY_CACHE_PATH: cache/slither
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # Pinned: a Slither upgrade changes the finding set, and the triage in docs/REVIEW.md is written against
+      # this exact version. Bump the pin and re-triage in the same commit, never separately.
+      - run: pip install slither-analyzer==0.11.6 solc-select==1.2.0
+      - name: Pin solc to the version foundry.toml pins
+        run: |
+          solc-select install 0.8.28
+          solc-select use 0.8.28
+          solc --version
+      - name: Slither
+        id: slither
+        run: |
+          set -o pipefail
+          slither . --config-file slither.config.json --json "$RUNNER_TEMP/slither-report.json" 2>&1 \
+            | tee "$RUNNER_TEMP/slither.log"
+      - name: Slither parsed every contract
+        # Slither 0.11.6 cannot resolve `import {Name as Alias}` for custom errors: it logs ERROR:ContractSolcParsing
+        # and then silently drops the enclosing functions, which turns live state variables into "never used" and
+        # hides the reentrancy and complexity findings the same run reports once the alias is gone. A run with this
+        # line in it is not evidence of anything. Do not remove this guard.
+        if: always()
+        run: |
+          if grep -q "ERROR:ContractSolcParsing" "$RUNNER_TEMP/slither.log"; then
+            echo "::error::Slither could not parse part of the tree; the finding set is incomplete and must not be trusted."
+            grep "ERROR:ContractSolcParsing" "$RUNNER_TEMP/slither.log"
+            exit 1
+          fi
+      - uses: actions/upload-artifact@v4
+        # Outputs live in the runner temp directory, never in the checkout, so a local or CI run never leaves
+        # untracked files behind and .gitignore needs no new rule.
+        if: always()
+        with:
+          name: slither-report
+          path: |
+            ${{ runner.temp }}/slither.log
+            ${{ runner.temp }}/slither-report.json
+          if-no-files-found: warn
+  client:
+    # Shared TypeScript packages and the web app; the root lint/typecheck/test/build scripts are recursive, so
+    # `web` is covered by this job without a separate one (SPEC section 11.2 "Static/mutation"; section 12:
+    # generated ABIs after contract compilation). The generated ABI and type files must match the compiled artifacts.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.1
+      - run: forge build
+        working-directory: contracts
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm abi:check
+      - run: pnpm typecheck
+      - run: pnpm test          # includes the anvil end-to-end journey (foundry-toolchain provides anvil)
+        env:
+          LUCKYDRAW_ANVIL: "1"
+      - run: pnpm build

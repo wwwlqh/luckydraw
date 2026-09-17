@@ -1,0 +1,22 @@
+{
+  "spec": "v8",
+  "checkedAtUtc": "2026-09-17T06:48:29.142294+00:00",
+  "referenceResult": "PASS",
+  "referenceAssertions": 216117,
+  "referenceSeed": 20260911,
+  "referenceCoverage": [
+    "USD threshold/freshness",
+    "whole-USD target boundaries",
+    "fee partition and conservation",
+    "512-bit modulo",
+    "repeat-buyer range selection",
+    "UTC daily/weekly/monthly boundaries and civil-date algorithms",
+    "settlement/refund ledger example"
+  ],
+  "documentResult": "PASS",
+  "sections": 17,
+  "propertyIds": 15,
+  "sourceSha256": "a6c3e2ada3e0c4bdaa0b667617cb96818185c5d21645fe97e273e17176792693",
+  "referenceSha256": "c7c89377b98edcd8100239f4dfd6a59928de4cdaa021d0fb188c02455cb3907a",
+  "limitations": "Math reference and document validation only. Contracts, UI, live VRF, security audit and operational checks have not been implemented or run."
+}

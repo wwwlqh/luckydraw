@@ -1,0 +1,8 @@
+# Single workspace manager for every TypeScript member (SPEC section 12).
+# The members below are planned by the section 12 layout and do not exist yet; pnpm ignores
+# globs and literal paths that match nothing, so the root installs cleanly until they land.
+packages:
+  - "packages/*"
+  - "web"
+  - "indexer"
+  - "keeper"

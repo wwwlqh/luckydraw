@@ -1,0 +1,203 @@
+{
+  "schemaVersion": 1,
+  "deploymentId": "56:0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "environment": "mainnet",
+  "createdAtUtc": "2026-09-11T00:00:00Z",
+  "notes": "Synthetic test fixture, not a deployment. No mainnet deployment exists; every address is a repeated-nibble placeholder and the section 14 gates are unmet.",
+  "chain": {
+    "chainId": 56,
+    "name": "bsc-mainnet",
+    "nativeSymbol": "BNB",
+    "explorerUrl": "https://bscscan.com",
+    "confirmationDepth": 200,
+    "startBlock": 1000000,
+    "rpcEnvVars": {
+      "public": "LUCKYDRAW_RPC_URL",
+      "operational": "LUCKYDRAW_OPS_RPC_URL"
+    }
+  },
+  "toolchain": {
+    "foundry": "1.8.1",
+    "solc": "0.8.28",
+    "evmVersion": "paris",
+    "optimizer": true,
+    "optimizerRuns": 600,
+    "viaIr": true,
+    "bytecodeHash": "none"
+  },
+  "contracts": {
+    "vault": {
+      "address": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "codeHash": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "deployBlock": 1000001,
+      "deployTx": "0xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "owner": "0x2020202020202020202020202020202020202020",
+      "pendingOwner": "0x0000000000000000000000000000000000000000"
+    },
+    "draw": {
+      "address": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "codeHash": "0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "deployBlock": 1000002,
+      "deployTx": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "owner": "0x2020202020202020202020202020202020202020",
+      "pendingOwner": "0x0000000000000000000000000000000000000000",
+      "constructorArgs": {
+        "vault": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinator": "0xcccccccccccccccccccccccccccccccccccccccc",
+        "subscriptionId": "42",
+        "keyHash": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "requestConfirmations": 200,
+        "callbackGasLimit": 300000,
+        "maxRequestCostNative": "3000000000000000",
+        "feeAccount": "0x3030303030303030303030303030303030303030",
+        "initialOwner": "0x1010101010101010101010101010101010101010"
+      }
+    }
+  },
+  "vrf": {
+    "coordinator": "0xcccccccccccccccccccccccccccccccccccccccc",
+    "coordinatorIsMock": false,
+    "subscriptionId": "42",
+    "subscriptionOwner": "0x2020202020202020202020202020202020202020",
+    "keyHash": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "nativeBilling": true,
+    "requestConfirmations": 200,
+    "numWords": 2,
+    "callbackGasLimit": 300000,
+    "maxRequestCostNative": "3000000000000000",
+    "maxRequestCostDerivation": {
+      "maxGasPriceWei": "5000000000",
+      "verificationGasOverhead": 100000,
+      "premiumPercentage": 25,
+      "flatFeeNativeWei": "0",
+      "note": "Synthetic fixture values. A real deployment records the lane's documented maximum gas price, verification overhead and premium, verified against the deployed coordinator."
+    },
+    "consumerRegistered": true,
+    "consumerRegistrationTx": "0x1212121212121212121212121212121212121212121212121212121212121212",
+    "keyHashGetter": "s_provingKeys(bytes32)",
+    "lowFundingThresholdNative": "30000000000000000",
+    "measuredCallbackGasUsed": 120000,
+    "source": {
+      "url": "https://docs.chain.link/vrf/v2-5/supported-networks",
+      "date": "2026-09-11"
+    }
+  },
+  "ownership": {
+    "finalOwner": "0x2020202020202020202020202020202020202020",
+    "feeAccount": "0x3030303030303030303030303030303030303030",
+    "seedAccount": "0x4040404040404040404040404040404040404040",
+    "ownershipAccepted": true,
+    "makeWholeReserve": "1000000000000000000",
+    "makeWholeCap": "5000000000000000000",
+    "note": "Three separate Safes as SPEC 10.5 requires before mainnet.",
+    "safes": [
+      {
+        "role": "owner",
+        "threshold": 2,
+        "signerCount": 3,
+        "hardwareKeys": true,
+        "distinctKeyHolders": true,
+        "implementation": null,
+        "fallbackHandlerCodeHash": null,
+        "modulesEnabled": false,
+        "guardEnabled": false,
+        "withdrawalSchedule": null,
+        "calldataDecodingPolicy": "Every signer decodes chain, Safe address, nonce, operation, target, value, calldata and refund fields on an independent device before approving."
+      },
+      {
+        "role": "treasury",
+        "threshold": 2,
+        "signerCount": 3,
+        "hardwareKeys": true,
+        "distinctKeyHolders": true,
+        "implementation": null,
+        "fallbackHandlerCodeHash": null,
+        "modulesEnabled": false,
+        "guardEnabled": false,
+        "withdrawalSchedule": "Monthly, against the recorded fee accrual.",
+        "calldataDecodingPolicy": "As for the owner Safe."
+      },
+      {
+        "role": "seed",
+        "threshold": 2,
+        "signerCount": 3,
+        "hardwareKeys": true,
+        "distinctKeyHolders": true,
+        "implementation": null,
+        "fallbackHandlerCodeHash": null,
+        "modulesEnabled": false,
+        "guardEnabled": false,
+        "withdrawalSchedule": null,
+        "calldataDecodingPolicy": "As for the owner Safe."
+      }
+    ]
+  },
+  "assets": [
+    {
+      "asset": "0x0000000000000000000000000000000000000000",
+      "native": true,
+      "symbol": "BNB",
+      "name": "BNB",
+      "decimals": 18,
+      "isMock": false,
+      "listed": true,
+      "depositsEnabled": true,
+      "exactTransferEvidence": "Native path: the Vault credits exactly msg.value and checks the exact debit on withdrawal, so no token hook can alter the amount.",
+      "status": "approved",
+      "source": {
+        "url": "https://docs.chain.link/data-feeds/price-feeds/addresses",
+        "date": "2026-09-11"
+      },
+      "price": {
+        "feed": "0xdddddddddddddddddddddddddddddddddddddddd",
+        "feedIsMock": false,
+        "feedDecimals": 8,
+        "baseQuote": "BNB/USD",
+        "heartbeatSeconds": 60,
+        "observedP999IntervalSeconds": 75,
+        "observationWindow": {
+          "fromBlock": 900000,
+          "toBlock": 1000000,
+          "samples": 4321
+        },
+        "maxPriceAge": 3600,
+        "minAnswer": "100000000",
+        "maxAnswer": "1000000000000",
+        "answerBoundsConfirmedAbsent": false,
+        "referenceKind": "ExactToken",
+        "displayLabel": null,
+        "pegAssumption": null,
+        "verifiedOn": "2026-09-11",
+        "source": {
+          "url": "https://docs.chain.link/data-feeds/price-feeds/addresses",
+          "date": "2026-09-11"
+        }
+      },
+      "pool": {
+        "poolId": "1",
+        "enabled": true,
+        "seedAmount": "5000000000000000",
+        "seedAuthorizedMaxPerRound": "10000000000000000",
+        "targetsUsd": {
+          "Day100": 100,
+          "Day1k": 1000,
+          "Day10k": 10000,
+          "Week1k": 1000,
+          "Week10k": 10000,
+          "Week100k": 100000,
+          "Month100k": 100000
+        },
+        "firstRoundIds": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7"
+        ]
+      }
+    }
+  ],
+  "mocks": []
+}

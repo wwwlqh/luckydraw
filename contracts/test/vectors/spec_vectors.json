@@ -1,0 +1,5332 @@
+{
+ "spec": "v8",
+ "seed": 20260911,
+ "minimum": [
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 0,
+   "price": "1",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 0,
+   "price": "3",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 0,
+   "price": "600",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 0,
+   "price": "987654321",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 0,
+   "price": "170141183460469231731687303715884105727",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 6,
+   "price": "1",
+   "minGrossRaw": "1000000"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 6,
+   "price": "3",
+   "minGrossRaw": "333334"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 6,
+   "price": "600000000",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 6,
+   "price": "987654321",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 6,
+   "price": "170141183460469231731687303715884105727",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 8,
+   "price": "1",
+   "minGrossRaw": "100000000"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 8,
+   "price": "3",
+   "minGrossRaw": "33333334"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 8,
+   "price": "60000000000",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 8,
+   "price": "987654321",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 8,
+   "price": "170141183460469231731687303715884105727",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 9,
+   "price": "1",
+   "minGrossRaw": "1000000000"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 9,
+   "price": "3",
+   "minGrossRaw": "333333334"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 9,
+   "price": "600000000000",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 9,
+   "price": "987654321",
+   "minGrossRaw": "2"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 9,
+   "price": "170141183460469231731687303715884105727",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 18,
+   "price": "1",
+   "minGrossRaw": "1000000000000000000"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 18,
+   "price": "3",
+   "minGrossRaw": "333333333333333334"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 18,
+   "price": "600000000000000000000",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 18,
+   "price": "987654321",
+   "minGrossRaw": "1012500000"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 18,
+   "price": "170141183460469231731687303715884105727",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 6,
+   "feedDecimals": 0,
+   "price": "1",
+   "minGrossRaw": "1000000"
+  },
+  {
+   "tokenDecimals": 6,
+   "feedDecimals": 0,
+   "price": "3",
+   "minGrossRaw": "333334"
+  },
+  {
+   "tokenDecimals": 6,
+   "feedDecimals": 0,
+   "price": "600",
+   "minGrossRaw": "1667"
+  },
+  {
+   "tokenDecimals": 6,
+   "feedDecimals": 0,
+   "price": "987654321",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 6,
+   "feedDecimals": 0,
+   "price": "170141183460469231731687303715884105727",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 6,
+   "feedDecimals": 6,
+   "price": "1",
+   "minGrossRaw": "1000000000000"
+  },
+  {
+   "tokenDecimals": 6,
+   "feedDecimals": 6,
+   "price": "3",
+   "minGrossRaw": "333333333334"
+  },
+  {
+   "tokenDecimals": 6,
+   "feedDecimals": 6,
+   "price": "600000000",
+   "minGrossRaw": "1667"
+  },
+  {
+   "tokenDecimals": 6,
+   "feedDecimals": 6,
+   "price": "987654321",
+   "minGrossRaw": "1013"
+  },
+  {
+   "tokenDecimals": 6,
+   "feedDecimals": 6,
+   "price": "170141183460469231731687303715884105727",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 6,
+   "feedDecimals": 8,
+   "price": "1",
+   "minGrossRaw": "100000000000000"
+  },
+  {
+   "tokenDecimals": 6,
+   "feedDecimals": 8,
+   "price": "3",
+   "minGrossRaw": "33333333333334"
+  },
+  {
+   "tokenDecimals": 6,
+   "feedDecimals": 8,
+   "price": "60000000000",
+   "minGrossRaw": "1667"
+  },
+  {
+   "tokenDecimals": 6,
+   "feedDecimals": 8,
+   "price": "987654321",
+   "minGrossRaw": "101250"
+  },
+  {
+   "tokenDecimals": 6,
+   "feedDecimals": 8,
+   "price": "170141183460469231731687303715884105727",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 6,
+   "feedDecimals": 9,
+   "price": "1",
+   "minGrossRaw": "1000000000000000"
+  },
+  {
+   "tokenDecimals": 6,
+   "feedDecimals": 9,
+   "price": "3",
+   "minGrossRaw": "333333333333334"
+  },
+  {
+   "tokenDecimals": 6,
+   "feedDecimals": 9,
+   "price": "600000000000",
+   "minGrossRaw": "1667"
+  },
+  {
+   "tokenDecimals": 6,
+   "feedDecimals": 9,
+   "price": "987654321",
+   "minGrossRaw": "1012500"
+  },
+  {
+   "tokenDecimals": 6,
+   "feedDecimals": 9,
+   "price": "170141183460469231731687303715884105727",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 6,
+   "feedDecimals": 18,
+   "price": "1",
+   "minGrossRaw": "1000000000000000000000000"
+  },
+  {
+   "tokenDecimals": 6,
+   "feedDecimals": 18,
+   "price": "3",
+   "minGrossRaw": "333333333333333333333334"
+  },
+  {
+   "tokenDecimals": 6,
+   "feedDecimals": 18,
+   "price": "600000000000000000000",
+   "minGrossRaw": "1667"
+  },
+  {
+   "tokenDecimals": 6,
+   "feedDecimals": 18,
+   "price": "987654321",
+   "minGrossRaw": "1012499999987344"
+  },
+  {
+   "tokenDecimals": 6,
+   "feedDecimals": 18,
+   "price": "170141183460469231731687303715884105727",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 0,
+   "price": "1",
+   "minGrossRaw": "100000000"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 0,
+   "price": "3",
+   "minGrossRaw": "33333334"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 0,
+   "price": "600",
+   "minGrossRaw": "166667"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 0,
+   "price": "987654321",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 0,
+   "price": "170141183460469231731687303715884105727",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 6,
+   "price": "1",
+   "minGrossRaw": "100000000000000"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 6,
+   "price": "3",
+   "minGrossRaw": "33333333333334"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 6,
+   "price": "600000000",
+   "minGrossRaw": "166667"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 6,
+   "price": "987654321",
+   "minGrossRaw": "101250"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 6,
+   "price": "170141183460469231731687303715884105727",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 8,
+   "price": "1",
+   "minGrossRaw": "10000000000000000"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 8,
+   "price": "3",
+   "minGrossRaw": "3333333333333334"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 8,
+   "price": "60000000000",
+   "minGrossRaw": "166667"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 8,
+   "price": "987654321",
+   "minGrossRaw": "10125000"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 8,
+   "price": "170141183460469231731687303715884105727",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 9,
+   "price": "1",
+   "minGrossRaw": "100000000000000000"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 9,
+   "price": "3",
+   "minGrossRaw": "33333333333333334"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 9,
+   "price": "600000000000",
+   "minGrossRaw": "166667"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 9,
+   "price": "987654321",
+   "minGrossRaw": "101250000"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 9,
+   "price": "170141183460469231731687303715884105727",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 18,
+   "price": "1",
+   "minGrossRaw": "100000000000000000000000000"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 18,
+   "price": "3",
+   "minGrossRaw": "33333333333333333333333334"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 18,
+   "price": "600000000000000000000",
+   "minGrossRaw": "166667"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 18,
+   "price": "987654321",
+   "minGrossRaw": "101249999998734376"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 18,
+   "price": "170141183460469231731687303715884105727",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 9,
+   "feedDecimals": 0,
+   "price": "1",
+   "minGrossRaw": "1000000000"
+  },
+  {
+   "tokenDecimals": 9,
+   "feedDecimals": 0,
+   "price": "3",
+   "minGrossRaw": "333333334"
+  },
+  {
+   "tokenDecimals": 9,
+   "feedDecimals": 0,
+   "price": "600",
+   "minGrossRaw": "1666667"
+  },
+  {
+   "tokenDecimals": 9,
+   "feedDecimals": 0,
+   "price": "987654321",
+   "minGrossRaw": "2"
+  },
+  {
+   "tokenDecimals": 9,
+   "feedDecimals": 0,
+   "price": "170141183460469231731687303715884105727",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 9,
+   "feedDecimals": 6,
+   "price": "1",
+   "minGrossRaw": "1000000000000000"
+  },
+  {
+   "tokenDecimals": 9,
+   "feedDecimals": 6,
+   "price": "3",
+   "minGrossRaw": "333333333333334"
+  },
+  {
+   "tokenDecimals": 9,
+   "feedDecimals": 6,
+   "price": "600000000",
+   "minGrossRaw": "1666667"
+  },
+  {
+   "tokenDecimals": 9,
+   "feedDecimals": 6,
+   "price": "987654321",
+   "minGrossRaw": "1012500"
+  },
+  {
+   "tokenDecimals": 9,
+   "feedDecimals": 6,
+   "price": "170141183460469231731687303715884105727",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 9,
+   "feedDecimals": 8,
+   "price": "1",
+   "minGrossRaw": "100000000000000000"
+  },
+  {
+   "tokenDecimals": 9,
+   "feedDecimals": 8,
+   "price": "3",
+   "minGrossRaw": "33333333333333334"
+  },
+  {
+   "tokenDecimals": 9,
+   "feedDecimals": 8,
+   "price": "60000000000",
+   "minGrossRaw": "1666667"
+  },
+  {
+   "tokenDecimals": 9,
+   "feedDecimals": 8,
+   "price": "987654321",
+   "minGrossRaw": "101250000"
+  },
+  {
+   "tokenDecimals": 9,
+   "feedDecimals": 8,
+   "price": "170141183460469231731687303715884105727",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 9,
+   "feedDecimals": 9,
+   "price": "1",
+   "minGrossRaw": "1000000000000000000"
+  },
+  {
+   "tokenDecimals": 9,
+   "feedDecimals": 9,
+   "price": "3",
+   "minGrossRaw": "333333333333333334"
+  },
+  {
+   "tokenDecimals": 9,
+   "feedDecimals": 9,
+   "price": "600000000000",
+   "minGrossRaw": "1666667"
+  },
+  {
+   "tokenDecimals": 9,
+   "feedDecimals": 9,
+   "price": "987654321",
+   "minGrossRaw": "1012500000"
+  },
+  {
+   "tokenDecimals": 9,
+   "feedDecimals": 9,
+   "price": "170141183460469231731687303715884105727",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 9,
+   "feedDecimals": 18,
+   "price": "1",
+   "minGrossRaw": "1000000000000000000000000000"
+  },
+  {
+   "tokenDecimals": 9,
+   "feedDecimals": 18,
+   "price": "3",
+   "minGrossRaw": "333333333333333333333333334"
+  },
+  {
+   "tokenDecimals": 9,
+   "feedDecimals": 18,
+   "price": "600000000000000000000",
+   "minGrossRaw": "1666667"
+  },
+  {
+   "tokenDecimals": 9,
+   "feedDecimals": 18,
+   "price": "987654321",
+   "minGrossRaw": "1012499999987343751"
+  },
+  {
+   "tokenDecimals": 9,
+   "feedDecimals": 18,
+   "price": "170141183460469231731687303715884105727",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 0,
+   "price": "1",
+   "minGrossRaw": "1000000000000000000"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 0,
+   "price": "3",
+   "minGrossRaw": "333333333333333334"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 0,
+   "price": "600",
+   "minGrossRaw": "1666666666666667"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 0,
+   "price": "987654321",
+   "minGrossRaw": "1012500000"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 0,
+   "price": "170141183460469231731687303715884105727",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 6,
+   "price": "1",
+   "minGrossRaw": "1000000000000000000000000"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 6,
+   "price": "3",
+   "minGrossRaw": "333333333333333333333334"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 6,
+   "price": "600000000",
+   "minGrossRaw": "1666666666666667"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 6,
+   "price": "987654321",
+   "minGrossRaw": "1012499999987344"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 6,
+   "price": "170141183460469231731687303715884105727",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 8,
+   "price": "1",
+   "minGrossRaw": "100000000000000000000000000"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 8,
+   "price": "3",
+   "minGrossRaw": "33333333333333333333333334"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 8,
+   "price": "60000000000",
+   "minGrossRaw": "1666666666666667"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 8,
+   "price": "987654321",
+   "minGrossRaw": "101249999998734376"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 8,
+   "price": "170141183460469231731687303715884105727",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 9,
+   "price": "1",
+   "minGrossRaw": "1000000000000000000000000000"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 9,
+   "price": "3",
+   "minGrossRaw": "333333333333333333333333334"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 9,
+   "price": "600000000000",
+   "minGrossRaw": "1666666666666667"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 9,
+   "price": "987654321",
+   "minGrossRaw": "1012499999987343751"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 9,
+   "price": "170141183460469231731687303715884105727",
+   "minGrossRaw": "1"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 18,
+   "price": "1",
+   "minGrossRaw": "1000000000000000000000000000000000000"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 18,
+   "price": "3",
+   "minGrossRaw": "333333333333333333333333333333333334"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 18,
+   "price": "600000000000000000000",
+   "minGrossRaw": "1666666666666667"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 18,
+   "price": "987654321",
+   "minGrossRaw": "1012499999987343750000158204"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 18,
+   "price": "170141183460469231731687303715884105727",
+   "minGrossRaw": "1"
+  }
+ ],
+ "targetGross": [
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 0,
+   "price": "1",
+   "targetUsd": 100,
+   "minGrossToReach": "100"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 0,
+   "price": "1",
+   "targetUsd": 1000,
+   "minGrossToReach": "1000"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 0,
+   "price": "1",
+   "targetUsd": 10000,
+   "minGrossToReach": "10000"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 0,
+   "price": "1",
+   "targetUsd": 100000,
+   "minGrossToReach": "100000"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 0,
+   "price": "600",
+   "targetUsd": 100,
+   "minGrossToReach": "1"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 0,
+   "price": "600",
+   "targetUsd": 1000,
+   "minGrossToReach": "2"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 0,
+   "price": "600",
+   "targetUsd": 10000,
+   "minGrossToReach": "17"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 0,
+   "price": "600",
+   "targetUsd": 100000,
+   "minGrossToReach": "167"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 0,
+   "price": "987654321",
+   "targetUsd": 100,
+   "minGrossToReach": "1"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 0,
+   "price": "987654321",
+   "targetUsd": 1000,
+   "minGrossToReach": "1"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 0,
+   "price": "987654321",
+   "targetUsd": 10000,
+   "minGrossToReach": "1"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 0,
+   "price": "987654321",
+   "targetUsd": 100000,
+   "minGrossToReach": "1"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 8,
+   "price": "1",
+   "targetUsd": 100,
+   "minGrossToReach": "10000000000"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 8,
+   "price": "1",
+   "targetUsd": 1000,
+   "minGrossToReach": "100000000000"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 8,
+   "price": "1",
+   "targetUsd": 10000,
+   "minGrossToReach": "1000000000000"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 8,
+   "price": "1",
+   "targetUsd": 100000,
+   "minGrossToReach": "10000000000000"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 8,
+   "price": "60000000000",
+   "targetUsd": 100,
+   "minGrossToReach": "1"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 8,
+   "price": "60000000000",
+   "targetUsd": 1000,
+   "minGrossToReach": "2"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 8,
+   "price": "60000000000",
+   "targetUsd": 10000,
+   "minGrossToReach": "17"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 8,
+   "price": "60000000000",
+   "targetUsd": 100000,
+   "minGrossToReach": "167"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 8,
+   "price": "987654321",
+   "targetUsd": 100,
+   "minGrossToReach": "11"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 8,
+   "price": "987654321",
+   "targetUsd": 1000,
+   "minGrossToReach": "102"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 8,
+   "price": "987654321",
+   "targetUsd": 10000,
+   "minGrossToReach": "1013"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 8,
+   "price": "987654321",
+   "targetUsd": 100000,
+   "minGrossToReach": "10125"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 18,
+   "price": "1",
+   "targetUsd": 100,
+   "minGrossToReach": "100000000000000000000"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 18,
+   "price": "1",
+   "targetUsd": 1000,
+   "minGrossToReach": "1000000000000000000000"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 18,
+   "price": "1",
+   "targetUsd": 10000,
+   "minGrossToReach": "10000000000000000000000"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 18,
+   "price": "1",
+   "targetUsd": 100000,
+   "minGrossToReach": "100000000000000000000000"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 18,
+   "price": "600000000000000000000",
+   "targetUsd": 100,
+   "minGrossToReach": "1"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 18,
+   "price": "600000000000000000000",
+   "targetUsd": 1000,
+   "minGrossToReach": "2"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 18,
+   "price": "600000000000000000000",
+   "targetUsd": 10000,
+   "minGrossToReach": "17"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 18,
+   "price": "600000000000000000000",
+   "targetUsd": 100000,
+   "minGrossToReach": "167"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 18,
+   "price": "987654321",
+   "targetUsd": 100,
+   "minGrossToReach": "101249999999"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 18,
+   "price": "987654321",
+   "targetUsd": 1000,
+   "minGrossToReach": "1012499999988"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 18,
+   "price": "987654321",
+   "targetUsd": 10000,
+   "minGrossToReach": "10124999999874"
+  },
+  {
+   "tokenDecimals": 0,
+   "feedDecimals": 18,
+   "price": "987654321",
+   "targetUsd": 100000,
+   "minGrossToReach": "101249999998735"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 0,
+   "price": "1",
+   "targetUsd": 100,
+   "minGrossToReach": "10000000000"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 0,
+   "price": "1",
+   "targetUsd": 1000,
+   "minGrossToReach": "100000000000"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 0,
+   "price": "1",
+   "targetUsd": 10000,
+   "minGrossToReach": "1000000000000"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 0,
+   "price": "1",
+   "targetUsd": 100000,
+   "minGrossToReach": "10000000000000"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 0,
+   "price": "600",
+   "targetUsd": 100,
+   "minGrossToReach": "16666667"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 0,
+   "price": "600",
+   "targetUsd": 1000,
+   "minGrossToReach": "166666667"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 0,
+   "price": "600",
+   "targetUsd": 10000,
+   "minGrossToReach": "1666666667"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 0,
+   "price": "600",
+   "targetUsd": 100000,
+   "minGrossToReach": "16666666667"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 0,
+   "price": "987654321",
+   "targetUsd": 100,
+   "minGrossToReach": "11"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 0,
+   "price": "987654321",
+   "targetUsd": 1000,
+   "minGrossToReach": "102"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 0,
+   "price": "987654321",
+   "targetUsd": 10000,
+   "minGrossToReach": "1013"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 0,
+   "price": "987654321",
+   "targetUsd": 100000,
+   "minGrossToReach": "10125"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 8,
+   "price": "1",
+   "targetUsd": 100,
+   "minGrossToReach": "1000000000000000000"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 8,
+   "price": "1",
+   "targetUsd": 1000,
+   "minGrossToReach": "10000000000000000000"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 8,
+   "price": "1",
+   "targetUsd": 10000,
+   "minGrossToReach": "100000000000000000000"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 8,
+   "price": "1",
+   "targetUsd": 100000,
+   "minGrossToReach": "1000000000000000000000"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 8,
+   "price": "60000000000",
+   "targetUsd": 100,
+   "minGrossToReach": "16666667"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 8,
+   "price": "60000000000",
+   "targetUsd": 1000,
+   "minGrossToReach": "166666667"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 8,
+   "price": "60000000000",
+   "targetUsd": 10000,
+   "minGrossToReach": "1666666667"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 8,
+   "price": "60000000000",
+   "targetUsd": 100000,
+   "minGrossToReach": "16666666667"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 8,
+   "price": "987654321",
+   "targetUsd": 100,
+   "minGrossToReach": "1012500000"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 8,
+   "price": "987654321",
+   "targetUsd": 1000,
+   "minGrossToReach": "10125000000"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 8,
+   "price": "987654321",
+   "targetUsd": 10000,
+   "minGrossToReach": "101249999999"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 8,
+   "price": "987654321",
+   "targetUsd": 100000,
+   "minGrossToReach": "1012499999988"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 18,
+   "price": "1",
+   "targetUsd": 100,
+   "minGrossToReach": "10000000000000000000000000000"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 18,
+   "price": "1",
+   "targetUsd": 1000,
+   "minGrossToReach": "100000000000000000000000000000"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 18,
+   "price": "1",
+   "targetUsd": 10000,
+   "minGrossToReach": "1000000000000000000000000000000"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 18,
+   "price": "1",
+   "targetUsd": 100000,
+   "minGrossToReach": "10000000000000000000000000000000"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 18,
+   "price": "600000000000000000000",
+   "targetUsd": 100,
+   "minGrossToReach": "16666667"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 18,
+   "price": "600000000000000000000",
+   "targetUsd": 1000,
+   "minGrossToReach": "166666667"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 18,
+   "price": "600000000000000000000",
+   "targetUsd": 10000,
+   "minGrossToReach": "1666666667"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 18,
+   "price": "600000000000000000000",
+   "targetUsd": 100000,
+   "minGrossToReach": "16666666667"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 18,
+   "price": "987654321",
+   "targetUsd": 100,
+   "minGrossToReach": "10124999999873437501"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 18,
+   "price": "987654321",
+   "targetUsd": 1000,
+   "minGrossToReach": "101249999998734375001"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 18,
+   "price": "987654321",
+   "targetUsd": 10000,
+   "minGrossToReach": "1012499999987343750001"
+  },
+  {
+   "tokenDecimals": 8,
+   "feedDecimals": 18,
+   "price": "987654321",
+   "targetUsd": 100000,
+   "minGrossToReach": "10124999999873437500002"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 0,
+   "price": "1",
+   "targetUsd": 100,
+   "minGrossToReach": "100000000000000000000"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 0,
+   "price": "1",
+   "targetUsd": 1000,
+   "minGrossToReach": "1000000000000000000000"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 0,
+   "price": "1",
+   "targetUsd": 10000,
+   "minGrossToReach": "10000000000000000000000"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 0,
+   "price": "1",
+   "targetUsd": 100000,
+   "minGrossToReach": "100000000000000000000000"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 0,
+   "price": "600",
+   "targetUsd": 100,
+   "minGrossToReach": "166666666666666667"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 0,
+   "price": "600",
+   "targetUsd": 1000,
+   "minGrossToReach": "1666666666666666667"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 0,
+   "price": "600",
+   "targetUsd": 10000,
+   "minGrossToReach": "16666666666666666667"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 0,
+   "price": "600",
+   "targetUsd": 100000,
+   "minGrossToReach": "166666666666666666667"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 0,
+   "price": "987654321",
+   "targetUsd": 100,
+   "minGrossToReach": "101249999999"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 0,
+   "price": "987654321",
+   "targetUsd": 1000,
+   "minGrossToReach": "1012499999988"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 0,
+   "price": "987654321",
+   "targetUsd": 10000,
+   "minGrossToReach": "10124999999874"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 0,
+   "price": "987654321",
+   "targetUsd": 100000,
+   "minGrossToReach": "101249999998735"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 8,
+   "price": "1",
+   "targetUsd": 100,
+   "minGrossToReach": "10000000000000000000000000000"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 8,
+   "price": "1",
+   "targetUsd": 1000,
+   "minGrossToReach": "100000000000000000000000000000"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 8,
+   "price": "1",
+   "targetUsd": 10000,
+   "minGrossToReach": "1000000000000000000000000000000"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 8,
+   "price": "1",
+   "targetUsd": 100000,
+   "minGrossToReach": "10000000000000000000000000000000"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 8,
+   "price": "60000000000",
+   "targetUsd": 100,
+   "minGrossToReach": "166666666666666667"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 8,
+   "price": "60000000000",
+   "targetUsd": 1000,
+   "minGrossToReach": "1666666666666666667"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 8,
+   "price": "60000000000",
+   "targetUsd": 10000,
+   "minGrossToReach": "16666666666666666667"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 8,
+   "price": "60000000000",
+   "targetUsd": 100000,
+   "minGrossToReach": "166666666666666666667"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 8,
+   "price": "987654321",
+   "targetUsd": 100,
+   "minGrossToReach": "10124999999873437501"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 8,
+   "price": "987654321",
+   "targetUsd": 1000,
+   "minGrossToReach": "101249999998734375001"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 8,
+   "price": "987654321",
+   "targetUsd": 10000,
+   "minGrossToReach": "1012499999987343750001"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 8,
+   "price": "987654321",
+   "targetUsd": 100000,
+   "minGrossToReach": "10124999999873437500002"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 18,
+   "price": "1",
+   "targetUsd": 100,
+   "minGrossToReach": "100000000000000000000000000000000000000"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 18,
+   "price": "1",
+   "targetUsd": 1000,
+   "minGrossToReach": "1000000000000000000000000000000000000000"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 18,
+   "price": "1",
+   "targetUsd": 10000,
+   "minGrossToReach": "10000000000000000000000000000000000000000"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 18,
+   "price": "1",
+   "targetUsd": 100000,
+   "minGrossToReach": "100000000000000000000000000000000000000000"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 18,
+   "price": "600000000000000000000",
+   "targetUsd": 100,
+   "minGrossToReach": "166666666666666667"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 18,
+   "price": "600000000000000000000",
+   "targetUsd": 1000,
+   "minGrossToReach": "1666666666666666667"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 18,
+   "price": "600000000000000000000",
+   "targetUsd": 10000,
+   "minGrossToReach": "16666666666666666667"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 18,
+   "price": "600000000000000000000",
+   "targetUsd": 100000,
+   "minGrossToReach": "166666666666666666667"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 18,
+   "price": "987654321",
+   "targetUsd": 100,
+   "minGrossToReach": "101249999998734375000015820313"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 18,
+   "price": "987654321",
+   "targetUsd": 1000,
+   "minGrossToReach": "1012499999987343750000158203125"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 18,
+   "price": "987654321",
+   "targetUsd": 10000,
+   "minGrossToReach": "10124999999873437500001582031250"
+  },
+  {
+   "tokenDecimals": 18,
+   "feedDecimals": 18,
+   "price": "987654321",
+   "targetUsd": 100000,
+   "minGrossToReach": "101249999998734375000015820312500"
+  }
+ ],
+ "feeSequences": [
+  [
+   {
+    "gross": "1",
+    "feeDelta": "0",
+    "grossTotal": "1",
+    "feeReserved": "0"
+   }
+  ],
+  [
+   {
+    "gross": "4",
+    "feeDelta": "0",
+    "grossTotal": "4",
+    "feeReserved": "0"
+   },
+   {
+    "gross": "8",
+    "feeDelta": "0",
+    "grossTotal": "12",
+    "feeReserved": "0"
+   },
+   {
+    "gross": "6",
+    "feeDelta": "0",
+    "grossTotal": "18",
+    "feeReserved": "0"
+   },
+   {
+    "gross": "8",
+    "feeDelta": "0",
+    "grossTotal": "26",
+    "feeReserved": "0"
+   },
+   {
+    "gross": "7",
+    "feeDelta": "0",
+    "grossTotal": "33",
+    "feeReserved": "0"
+   }
+  ],
+  [
+   {
+    "gross": "7",
+    "feeDelta": "0",
+    "grossTotal": "7",
+    "feeReserved": "0"
+   },
+   {
+    "gross": "1",
+    "feeDelta": "0",
+    "grossTotal": "8",
+    "feeReserved": "0"
+   },
+   {
+    "gross": "13",
+    "feeDelta": "0",
+    "grossTotal": "21",
+    "feeReserved": "0"
+   },
+   {
+    "gross": "4",
+    "feeDelta": "0",
+    "grossTotal": "25",
+    "feeReserved": "0"
+   },
+   {
+    "gross": "9",
+    "feeDelta": "1",
+    "grossTotal": "34",
+    "feeReserved": "1"
+   }
+  ],
+  [
+   {
+    "gross": "15",
+    "feeDelta": "0",
+    "grossTotal": "15",
+    "feeReserved": "0"
+   },
+   {
+    "gross": "15",
+    "feeDelta": "0",
+    "grossTotal": "30",
+    "feeReserved": "0"
+   },
+   {
+    "gross": "3",
+    "feeDelta": "0",
+    "grossTotal": "33",
+    "feeReserved": "0"
+   },
+   {
+    "gross": "4",
+    "feeDelta": "1",
+    "grossTotal": "37",
+    "feeReserved": "1"
+   },
+   {
+    "gross": "3",
+    "feeDelta": "0",
+    "grossTotal": "40",
+    "feeReserved": "1"
+   },
+   {
+    "gross": "55",
+    "feeDelta": "1",
+    "grossTotal": "95",
+    "feeReserved": "2"
+   },
+   {
+    "gross": "4",
+    "feeDelta": "0",
+    "grossTotal": "99",
+    "feeReserved": "2"
+   }
+  ],
+  [
+   {
+    "gross": "4",
+    "feeDelta": "0",
+    "grossTotal": "4",
+    "feeReserved": "0"
+   },
+   {
+    "gross": "18",
+    "feeDelta": "0",
+    "grossTotal": "22",
+    "feeReserved": "0"
+   },
+   {
+    "gross": "13",
+    "feeDelta": "1",
+    "grossTotal": "35",
+    "feeReserved": "1"
+   },
+   {
+    "gross": "34",
+    "feeDelta": "1",
+    "grossTotal": "69",
+    "feeReserved": "2"
+   },
+   {
+    "gross": "12",
+    "feeDelta": "0",
+    "grossTotal": "81",
+    "feeReserved": "2"
+   },
+   {
+    "gross": "8",
+    "feeDelta": "0",
+    "grossTotal": "89",
+    "feeReserved": "2"
+   },
+   {
+    "gross": "11",
+    "feeDelta": "1",
+    "grossTotal": "100",
+    "feeReserved": "3"
+   }
+  ],
+  [
+   {
+    "gross": "112",
+    "feeDelta": "3",
+    "grossTotal": "112",
+    "feeReserved": "3"
+   },
+   {
+    "gross": "7",
+    "feeDelta": "0",
+    "grossTotal": "119",
+    "feeReserved": "3"
+   },
+   {
+    "gross": "334",
+    "feeDelta": "10",
+    "grossTotal": "453",
+    "feeReserved": "13"
+   },
+   {
+    "gross": "26",
+    "feeDelta": "1",
+    "grossTotal": "479",
+    "feeReserved": "14"
+   },
+   {
+    "gross": "207",
+    "feeDelta": "6",
+    "grossTotal": "686",
+    "feeReserved": "20"
+   },
+   {
+    "gross": "313",
+    "feeDelta": "9",
+    "grossTotal": "999",
+    "feeReserved": "29"
+   },
+   {
+    "gross": "1",
+    "feeDelta": "1",
+    "grossTotal": "1000",
+    "feeReserved": "30"
+   }
+  ],
+  [
+   {
+    "gross": "5358868260250986682443132631022367119780524143121184118917528098059218896971",
+    "feeDelta": "160766047807529600473293978930671013593415724293635523567525842941776566909",
+    "grossTotal": "5358868260250986682443132631022367119780524143121184118917528098059218896971",
+    "feeReserved": "160766047807529600473293978930671013593415724293635523567525842941776566909"
+   },
+   {
+    "gross": "37897362195105039123236312932914607935046561139339814394001234815030665232722",
+    "feeDelta": "1136920865853151173697089387987438238051396834180194431820037044450919956981",
+    "grossTotal": "43256230455356025805679445563936975054827085282460998512918762913089884129693",
+    "feeReserved": "1297686913660680774170383366918109251644812558473829955387562887392696523890"
+   },
+   {
+    "gross": "14306892015014329178439159743426531193434890036662172227559069499264232060645",
+    "feeDelta": "429206760450429875353174792302795935803046701099865166826772084977926961820",
+    "grossTotal": "57563122470370354984118605307363506248261975319123170740477832412354116190338",
+    "feeReserved": "1726893674111110649523558159220905187447859259573695122214334972370623485710"
+   },
+   {
+    "gross": "7674455279100882172129722400336644991297609246964136643723119315640426409575",
+    "feeDelta": "230233658373026465163891672010099349738928277408924099311693579469212792287",
+    "grossTotal": "65237577749471237156248327707700151239559584566087307384200951727994542599913",
+    "feeReserved": "1957127332484137114687449831231004537186787536982619221526028551839836277997"
+   },
+   {
+    "gross": "12693911629196795525254450658860082053011861649443267720449529164752991765889",
+    "feeDelta": "380817348875903865757633519765802461590355849483298031613485874942589752977",
+    "grossTotal": "77931489378668032681502778366560233292571446215530575104650480892747534365802",
+    "feeReserved": "2337944681360040980445083350996806998777143386465917253139514426782426030974"
+   },
+   {
+    "gross": "24947518448414083369502943557549602095903564724139135253909141210919142022135",
+    "feeDelta": "748425553452422501085088306726488062877106941724174057617274236327574260664",
+    "grossTotal": "102879007827082116051005721924109835388475010939669710358559622103666676387937",
+    "feeReserved": "3086370234812463481530171657723295061654250328190091310756788663110000291638"
+   },
+   {
+    "gross": "12913081410234079372565263084578072464794973725970853680897961904246453251998",
+    "feeDelta": "387392442307022381176957892537342173943849211779125610426938857127393597560",
+    "grossTotal": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+    "feeReserved": "3473762677119485862707129550260637235598099539969216921183727520237393889198"
+   }
+  ],
+  [
+   {
+    "gross": "2509465784967125414891535834742462054122374097480523271369904979008162764738",
+    "feeDelta": "75283973549013762446746075042273861623671222924415698141097149370244882942",
+    "grossTotal": "2509465784967125414891535834742462054122374097480523271369904979008162764738",
+    "feeReserved": "75283973549013762446746075042273861623671222924415698141097149370244882942"
+   },
+   {
+    "gross": "12029522200538078557811849337004269354498944363594849033281798943629101138683",
+    "feeDelta": "360885666016142356734355480110128080634968330907845470998453968308873034160",
+    "grossTotal": "14538987985505203972703385171746731408621318461075372304651703922637263903421",
+    "feeReserved": "436169639565156119181101555152401942258639553832261169139551117679117917102"
+   },
+   {
+    "gross": "20343376195737923483444688164844353215725437332370690302947377037324822567965",
+    "feeDelta": "610301285872137704503340644945330596471763119971120709088421311119744677039",
+    "grossTotal": "34882364181243127456148073336591084624346755793446062607599080959962086471386",
+    "feeReserved": "1046470925437293823684442200097732538730402673803381878227972428798862594141"
+   },
+   {
+    "gross": "8061753887244979560812459741685598764694536452322291578893593179366694111917",
+    "feeDelta": "241852616617349386824373792250567962940836093569668747366807795381000823358",
+    "grossTotal": "42944118068488107016960533078276683389041292245768354186492674139328780583303",
+    "feeReserved": "1288323542054643210508815992348300501671238767373050625594780224179863417499"
+   },
+   {
+    "gross": "6167040081920818896879669626752960318111247274574703661750652234923655164466",
+    "feeDelta": "185011202457624566906390088802588809543337418237241109852519567047709654934",
+    "grossTotal": "49111158150408925913840202705029643707152539520343057848243326374252435747769",
+    "feeReserved": "1473334744512267777415206081150889311214576185610291735447299791227573072433"
+   },
+   {
+    "gross": "6748298533215057073969522773785314832106233596945228395022444551425047811653",
+    "feeDelta": "202448955996451712219085683213559444963187007908356851850673336542751434349",
+    "grossTotal": "55859456683623982987809725478814958539258773117288286243265770925677483559422",
+    "feeReserved": "1675783700508719489634291764364448756177763193518648587297973127770324506782"
+   },
+   {
+    "gross": "20854796002599345974962169068714193452872822883413305200224273100955100061028",
+    "feeDelta": "625643880077980379248865072061425803586184686502399156006728193028653001831",
+    "grossTotal": "76714252686223328962771894547529151992131596000701591443490044026632583620450",
+    "feeReserved": "2301427580586699868883156836425874559763947880021047743304701320798977508613"
+   }
+  ],
+  [
+   {
+    "gross": "2777335066879770236553290537835278235794394527305680885505836743677668687504",
+    "feeDelta": "83320052006393107096598716135058347073831835819170426565175102310330060625",
+    "grossTotal": "2777335066879770236553290537835278235794394527305680885505836743677668687504",
+    "feeReserved": "83320052006393107096598716135058347073831835819170426565175102310330060625"
+   },
+   {
+    "gross": "7384879471423481734914067788361221632546404668973794229027598687189607596648",
+    "feeDelta": "221546384142704452047422033650836648976392140069213826870827960615688227899",
+    "grossTotal": "10162214538303251971467358326196499868340799196279475114533435430867276284152",
+    "feeReserved": "304866436149097559144020749785894996050223975888384253436003062926018288524"
+   },
+   {
+    "gross": "9168687025218039467936951331206845333114149166606909210766195233837749090024",
+    "feeDelta": "275060610756541184038108539936205359993424474998207276322985857015132472701",
+    "grossTotal": "19330901563521291439404309657403345201454948362886384325299630664705025374176",
+    "feeReserved": "579927046905638743182129289722100356043648450886591529758988919941150761225"
+   },
+   {
+    "gross": "3988590940990964615439945023296248269701586554439038348546959094181534258861",
+    "feeDelta": "119657728229728938463198350698887448091047596633171150456408772825446027766",
+    "grossTotal": "23319492504512256054844254680699593471156534917325422673846589758886559633037",
+    "feeReserved": "699584775135367681645327640420987804134696047519762680215397692766596788991"
+   },
+   {
+    "gross": "4108959011855835621514225396678013014157866922451472932999870441650176093394",
+    "feeDelta": "123268770355675068645426761900340390424736007673544187989996113249505282801",
+    "grossTotal": "27428451516368091676358480077377606485314401839776895606846460200536735726431",
+    "feeReserved": "822853545491042750290754402321328194559432055193306868205393806016102071792"
+   },
+   {
+    "gross": "1010714765286991944052890039744819815538178953179405208183435569295225034639",
+    "feeDelta": "30321442958609758321586701192344594466145368595382156245503067078856751040",
+    "grossTotal": "28439166281655083620411370117122426300852580792956300815029895769831960761070",
+    "feeReserved": "853174988449652508612341103513672789025577423788689024450896873094958822832"
+   },
+   {
+    "gross": "833968059712086508884338171179030348107860798334495940304742360649731482986",
+    "feeDelta": "25019041791362595266530145135370910443235823950034878209142270819491944489",
+    "grossTotal": "29273134341367170129295708288301456648960441591290796755334638130481692244056",
+    "feeReserved": "878194030241015103878871248649043699468813247738723902660039143914450767321"
+   }
+  ],
+  [
+   {
+    "gross": "444877671339047342261362414076332952764099951485370888452741941681279417857",
+    "feeDelta": "13346330140171420267840872422289988582922998544561126653582258250438382535",
+    "grossTotal": "444877671339047342261362414076332952764099951485370888452741941681279417857",
+    "feeReserved": "13346330140171420267840872422289988582922998544561126653582258250438382535"
+   },
+   {
+    "gross": "9976649362493533446896042820501061557877873739522297809314264712559134821128",
+    "feeDelta": "299299480874806003406881284615031846736336212185668934279427941376774044634",
+    "grossTotal": "10421527033832580789157405234577394510641973691007668697767006654240414238985",
+    "feeReserved": "312645811014977423674722157037321835319259210730230060933010199627212427169"
+   },
+   {
+    "gross": "4149890635057139110948035207630879815248327384010926675050924324415314251976",
+    "feeDelta": "124496719051714173328441056228926394457449821520327800251527729732459427559",
+    "grossTotal": "14571417668889719900105440442208274325890301075018595372817930978655728490961",
+    "feeReserved": "437142530066691597003163213266248229776709032250557861184537929359671854728"
+   },
+   {
+    "gross": "1064213491205483273477236516107127838659378292460904152072073559164291929727",
+    "feeDelta": "31926404736164498204317095483213835159781348773827124562162206774928757892",
+    "grossTotal": "15635631160095203173582676958315402164549679367479499524890004537820020420688",
+    "feeReserved": "469068934802856095207480308749462064936490381024384985746700136134600612620"
+   },
+   {
+    "gross": "8604788578295923156991388732642783365220999238160188530779317900360677395043",
+    "feeDelta": "258143657348877694709741661979283500956629977144805655923379537010820321851",
+    "grossTotal": "24240419738391126330574065690958185529770678605639688055669322438180697815731",
+    "feeReserved": "727212592151733789917221970728745565893120358169190641670079673145420934471"
+   },
+   {
+    "gross": "8573414057680954874733632815090132109058620964239317958550707533599051092980",
+    "feeDelta": "257202421730428646242008984452703963271758628927179538756521226007971532790",
+    "grossTotal": "32813833796072081205307698506048317638829299569879006014220029971779748908711",
+    "feeReserved": "984415013882162436159230955181449529164878987096370180426600899153392467261"
+   },
+   {
+    "gross": "17819448253763250118587927988404584971101077899785667126842869847081877665731",
+    "feeDelta": "534583447612897503557637839652137549133032336993570013805286095412456329972",
+    "grossTotal": "50633282049835331323895626494452902609930377469664673141062899818861626574442",
+    "feeReserved": "1518998461495059939716868794833587078297911324089940194231886994565848797233"
+   }
+  ],
+  [
+   {
+    "gross": "2640288894613452724612085865487285173497572719682668361404383029756320445420",
+    "feeDelta": "79208666838403581738362575964618555204927181590480050842131490892689613362",
+    "grossTotal": "2640288894613452724612085865487285173497572719682668361404383029756320445420",
+    "feeReserved": "79208666838403581738362575964618555204927181590480050842131490892689613362"
+   },
+   {
+    "gross": "19418231310742897824421662227747305298138981665126208509563615392732968725787",
+    "feeDelta": "582546939322286934732649866832419158944169449953786255286908461781989061774",
+    "grossTotal": "22058520205356350549033748093234590471636554384808876870967998422489289171207",
+    "feeReserved": "661755606160690516471012442797037714149096631544266306129039952674678675136"
+   },
+   {
+    "gross": "12978106768424651867371719419811215243952857826561202741901597266023146294611",
+    "feeDelta": "389343203052739556021151582594336457318585734796836082257047917980694388838",
+    "grossTotal": "35036626973781002416405467513045805715589412211370079612869595688512435465818",
+    "feeReserved": "1051098809213430072492164025391374171467682366341102388386087870655373063974"
+   },
+   {
+    "gross": "6008615165048741674146407229679847645930255931624919621764870686896696630541",
+    "feeDelta": "180258454951462250224392216890395429377907677948747588652946120606900898916",
+    "grossTotal": "41045242138829744090551874742725653361519668142994999234634466375409132096359",
+    "feeReserved": "1231357264164892322716556242281769600845590044289849977039033991262273962890"
+   },
+   {
+    "gross": "2085771089844934385899151044986276892602803845229757041132566882301283377502",
+    "feeDelta": "62573132695348031576974531349588306778084115356892711233977006469038501325",
+    "grossTotal": "43131013228674678476451025787711930254122471988224756275767033257710415473861",
+    "feeReserved": "1293930396860240354293530773631357907623674159646742688273010997731312464215"
+   },
+   {
+    "gross": "9006586143436166195330515860243487602558857857437969263180697129463021524764",
+    "feeDelta": "270197584303084985859915475807304628076765735723139077895420913883890645743",
+    "grossTotal": "52137599372110844671781541647955417856681329845662725538947730387173436998625",
+    "feeReserved": "1564127981163325340153446249438662535700439895369881766168431911615203109958"
+   },
+   {
+    "gross": "6436463639876413191611718974931716671032076549589142229681196722759362254242",
+    "feeDelta": "193093909196292395748351569247951500130962296487674266890435901682780867628",
+    "grossTotal": "58574063011987257863393260622887134527713406395251867768628927109932799252867",
+    "feeReserved": "1757221890359617735901797818686614035831402191857556033058867813297983977586"
+   }
+  ],
+  [
+   {
+    "gross": "5667444364919637219752937429870056423472551964238762849845658401411509939157",
+    "feeDelta": "170023330947589116592588122896101692704176558927162885495369752042345298174",
+    "grossTotal": "5667444364919637219752937429870056423472551964238762849845658401411509939157",
+    "feeReserved": "170023330947589116592588122896101692704176558927162885495369752042345298174"
+   },
+   {
+    "gross": "8870406036055271261352731435213437672832364684983076331037352910159856805803",
+    "feeDelta": "266112181081658137840581943056403130184970940549492289931120587304795704174",
+    "grossTotal": "14537850400974908481105668865083494096304916649221839180883011311571366744960",
+    "feeReserved": "436135512029247254433170065952504822889147499476655175426490339347141002348"
+   },
+   {
+    "gross": "2286898391715251099955981070751529385024468622006266851295387958060645019178",
+    "feeDelta": "68606951751457532998679432122545881550734058660188005538861638741819350576",
+    "grossTotal": "16824748792690159581061649935835023481329385271228106032178399269632011764138",
+    "feeReserved": "504742463780704787431849498075050704439881558136843180965351978088960352924"
+   },
+   {
+    "gross": "8542619300593433151597757146683760971182244064196277918091367781872684114054",
+    "feeDelta": "256278579017802994547932714400512829135467321925888337542741033456180523421",
+    "grossTotal": "25367368093283592732659407082518784452511629335424383950269767051504695878192",
+    "feeReserved": "761021042798507781979782212475563533575348880062731518508093011545140876345"
+   },
+   {
+    "gross": "1665802425499280665426445724527473520700199292513048067537586419451976386163",
+    "feeDelta": "49974072764978419962793371735824205621005978775391442026127592583559291585",
+    "grossTotal": "27033170518782873398085852807046257973211828627937432017807353470956672264355",
+    "feeReserved": "810995115563486201942575584211387739196354858838122960534220604128700167930"
+   },
+   {
+    "gross": "3159211882212261088226177187574909948598791597789636978042023518482472646717",
+    "feeDelta": "94776356466367832646785315627247298457963747933689109341260705554474179402",
+    "grossTotal": "30192382400995134486312029994621167921810620225727068995849376989439144911072",
+    "feeReserved": "905771472029854034589360899838635037654318606771812069875481309683174347332"
+   },
+   {
+    "gross": "6593354551193826565884744304564017982970245119203657796664465617452402402502",
+    "feeDelta": "197800636535814796976542329136920539489107353576109733899933968523572072075",
+    "grossTotal": "36785736952188961052196774299185185904780865344930726792513842606891547313574",
+    "feeReserved": "1103572108565668831565903228975555577143425960347921803775415278206746419407"
+   }
+  ],
+  [
+   {
+    "gross": "26075818333698183289807564440801500491873545980944484203885861157875607221065",
+    "feeDelta": "782274550010945498694226933224045014756206379428334526116575834736268216631",
+    "grossTotal": "26075818333698183289807564440801500491873545980944484203885861157875607221065",
+    "feeReserved": "782274550010945498694226933224045014756206379428334526116575834736268216631"
+   },
+   {
+    "gross": "1873969908228389419811130957810503121081832632081591091890800706950952030165",
+    "feeDelta": "56219097246851682594333928734315093632454978962447732756724021208528560905",
+    "grossTotal": "27949788241926572709618695398612003612955378613026075295776661864826559251230",
+    "feeReserved": "838493647257797181288560861958360108388661358390782258873299855944796777536"
+   },
+   {
+    "gross": "18076788028194621617661031097885944609472224090887692486368506709813678505478",
+    "feeDelta": "542303640845838648529830932936578338284166722726630774591055201294410355165",
+    "grossTotal": "46026576270121194327279726496497948222427602703913767782145168574640237756708",
+    "feeReserved": "1380797288103635829818391794894938446672828081117413033464355057239207132701"
+   },
+   {
+    "gross": "16057274070962527201875354580594840267191971221919222091397379405540967788679",
+    "feeDelta": "481718222128875816056260637417845208015759136657576662741921382166229033660",
+    "grossTotal": "62083850341083721529155081077092788489619573925832989873542547980181205545387",
+    "feeReserved": "1862515510232511645874652432312783654688587217774989696206276439405436166361"
+   },
+   {
+    "gross": "6165958920474668734184760563610748541665371799329738397211933608263423623318",
+    "feeDelta": "184978767614240062025542816908322456249961153979892151916358008247902708700",
+    "grossTotal": "68249809261558390263339841640703537031284945725162728270754481588444629168705",
+    "feeReserved": "2047494277846751707900195249221106110938548371754881848122634447653338875061"
+   },
+   {
+    "gross": "11758261288270010377013650209748292432335405034812178734971118597655531259972",
+    "feeDelta": "352747838648100311310409506292448772970062151044365362049133557929665937799",
+    "grossTotal": "80008070549828400640353491850451829463620350759974907005725600186100160428677",
+    "feeReserved": "2400242116494852019210604755513554883908610522799247210171768005583004812860"
+   },
+   {
+    "gross": "8069235592831931531238948078719976165444849604608350304739358846375113820120",
+    "feeDelta": "242077067784957945937168442361599284963345488138250509142180765391253414603",
+    "grossTotal": "88077306142660332171592439929171805629065200364583257310464959032475274248797",
+    "feeReserved": "2642319184279809965147773197875154168871956010937497719313948770974258227463"
+   }
+  ],
+  [
+   {
+    "gross": "15478988286092153433974430653574071055559233508206179304073277251941353700924",
+    "feeDelta": "464369648582764603019232919607222131666777005246185379122198317558240611027",
+    "grossTotal": "15478988286092153433974430653574071055559233508206179304073277251941353700924",
+    "feeReserved": "464369648582764603019232919607222131666777005246185379122198317558240611027"
+   },
+   {
+    "gross": "873109004368783871255703224223278797829479022084727525007687210174113939683",
+    "feeDelta": "26193270131063516137671096726698363934884370662541825750230616305223418191",
+    "grossTotal": "16352097290460937305230133877797349853388712530290906829080964462115467640607",
+    "feeReserved": "490562918713828119156904016333920495601661375908727204872428933863464029218"
+   },
+   {
+    "gross": "682587772496195019768957492446952537166453969431696763478146028561873083379",
+    "feeDelta": "20477633174885850593068724773408576114993619082950902904344380856856192501",
+    "grossTotal": "17034685062957132324999091370244302390555166499722603592559110490677340723986",
+    "feeReserved": "511040551888713969749972741107329071716654994991678107776773314720320221719"
+   },
+   {
+    "gross": "7892470155264297178790549797019995336386727879592532691562799625889643647047",
+    "feeDelta": "236774104657928915363716493910599860091601836387775980746883988776689309411",
+    "grossTotal": "24927155218221429503789641167264297726941894379315136284121910116566984371033",
+    "feeReserved": "747814656546642885113689235017928931808256831379454088523657303497009531130"
+   },
+   {
+    "gross": "10944287894331776442963776587480496988251880501538037039581656258803342873986",
+    "feeDelta": "328328636829953293288913297624414909647556415046141111187449687764100286220",
+    "grossTotal": "35871443112553205946753417754744794715193774880853173323703566375370327245019",
+    "feeReserved": "1076143293376596178402602532642343841455813246425595199711106991261109817350"
+   },
+   {
+    "gross": "2394483441024058797619177704410320042635950950412446446168532732211484690895",
+    "feeDelta": "71834503230721763928575331132309601279078528512373393385055981966344540727",
+    "grossTotal": "38265926553577264744372595459155114757829725831265619769872099107581811935914",
+    "feeReserved": "1147977796607317942331177863774653442734891774937968593096162973227454358077"
+   },
+   {
+    "gross": "5624355421746500276936597854373241374391343516185559703615653799366327282882",
+    "feeDelta": "168730662652395008308097935631197241231740305485566791108469613980989818486",
+    "grossTotal": "43890281975323765021309193313528356132221069347451179473487752906948139218796",
+    "feeReserved": "1316708459259712950639275799405850683966632080423535384204632587208444176563"
+   }
+  ],
+  [
+   {
+    "gross": "1458465607253618777020465532342489571711755013488383631347176123567149273628",
+    "feeDelta": "43753968217608563310613965970274687151352650404651508940415283707014478208",
+    "grossTotal": "1458465607253618777020465532342489571711755013488383631347176123567149273628",
+    "feeReserved": "43753968217608563310613965970274687151352650404651508940415283707014478208"
+   },
+   {
+    "gross": "23675641336272756620885011007895570498876180488953744862439347580145482130397",
+    "feeDelta": "710269240088182698626550330236867114966285414668612345873180427404364463912",
+    "grossTotal": "25134106943526375397905476540238060070587935502442128493786523703712631404025",
+    "feeReserved": "754023208305791261937164296207141802117638065073263854813595711111378942120"
+   },
+   {
+    "gross": "7550328450715902738090961872186025178690763784608063843935474423559397752882",
+    "feeDelta": "226509853521477082142728856165580755360722913538241915318064232706781932587",
+    "grossTotal": "32684435394242278135996438412424085249278699287050192337721998127272029156907",
+    "feeReserved": "980533061827268344079893152372722557478360978611505770131659943818160874707"
+   },
+   {
+    "gross": "1288524512535525883251320841208289411295040687203702728677849463451674650715",
+    "feeDelta": "38655735376065776497539625236248682338851220616111081860335483903550239521",
+    "grossTotal": "33972959906777804019247759253632374660573739974253895066399847590723703807622",
+    "feeReserved": "1019188797203334120577432777608971239817212199227616851991995427721711114228"
+   },
+   {
+    "gross": "8641057000061849285028665143938104405957239135761808924680745084295476429935",
+    "feeDelta": "259231710001855478550859954318143132178717174072854267740422352528864292898",
+    "grossTotal": "42614016906839653304276424397570479066530979110015703991080592675019180237557",
+    "feeReserved": "1278420507205189599128292731927114371995929373300471119732417780250575407126"
+   },
+   {
+    "gross": "14748022274047630161319495183772123107951603472561075485208229208922027194217",
+    "feeDelta": "442440668221428904839584855513163693238548104176832264556246876267660815827",
+    "grossTotal": "57362039180887283465595919581342602174482582582576779476288821883941207431774",
+    "feeReserved": "1720861175426618503967877587440278065234477477477303384288664656518236222953"
+   },
+   {
+    "gross": "7696545082710106032726231295150559712025217583102205434272361736146937192705",
+    "feeDelta": "230896352481303180981786938854516791360756527493066163028170852084408115781",
+    "grossTotal": "65058584263597389498322150876493161886507800165678984910561183620088144624479",
+    "feeReserved": "1951757527907921684949664526294794856595234004970369547316835508602644338734"
+   }
+  ],
+  [
+   {
+    "gross": "7064858645230750316508085135647441327098498953575851651359029623528720340649",
+    "feeDelta": "211945759356922509495242554069423239812954968607275549540770888705861610219",
+    "grossTotal": "7064858645230750316508085135647441327098498953575851651359029623528720340649",
+    "feeReserved": "211945759356922509495242554069423239812954968607275549540770888705861610219"
+   },
+   {
+    "gross": "1616734892278759386643157990651026470905281703903765567141985656341650492954",
+    "feeDelta": "48502046768362781599294739719530794127158451117112967014259569690249514789",
+    "grossTotal": "8681593537509509703151243126298467798003780657479617218501015279870370833603",
+    "feeReserved": "260447806125285291094537293788954033940113419724388516555030458396111125008"
+   },
+   {
+    "gross": "39819681719955109012621584412893298793911386987587123228429552069175540339841",
+    "feeDelta": "1194590451598653270378647532386798963817341609627613696852886562075266210195",
+    "grossTotal": "48501275257464618715772827539191766591915167645066740446930567349045911173444",
+    "feeReserved": "1455038257723938561473184826175752997757455029352002213407917020471377335203"
+   },
+   {
+    "gross": "3558796231428440336977403160413022947655336142137591234830975256487277184856",
+    "feeDelta": "106763886942853210109322094812390688429660084264127737044929257694618315546",
+    "grossTotal": "52060071488893059052750230699604789539570503787204331681761542605533188358300",
+    "feeReserved": "1561802144666791771582506920988143686187115113616129950452846278165995650749"
+   },
+   {
+    "gross": "4653124612729511522160060029319462754968233370992097316148305196006756110033",
+    "feeDelta": "139593738381885345664801800879583882649047001129762919484449155880202683300",
+    "grossTotal": "56713196101622570574910290728924252294538737158196428997909847801539944468333",
+    "feeReserved": "1701395883048677117247308721867727568836162114745892869937295434046198334049"
+   },
+   {
+    "gross": "11039261025258505610489915914256311639587553989828354251420297843355204921528",
+    "feeDelta": "331177830757755168314697477427689349187626619694850627542608935300656147646",
+    "grossTotal": "67752457126881076185400206643180563934126291148024783249330145644895149389861",
+    "feeReserved": "2032573713806432285562006199295416918023788734440743497479904369346854481695"
+   },
+   {
+    "gross": "3147955466258133658918968783024612207701785805933150717838465618046533302272",
+    "feeDelta": "94438663987744009767569063490738366231053574177994521535153968541395999068",
+    "grossTotal": "70900412593139209844319175426205176141828076953957933967168611262941682692133",
+    "feeReserved": "2127012377794176295329575262786155284254842308618738019015058337888250480763"
+   }
+  ],
+  [
+   {
+    "gross": "6357533991398109761084181276998290227275401532311975563505859680797820947129",
+    "feeDelta": "190726019741943292832525438309948706818262045969359266905175790423934628413",
+    "grossTotal": "6357533991398109761084181276998290227275401532311975563505859680797820947129",
+    "feeReserved": "190726019741943292832525438309948706818262045969359266905175790423934628413"
+   },
+   {
+    "gross": "4036130596341143668151532642062912680656157768275652299451265993296516047083",
+    "feeDelta": "121083917890234310044545979261887380419684733048269568983537979798895481413",
+    "grossTotal": "10393664587739253429235713919061202907931559300587627862957125674094336994212",
+    "feeReserved": "311809937632177602877071417571836087237946779017628835888713770222830109826"
+   },
+   {
+    "gross": "862331338503798161308947455029616904197934615059076578472324568279295921643",
+    "feeDelta": "25869940155113944839268423650888507125938038451772297354169737048378877649",
+    "grossTotal": "11255995926243051590544661374090819812129493915646704441429450242373632915855",
+    "feeReserved": "337679877787291547716339841222724594363884817469401133242883507271208987475"
+   },
+   {
+    "gross": "3097617893674526510641025413050975822495697149785886445388185954281172648617",
+    "feeDelta": "92928536810235795319230762391529274674870914493576593361645578628435179459",
+    "grossTotal": "14353613819917578101185686787141795634625191065432590886817636196654805564472",
+    "feeReserved": "430608414597527343035570603614253869038755731962977726604529085899644166934"
+   },
+   {
+    "gross": "169962523222587112709158930219799277548784983860707640658929486705355675195",
+    "feeDelta": "5098875696677613381274767906593978326463549515821229219767884601160670256",
+    "grossTotal": "14523576343140165213894845717361594912173976049293298527476565683360161239667",
+    "feeReserved": "435707290294204956416845371520847847365219281478798955824296970500804837190"
+   },
+   {
+    "gross": "1448155963653268192449357948286485924429142743678725487780575407993922475194",
+    "feeDelta": "43444678909598045773480738448594577732874282310361764633417262239817674255",
+    "grossTotal": "15971732306793433406344203665648080836603118792972024015257141091354083714861",
+    "feeReserved": "479151969203803002190326109969442425098093563789160720457714232740622511445"
+   },
+   {
+    "gross": "5614908795127478683269719995592521450167918256990154031960930658488034314702",
+    "feeDelta": "168447263853824360498091599867775643505037547709704620958827919754641029441",
+    "grossTotal": "21586641101920912089613923661240602286771037049962178047218071749842118029563",
+    "feeReserved": "647599233057627362688417709837218068603131111498865341416542152495263540886"
+   }
+  ],
+  [
+   {
+    "gross": "15824550026741959117540864680481703947134293434495947247102040501211038598097",
+    "feeDelta": "474736500802258773526225940414451118414028803034878417413061215036331157942",
+    "grossTotal": "15824550026741959117540864680481703947134293434495947247102040501211038598097",
+    "feeReserved": "474736500802258773526225940414451118414028803034878417413061215036331157942"
+   },
+   {
+    "gross": "20981207644494559152413589264471383475227589584945674818376969253655193453539",
+    "feeDelta": "629436229334836774572407677934141504256827687548370244551309077609655803607",
+    "grossTotal": "36805757671236518269954453944953087422361883019441622065479009754866232051636",
+    "feeReserved": "1104172730137095548098633618348592622670856490583248661964370292645986961549"
+   },
+   {
+    "gross": "8873914042814718715472018443889870603960149329769618156405134151182638108009",
+    "feeDelta": "266217421284441561464160553316696118118804479893088544692154024535479143240",
+    "grossTotal": "45679671714051236985426472388842958026322032349211240221884143906048870159645",
+    "feeReserved": "1370390151421537109562794171665288740789660970476337206656524317181466104789"
+   },
+   {
+    "gross": "874261878674193149009408866655868408201114826210822785317013540963688102209",
+    "feeDelta": "26227856360225794470282265999676052246033444786324683559510406228910643066",
+    "grossTotal": "46553933592725430134435881255498826434523147175422063007201157447012558261854",
+    "feeReserved": "1396618007781762904033076437664964793035694415262661890216034723410376747855"
+   },
+   {
+    "gross": "10179945878944880363566410994977187922084827085728898377116108898324318466333",
+    "feeDelta": "305398376368346410906992329849315637662544812571866951313483266949729553990",
+    "grossTotal": "56733879471670310498002292250476014356607974261150961384317266345336876728187",
+    "feeReserved": "1702016384150109314940068767514280430698239227834528841529517990360106301845"
+   },
+   {
+    "gross": "3687440069466151669225424921344840811371782920765872480456536886724493503597",
+    "feeDelta": "110623202083984550076762747640345224341153487622976174413696106601734805108",
+    "grossTotal": "60421319541136462167227717171820855167979757181916833864773803232061370231784",
+    "feeReserved": "1812639586234093865016831515154625655039392715457505015943214096961841106953"
+   },
+   {
+    "gross": "16472700898548631461733648063054789195347914902557091989252483694768582782098",
+    "feeDelta": "494181026956458943852009441891643675860437447076712759677574510843057483463",
+    "grossTotal": "76894020439685093628961365234875644363327672084473925854026286926829953013882",
+    "feeReserved": "2306820613190552808868840957046269330899830162534217775620788607804898590416"
+   }
+  ],
+  [
+   {
+    "gross": "14429318681661647062309097980345372649534186547214877503809722346691229928948",
+    "feeDelta": "432879560449849411869272939410361179486025596416446325114291670400736897868",
+    "grossTotal": "14429318681661647062309097980345372649534186547214877503809722346691229928948",
+    "feeReserved": "432879560449849411869272939410361179486025596416446325114291670400736897868"
+   },
+   {
+    "gross": "25443818264997629810179381106458532668767898596381700832153026682569164672994",
+    "feeDelta": "763314547949928894305381433193755980063036957891451024964590800477074940190",
+    "grossTotal": "39873136946659276872488479086803905318302085143596578335962749029260394601942",
+    "feeReserved": "1196194108399778306174654372604117159549062554307897350078882470877811838058"
+   },
+   {
+    "gross": "2876156950840596612386260910041214573784679641730265532325193811593603154554",
+    "feeDelta": "86284708525217898371587827301236437213540389251907965969755814347808094636",
+    "grossTotal": "42749293897499873484874739996845119892086764785326843868287942840853997756496",
+    "feeReserved": "1282478816924996204546242199905353596762602943559805316048638285225619932694"
+   },
+   {
+    "gross": "215477018846547968309804633657498965521512571413528394375982105715552108264",
+    "feeDelta": "6464310565396439049294139009724968965645377142405851831279463171466563248",
+    "grossTotal": "42964770916346421453184544630502618857608277356740372262663924946569549864760",
+    "feeReserved": "1288943127490392643595536338915078565728248320702211167879917748397086495942"
+   },
+   {
+    "gross": "29129936099627770992166811459753806184928281062021106146792804411253407396928",
+    "feeDelta": "873898082988833129765004343792614185547848431860633184403784132337602221908",
+    "grossTotal": "72094707015974192445351356090256425042536558418761478409456729357822957261688",
+    "feeReserved": "2162841210479225773360540682707692751276096752562844352283701880734688717850"
+   },
+   {
+    "gross": "5370111211834038269223341827130141620674992340745169632044452411551608540249",
+    "feeDelta": "161103336355021148076700254813904248620249770222355088961333572346548256208",
+    "grossTotal": "77464818227808230714574697917386566663211550759506648041501181769374565801937",
+    "feeReserved": "2323944546834246921437240937521596999896346522785199441245035453081236974058"
+   },
+   {
+    "gross": "12880977131653977008476615686021178849039424439817803552551206452666109310600",
+    "feeDelta": "386429313949619310254298470580635365471182733194534106576536193579983279318",
+    "grossTotal": "90345795359462207723051313603407745512250975199324451594052388222040675112537",
+    "feeReserved": "2710373860783866231691539408102232365367529255979733547821571646661220253376"
+   }
+  ],
+  [
+   {
+    "gross": "5467799857473443277172255509546749543606135394297482094150531978233117539950",
+    "feeDelta": "164033995724203298315167665286402486308184061828924462824515959346993526198",
+    "grossTotal": "5467799857473443277172255509546749543606135394297482094150531978233117539950",
+    "feeReserved": "164033995724203298315167665286402486308184061828924462824515959346993526198"
+   },
+   {
+    "gross": "2856735852242209731554648535464081310104201056875135043543586721700823589836",
+    "feeDelta": "85702075567266291946639456063922439303126031706254051306307601651024707695",
+    "grossTotal": "8324535709715653008726904045010830853710336451172617137694118699933941129786",
+    "feeReserved": "249736071291469590261807121350324925611310093535178514130823560998018233893"
+   },
+   {
+    "gross": "15181036208710754268463775472654077551368913320236321427895967564268616427471",
+    "feeDelta": "455431086261322628053913264179622326541067399607089642836879026928058492824",
+    "grossTotal": "23505571918426407277190679517664908405079249771408938565590086264202557557257",
+    "feeReserved": "705167157552792218315720385529947252152377493142268156967702587926076726717"
+   },
+   {
+    "gross": "584859210456556850902168605640680998881826311800587825933763967705171717780",
+    "feeDelta": "17545776313696705527065058169220429966454789354017634778012919031155151534",
+    "grossTotal": "24090431128882964128092848123305589403961076083209526391523850231907729275037",
+    "feeReserved": "722712933866488923842785443699167682118832282496285791745715506957231878251"
+   },
+   {
+    "gross": "6402502960618050432783911785111726000960852147390816905005499411275274125961",
+    "feeDelta": "192075088818541512983517353553351780028825564421724507150164982338258223778",
+    "grossTotal": "30492934089501014560876759908417315404921928230600343296529349643183003400998",
+    "feeReserved": "914788022685030436826302797252519462147657846918010298895880489295490102029"
+   },
+   {
+    "gross": "4159816146975677195350765767698153066407720431211663578298334178603512515879",
+    "feeDelta": "124794484409270315860522973030944591992231612936349907348950025358105375477",
+    "grossTotal": "34652750236476691756227525676115468471329648661812006874827683821786515916877",
+    "feeReserved": "1039582507094300752686825770283464054139889459854360206244830514653595477506"
+   },
+   {
+    "gross": "20363768769466589488075024241453012287697122913393670082105842815968506541169",
+    "feeDelta": "610913063083997684642250727243590368630913687401810102463175284479055196235",
+    "grossTotal": "55016519005943281244302549917568480759026771575205676956933526637755022458046",
+    "feeReserved": "1650495570178298437329076497527054422770803147256170308708005799132650673741"
+   }
+  ],
+  [
+   {
+    "gross": "2483350138303105619186464059990648671772099546869312177262860866777124707",
+    "feeDelta": "74500504149093168575593921799719460153162986406079365317885826003313741",
+    "grossTotal": "2483350138303105619186464059990648671772099546869312177262860866777124707",
+    "feeReserved": "74500504149093168575593921799719460153162986406079365317885826003313741"
+   },
+   {
+    "gross": "3920698875311520925797291024384567832942240983396794305296014708379708449709",
+    "feeDelta": "117620966259345627773918730731537034988267229501903829158880441251391253491",
+    "grossTotal": "3923182225449824031416477488444558481614013082943663617473277569246485574416",
+    "feeReserved": "117695466763494720942494324653336754448420392488309908524198327077394567232"
+   },
+   {
+    "gross": "19341058604234274442566559308542716817313878016412296076045164146733897467757",
+    "feeDelta": "580231758127028233276996779256281504519416340492368882281354924402016924033",
+    "grossTotal": "23264240829684098473983036796987275298927891099355959693518441715980383042173",
+    "feeReserved": "697927224890522954219491103909618258967836732980678790805553251479411491265"
+   },
+   {
+    "gross": "810798091601289987998873202939134647369505522955336690156111525804437430048",
+    "feeDelta": "24323942748038699639966196088174039421085165688660100704683345774133122901",
+    "grossTotal": "24075038921285388461981909999926409946297396622311296383674553241784820472221",
+    "feeReserved": "722251167638561653859457299997792298388921898669338891510236597253544614166"
+   },
+   {
+    "gross": "7695072796698211342457400116125261732290983889996514769631317282751358416591",
+    "feeDelta": "230852183900946340273722003483757851968729516699895443088939518482540752498",
+    "grossTotal": "31770111717983599804439310116051671678588380512307811153305870524536178888812",
+    "feeReserved": "953103351539507994133179303481550150357651415369234334599176115736085366664"
+   },
+   {
+    "gross": "6392662219075966054581243022009426259371865776799806122071720425666573266903",
+    "feeDelta": "191779866572278981637437290660282787781155973303994183662151612769997198007",
+    "grossTotal": "38162773937059565859020553138061097937960246289107617275377590950202752155715",
+    "feeReserved": "1144883218111786975770616594141832938138807388673228518261327728506082564671"
+   },
+   {
+    "gross": "3621158078735934396439028736312665208997356893235891264417463033642394595859",
+    "feeDelta": "108634742362078031893170862089379956269920706797076737932523891009271837876",
+    "grossTotal": "41783932015795500255459581874373763146957603182343508539795053983845146751574",
+    "feeReserved": "1253517960473865007663787456231212894408728095470305256193851619515354402547"
+   }
+  ],
+  [
+   {
+    "gross": "1229294079470687773572254367831577021535962218221768499045055732133236598498",
+    "feeDelta": "36878822384120633207167631034947310646078866546653054971351671963997097954",
+    "grossTotal": "1229294079470687773572254367831577021535962218221768499045055732133236598498",
+    "feeReserved": "36878822384120633207167631034947310646078866546653054971351671963997097954"
+   },
+   {
+    "gross": "3597453818051294858509532602778038983410490223556881814822509974729036650013",
+    "feeDelta": "107923614541538845755285978083341169502314706706706454444675299241871099501",
+    "grossTotal": "4826747897521982632081786970609616004946452441778650313867565706862273248511",
+    "feeReserved": "144802436925659478962453609118288480148393573253359509416026971205868197455"
+   },
+   {
+    "gross": "379814728269771463888212334402259053596875633646332719976792696776413332906",
+    "feeDelta": "11394441848093143916646370032067771607906269009389981599303780903292399987",
+    "grossTotal": "5206562625791754095969999305011875058543328075424983033844358403638686581417",
+    "feeReserved": "156196878773752622879099979150356251756299842262749491015330752109160597442"
+   },
+   {
+    "gross": "762023261836919605289541748424415510813189075464829495826051346159368012186",
+    "feeDelta": "22860697855107588158686252452732465324395672263944884874781540384781040366",
+    "grossTotal": "5968585887628673701259541053436290569356517150889812529670409749798054593603",
+    "feeReserved": "179057576628860211037786231603088717080695514526694375890112292493941637808"
+   },
+   {
+    "gross": "3835464407491013827389907492899891987946608617414097328458240471924296426132",
+    "feeDelta": "115063932224730414821697224786996759638398258522422919853747214157728892784",
+    "grossTotal": "9804050295119687528649448546336182557303125768303909858128650221722351019735",
+    "feeReserved": "294121508853590625859483456390085476719093773049117295743859506651670530592"
+   },
+   {
+    "gross": "400642229060179616457745691621944602592929416606373578912632348117429069288",
+    "feeDelta": "12019266871805388493732370748658338077787882498191207367378970443522872078",
+    "grossTotal": "10204692524179867145107194237958127159896055184910283437041282569839780089023",
+    "feeReserved": "306140775725396014353215827138743814796881655547308503111238477095193402670"
+   },
+   {
+    "gross": "28508166061400603019903714776250631170162578333656383289435589759995783553",
+    "feeDelta": "855244981842018090597111443287518935104877350009691498683067692799873507",
+    "grossTotal": "10233200690241267748127097952734377791066217763243939820330718159599775872576",
+    "feeReserved": "306996020707238032443812938582031333731986532897318194609921544787993276177"
+   }
+  ],
+  [
+   {
+    "gross": "8622851349250341503681402866535360455467943807766182019556629924297288922322",
+    "feeDelta": "258685540477510245110442085996060813664038314232985460586698897728918667669",
+    "grossTotal": "8622851349250341503681402866535360455467943807766182019556629924297288922322",
+    "feeReserved": "258685540477510245110442085996060813664038314232985460586698897728918667669"
+   },
+   {
+    "gross": "4174761140685924666839085088392912361701661112314150696973035241988186147860",
+    "feeDelta": "125242834220577740005172552651787370851049833369424520909191057259645584436",
+    "grossTotal": "12797612489936266170520487954928272817169604920080332716529665166285475070182",
+    "feeReserved": "383928374698087985115614638647848184515088147602409981495889954988564252105"
+   },
+   {
+    "gross": "34955607825758617344954008515658431227787906737757185461863211291367584369633",
+    "feeDelta": "1048668234772758520348620255469752936833637202132715563855896338741027531089",
+    "grossTotal": "47753220315694883515474496470586704044957511657837518178392876457653059439815",
+    "feeReserved": "1432596609470846505464234894117601121348725349735125545351786293729591783194"
+   },
+   {
+    "gross": "20302922805380415999457104540303167509118537446828995154497911705193521574387",
+    "feeDelta": "609087684161412479983713136209095025273556123404869854634937351155805647232",
+    "grossTotal": "68056143121075299514931601010889871554076049104666513332890788162846581014202",
+    "feeReserved": "2041684293632258985447948030326696146622281473139995399986723644885397430426"
+   },
+   {
+    "gross": "136500933348054091263485392731225762791094336057290533967416205422337240314",
+    "feeDelta": "4095028000441622737904561781936772883732830081718716019022486162670117209",
+    "grossTotal": "68192644054423353606195086403621097316867143440723803866858204368268918254516",
+    "feeReserved": "2045779321632700608185852592108632919506014303221714116005746131048067547635"
+   },
+   {
+    "gross": "2131031946676915318700125943327238573036811483805147484699535291769030361031",
+    "feeDelta": "63930958400307459561003778299817157191104344514154424540986058753070910831",
+    "grossTotal": "70323676001100268924895212346948335889903954924528951351557739660037948615547",
+    "feeReserved": "2109710280033008067746856370408450076697118647735868540546732189801138458466"
+   },
+   {
+    "gross": "9367821961998436934409523616146871235928023803867774194747355708238725518408",
+    "feeDelta": "281034658859953108032285708484406137077840714116033225842420671247161765552",
+    "grossTotal": "79691497963098705859304735963095207125831978728396725546305095368276674133955",
+    "feeReserved": "2390744938892961175779142078892856213774959361851901766389152861048300224018"
+   }
+  ],
+  [
+   {
+    "gross": "13441774542718811569594862254284001923019699222343670587854488225869537776540",
+    "feeDelta": "403253236281564347087845867628520057690590976670310117635634646776086133296",
+    "grossTotal": "13441774542718811569594862254284001923019699222343670587854488225869537776540",
+    "feeReserved": "403253236281564347087845867628520057690590976670310117635634646776086133296"
+   },
+   {
+    "gross": "32843058665310045406628014943254853138122749518474167806936078675173707630222",
+    "feeDelta": "985291759959301362198840448297645594143682485554225034208082360255211228906",
+    "grossTotal": "46284833208028856976222877197538855061142448740817838394790566901043245406762",
+    "feeReserved": "1388544996240865709286686315926165651834273462224535151843717007031297362202"
+   },
+   {
+    "gross": "1462129876183482689010268587885901763004916314526031404946600516072185212091",
+    "feeDelta": "43863896285504480670308057636577052890147489435780942148398015482165556363",
+    "grossTotal": "47746963084212339665233145785424756824147365055343869799737167417115430618853",
+    "feeReserved": "1432408892526370189956994373562742704724420951660316093992115022513462918565"
+   },
+   {
+    "gross": "3872799707728486333105970979195962605940331769427112936584037961845459597079",
+    "feeDelta": "116183991231854589993179129375878878178209953082813388097521138855363787912",
+    "grossTotal": "51619762791940825998339116764620719430087696824770982736321205378960890215932",
+    "feeReserved": "1548592883758224779950173502938621582902630904743129482089636161368826706477"
+   },
+   {
+    "gross": "755095450588764147174578383937831200755770059423567676104961710417153280066",
+    "feeDelta": "22652863517662924415237351518134936022673101782707030283148851312514598402",
+    "grossTotal": "52374858242529590145513695148558550630843466884194550412426167089378043495998",
+    "feeReserved": "1571245747275887704365410854456756518925304006525836512372785012681341304879"
+   },
+   {
+    "gross": "2587441007806751093805190578430703183297751238188316093228711602571894863098",
+    "feeDelta": "77623230234202532814155717352921095498932537145649482796861348077156845893",
+    "grossTotal": "54962299250336341239318885726989253814141218122382866505654878691949938359096",
+    "feeReserved": "1648868977510090237179566571809677614424236543671485995169646360758498150772"
+   },
+   {
+    "gross": "30808323457979831853635955287766682773045985740858597438211472060566379660091",
+    "feeDelta": "924249703739394955609078658633000483191379572225757923146344161816991389803",
+    "grossTotal": "85770622708316173092954841014755936587187203863241463943866350752516318019187",
+    "feeReserved": "2573118681249485192788645230442678097615616115897243918315990522575489540575"
+   }
+  ],
+  [
+   {
+    "gross": "37334196955188133469103734090917085159682114137918956194846661562814002838630",
+    "feeDelta": "1120025908655644004073112022727512554790463424137568685845399846884420085158",
+    "grossTotal": "37334196955188133469103734090917085159682114137918956194846661562814002838630",
+    "feeReserved": "1120025908655644004073112022727512554790463424137568685845399846884420085158"
+   },
+   {
+    "gross": "5618480820359794892479104766767742652580441362923754556187942924147035991257",
+    "feeDelta": "168554424610793846774373143003032279577413240887712636685638287724411079738",
+    "grossTotal": "42952677775547928361582838857684827812262555500842710751034604486961038829887",
+    "feeReserved": "1288580333266437850847485165730544834367876665025281322531038134608831164896"
+   },
+   {
+    "gross": "3050260122991515285304490669683886310270552179862494354645374886537472182132",
+    "feeDelta": "91507803689745458559134720090516589308116565395874830639361246596124165464",
+    "grossTotal": "46002937898539443646887329527368714122533107680705205105679979373498511012019",
+    "feeReserved": "1380088136956183309406619885821061423675993230421156153170399381204955330360"
+   },
+   {
+    "gross": "409925593455026959053175739865820131005368992159246621196408258180222501283",
+    "feeDelta": "12297767803650808771595272195974603930161069764777398635892247745406675039",
+    "grossTotal": "46412863491994470605940505267234534253538476672864451726876387631678733513302",
+    "feeReserved": "1392385904759834118178215158017036027606154300185933551806291628950362005399"
+   },
+   {
+    "gross": "8343255902686556510226567970240275152996339270185199098120670781694045221721",
+    "feeDelta": "250297677080596695306797039107208254589890178105555972943620123450821356651",
+    "grossTotal": "54756119394681027116167073237474809406534815943049650824997058413372778735023",
+    "feeReserved": "1642683581840430813485012197124244282196044478291489524749911752401183362050"
+   },
+   {
+    "gross": "10884771974444604005768400652712048242325198560523974751855667172574132855622",
+    "feeDelta": "326543159233338120173052019581361447269755956815719242555670015177223985669",
+    "grossTotal": "65640891369125631121935473890186857648860014503573625576852725585946911590645",
+    "feeReserved": "1969226741073768933658064216705605729465800435107208767305581767578407347719"
+   },
+   {
+    "gross": "15903510890361373676930358504881971737763579292290295167213180634636026205503",
+    "feeDelta": "477105326710841210307910755146459152132907378768708855016395419039080786165",
+    "grossTotal": "81544402259487004798865832395068829386623593795863920744065906220582937796148",
+    "feeReserved": "2446332067784610143965974971852064881598707813875917622321977186617488133884"
+   }
+  ],
+  [
+   {
+    "gross": "498729085815043459082024808241744927053663683385601530506017752733620597347",
+    "feeDelta": "14961872574451303772460744247252347811609910501568045915180532582008617920",
+    "grossTotal": "498729085815043459082024808241744927053663683385601530506017752733620597347",
+    "feeReserved": "14961872574451303772460744247252347811609910501568045915180532582008617920"
+   },
+   {
+    "gross": "1159406660925922569145772485097993997620480689568575990320202159074404484249",
+    "feeDelta": "34782199827777677074373174552939819928614420687057279709606064772232134527",
+    "grossTotal": "1658135746740966028227797293339738924674144372954177520826219911808025081596",
+    "feeReserved": "49744072402228980846833918800192167740224331188625325624786597354240752447"
+   },
+   {
+    "gross": "275451517137860830002034109956818298217952001829275736217377446951183457240",
+    "feeDelta": "8263545514135824900061023298704548946538560054878272086521323408535503718",
+    "grossTotal": "1933587263878826858229831403296557222892096374783453257043597358759208538836",
+    "feeReserved": "58007617916364805746894942098896716686762891243503597711307920762776256165"
+   },
+   {
+    "gross": "2308348909139921114778275856661347883884465421061608879943233794022085272338",
+    "feeDelta": "69250467274197633443348275699840436516533962631848266398297013820662558170",
+    "grossTotal": "4241936173018747973008107259957905106776561795845062136986831152781293811174",
+    "feeReserved": "127258085190562439190243217798737153203296853875351864109604934583438814335"
+   },
+   {
+    "gross": "6255469474145141706338274071062368101854112424829756215155849234239808250289",
+    "feeDelta": "187664084224354251190148222131871043055623372744892686454675477027194247508",
+    "grossTotal": "10497405647163889679346381331020273208630674220674818352142680387021102061463",
+    "feeReserved": "314922169414916690380391439930608196258920226620244550564280411610633061843"
+   },
+   {
+    "gross": "10405896141906520878150036025616271167274544937259480486000425393269428310439",
+    "feeDelta": "312176884257195626344501080768488135018236348117784414580012761798082849314",
+    "grossTotal": "20903301789070410557496417356636544375905219157934298838143105780290530371902",
+    "feeReserved": "627099053672112316724892520699096331277156574738028965144293173408715911157"
+   },
+   {
+    "gross": "18866144233289955851649713269814665654652589791612064639854838411888482887490",
+    "feeDelta": "565984326998698675549491398094439969639577693748361939195645152356654486624",
+    "grossTotal": "39769446022360366409146130626451210030557808949546363477997944192179013259392",
+    "feeReserved": "1193083380670810992274383918793536300916734268486390904339938325765370397781"
+   }
+  ],
+  [
+   {
+    "gross": "3342285068378512751710003820791938888638094235068627179630053841126302278954",
+    "feeDelta": "100268552051355382551300114623758166659142827052058815388901615233789068368",
+    "grossTotal": "3342285068378512751710003820791938888638094235068627179630053841126302278954",
+    "feeReserved": "100268552051355382551300114623758166659142827052058815388901615233789068368"
+   },
+   {
+    "gross": "3133079417018706762746968029395639019882877563394247408144788530538612189502",
+    "feeDelta": "93992382510561202882409040881869170596486326901827422244343655916158365685",
+    "grossTotal": "6475364485397219514456971850187577908520971798462874587774842371664914468456",
+    "feeReserved": "194260934561916585433709155505627337255629153953886237633245271149947434053"
+   },
+   {
+    "gross": "2318250871767714360878164096673632376136186357151154014089411494897459787278",
+    "feeDelta": "69547526153031430826344922900208971284085590714534620422682344846923793619",
+    "grossTotal": "8793615357164933875335135946861210284657158155614028601864253866562374255734",
+    "feeReserved": "263808460714948016260054078405836308539714744668420858055927615996871227672"
+   },
+   {
+    "gross": "2075536627203084642465746195153181576196513242449820124073451674875241509356",
+    "feeDelta": "62266098816092539273972385854595447285895397273494603722203550246257245280",
+    "grossTotal": "10869151984368018517800882142014391860853671398063848725937705541437615765090",
+    "feeReserved": "326074559531040555534026464260431755825610141941915461778131166243128472952"
+   },
+   {
+    "gross": "5652745746427417638417302832695044104161677538809503373875347063960511603697",
+    "feeDelta": "169582372392822529152519084980851323124850326164285101216260411918815348111",
+    "grossTotal": "16521897730795436156218184974709435965015348936873352099813052605398127368787",
+    "feeReserved": "495656931923863084686545549241283078950460468106200562994391578161943821063"
+   },
+   {
+    "gross": "5519811474804858347824551370825284714421455891073103067705684776984188193241",
+    "feeDelta": "165594344244145750434736541124758541432643676732193092031170543309525645797",
+    "grossTotal": "22041709205600294504042736345534720679436804827946455167518737382382315562028",
+    "feeReserved": "661251276168008835121282090366041620383104144838393655025562121471469466860"
+   },
+   {
+    "gross": "1633063568135865075568206998729397366897560162184135579072100263222705004995",
+    "feeDelta": "48991907044075952267046209961881921006926804865524067372163007896681150150",
+    "grossTotal": "23674772773736159579610943344264118046334364990130590746590837645605020567023",
+    "feeReserved": "710243183212084787388328300327923541390030949703917722397725129368150617010"
+   }
+  ]
+ ],
+ "indexModular": [
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "1",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "1",
+   "index": "0"
+  },
+  {
+   "word0": "49181922915186203376691380024466121280608659880913874912211277384800751278180",
+   "word1": "100343642103658682867863204234050472190529764981728241561769781443158592043431",
+   "weight": "1",
+   "index": "0"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "2",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "2",
+   "index": "1"
+  },
+  {
+   "word0": "28319660926530220245938274493033030630395689478175563685990611798286043420902",
+   "word1": "90377272772244898337172252518063965638456799820971380581155902276287041600849",
+   "weight": "2",
+   "index": "1"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "3",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "3",
+   "index": "0"
+  },
+  {
+   "word0": "744718729350877360233353456651737250213085601103133140083748277173005723027",
+   "word1": "80587243539998491316622665785295358039029388114992607454967721741087964634894",
+   "weight": "3",
+   "index": "0"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "20",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "20",
+   "index": "15"
+  },
+  {
+   "word0": "82473413420669510938296829857688241274701395388088458510785191572626022051958",
+   "word1": "46034108066794671188891164469556764130819415244237809538566864895576995777891",
+   "weight": "20",
+   "index": "19"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "79228162514264337593543950336",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "79228162514264337593543950336",
+   "index": "79228162514264337593543950335"
+  },
+  {
+   "word0": "49582236614727377404339733331643164174510270756290001625701199166776897612185",
+   "word1": "73037878348265731758238225366489395409817827358326713216354326957467992233243",
+   "weight": "79228162514264337593543950336",
+   "index": "60085349526921992452284781851"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "57896044618658097711785492504343953926634992332820282019728792003956564819968",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "57896044618658097711785492504343953926634992332820282019728792003956564819968",
+   "index": "57896044618658097711785492504343953926634992332820282019728792003956564819967"
+  },
+  {
+   "word0": "71637760382136465324046380951049344692211111746582114177516638934540062076357",
+   "word1": "70229059418201961207675430571637406843800380413070555697492910691936293378781",
+   "weight": "57896044618658097711785492504343953926634992332820282019728792003956564819968",
+   "index": "12333014799543863495889938067293452917165388080250273677764118687979728558813"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "index": "0"
+  },
+  {
+   "word0": "66465456819279162369596499206795687782400820037467041738134096931879188239489",
+   "word1": "45484257897946879768835706666654859149349645932995832186084717799731558552723",
+   "weight": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "index": "111949714717226042138432205873450546931750465970462873924218814731610746792212"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "6960294828822193773920858205849996424564923191563346011586361974858596445436",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "6960294828822193773920858205849996424564923191563346011586361974858596445436",
+   "index": "2987686199325311616150994473410318086990621111301172759304931808961701159339"
+  },
+  {
+   "word0": "18821679059697974510731456624434516484753455014954370994007785076679535081592",
+   "word1": "69589685241676189316651160073267537745631722748990902861258301337707041059869",
+   "weight": "6960294828822193773920858205849996424564923191563346011586361974858596445436",
+   "index": "355364580886024347930487024195567203258670062699496023084647536740409041461"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "106258599820386595096364709049124632940497972510107329965420136360969341242319",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "106258599820386595096364709049124632940497972510107329965420136360969341242319",
+   "index": "47321303171263884411127219237078584204930001764948097703669059590628352997780"
+  },
+  {
+   "word0": "114898972344397158671713040698105515572268512033111662060665678903182992431141",
+   "word1": "30397147620312909747003320646032215534281412749028093417469973425890787830797",
+   "weight": "106258599820386595096364709049124632940497972510107329965420136360969341242319",
+   "index": "65502409727970160852624838702247356028266672824324220496872082896137702982521"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "49776508237428569965944596623827679109217502137889949616525581892535406500074",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "49776508237428569965944596623827679109217502137889949616525581892535406500074",
+   "index": "7418726761566467688893823282755660487232832217162913892527797978358649283459"
+  },
+  {
+   "word0": "50748527925573020633832739437006501080408328850345451886949327032184349941810",
+   "word1": "51496761836365929077553522301314747209919660494050361578873527214536572818800",
+   "weight": "49776508237428569965944596623827679109217502137889949616525581892535406500074",
+   "index": "6373041516781882715290354561191554344261705747395427625617939315602512499604"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "114992552692096060524129198376130333278069576014158504727775941805792826202128",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "114992552692096060524129198376130333278069576014158504727775941805792826202128",
+   "index": "56199131056581734751628953745409779238136826708714035365839430557975719988239"
+  },
+  {
+   "word0": "108106834160441862966337976051188258881997841908621511380941397207358916822296",
+   "word1": "83145765420701427386894903945962110138145621521719004880719250765847911221755",
+   "weight": "114992552692096060524129198376130333278069576014158504727775941805792826202128",
+   "index": "14521375399991366557391432449975502045078706709650954751030634501079181229387"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "4032706891477804155397917660989964186022040336929108554750629278689712628640",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "4032706891477804155397917660989964186022040336929108554750629278689712628640",
+   "index": "2301531126439466607603615309636406534275487722111184401524646999977001600735"
+  },
+  {
+   "word0": "109297021249001708623672627865542106001842275308316396368739674996925768330742",
+   "word1": "498963976022528281744304256886958308359246889747446424154263696556756651660",
+   "weight": "4032706891477804155397917660989964186022040336929108554750629278689712628640",
+   "index": "2934910468866288881024147167416299667016022258749687032571300516784801810092"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "62547109258007801686731704544186886702903864821233677799285673223522958901313",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "62547109258007801686731704544186886702903864821233677799285673223522958901313",
+   "index": "42722087870232850649644240941441497496630673623337379687140156034356732675090"
+  },
+  {
+   "word0": "29903865374290688704253148428165966925429200055055619668819506211295913481004",
+   "word1": "96305588819270280186224172103345537229970769942514067029222276349185816310221",
+   "weight": "62547109258007801686731704544186886702903864821233677799285673223522958901313",
+   "index": "7671938386944686210007522156357255647455151762115009777658020067658165487986"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "5724498515686818673735471502280570062326685215935108889062694185013280567291",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "5724498515686818673735471502280570062326685215935108889062694185013280567291",
+   "index": "4820524954888866327562206518608382865870749312369683469243991157001140359654"
+  },
+  {
+   "word0": "23856300743937358088532531953163382251668716291973454024315420091960799502509",
+   "word1": "114897673113332294260566422361428152527117544206435936857998137964109145768935",
+   "weight": "5724498515686818673735471502280570062326685215935108889062694185013280567291",
+   "index": "2783755895496115498270552645628962579641927388554752919381273893868436958237"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "14966081018587364928676791867457304380736346529772828223223115203665362334244",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "14966081018587364928676791867457304380736346529772828223223115203665362334244",
+   "index": "5727683208914139481889292285275349090849456792943142439894891638912102646895"
+  },
+  {
+   "word0": "47588190446953702716077446042828278381538149051815456118169885919938560913376",
+   "word1": "69467868384198692995391496189395415856277824340617892073553631309686767355970",
+   "weight": "14966081018587364928676791867457304380736346529772828223223115203665362334244",
+   "index": "7206710908417995176108737305619206485385149394605258213928827838742726112146"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "35407371517097642153436588797203299818255220189407262646015009461309644709570",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "35407371517097642153436588797203299818255220189407262646015009461309644709570",
+   "index": "30459107292947191700396783785363036261477070709545180398745986996847767961385"
+  },
+  {
+   "word0": "38767391865739261303170047792584237071036325431753884273831832226988987713496",
+   "word1": "91018987055511129294799735498382037218254676334661517266905124592538626004264",
+   "weight": "35407371517097642153436588797203299818255220189407262646015009461309644709570",
+   "index": "13805401986072720883507078487819572751746065592238973347500197763349198599430"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "89702308472711905900750093900848756058374509428459964426682313180169603914783",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "89702308472711905900750093900848756058374509428459964426682313180169603914783",
+   "index": "16152134819538235197872675624950972764604768462467460639819364908452670167070"
+  },
+  {
+   "word0": "30197001843743158035251744025389095880467891826828298298015700145426075264729",
+   "word1": "58454927203567576308603859406013982114460347906232245043183911002060069413102",
+   "weight": "89702308472711905900750093900848756058374509428459964426682313180169603914783",
+   "index": "78306256892670039834242253097633853323156379190698337415137510720477172265782"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "22034792289038255899056796379392262097478241445346879684490973313209309505038",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "22034792289038255899056796379392262097478241445346879684490973313209309505038",
+   "index": "4961333522150829447899964635370384574115700380453902630190237775843915488607"
+  },
+  {
+   "word0": "63324258225064706101670837564092666220937838191347887714795621424035911582011",
+   "word1": "110689390058395492028338220129138832070164186676623360469019613559083058280024",
+   "weight": "22034792289038255899056796379392262097478241445346879684490973313209309505038",
+   "index": "17079745404673628171753595091978939801320568347076021632876194728810080589354"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "49472786273828554497441311827595414292794629039003963401621454272367661864706",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "49472786273828554497441311827595414292794629039003963401621454272367661864706",
+   "index": "21809456338428438546821369628870658349140492727346530307616462704348498088191"
+  },
+  {
+   "word0": "929248966892153721554982489422324011449236253729125044932799684508738124204",
+   "word1": "61557213964798331522032723855999069237446197186759773310832912363757122201895",
+   "weight": "49472786273828554497441311827595414292794629039003963401621454272367661864706",
+   "index": "48453507610819404087790289885191247927965995656547567771124409092395064827505"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "83062372387804796500644000600796858157877415287986246409547703540145746700858",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "83062372387804796500644000600796858157877415287986246409547703540145746700858",
+   "index": "6254301878451275556482298071956636195929647779889022850085035481039201182827"
+  },
+  {
+   "word0": "59516685310791314928805631837067756923689803505091505409842805475601542116064",
+   "word1": "10250457344069909319709838859173480262649371996650337783195204774644688302124",
+   "weight": "83062372387804796500644000600796858157877415287986246409547703540145746700858",
+   "index": "21877084848887338947945184915711493263483247039314296697136090060545304067098"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "20469420737880148756700622300410028272451026897689503272759474864882556987499",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "20469420737880148756700622300410028272451026897689503272759474864882556987499",
+   "index": "16158029862307254471672199978704822265239246970786334864681902305435467287301"
+  },
+  {
+   "word0": "88165642842299368319218325246023037403138743265979421913618272716007783151748",
+   "word1": "34873981381475948080484486168972153556130306025797514201764177236212624971630",
+   "weight": "20469420737880148756700622300410028272451026897689503272759474864882556987499",
+   "index": "9297994425283281300440413747740950314427486329782897153098271446905532689565"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "44019708190549256234531059547598389874502292719026664056771705653944280365352",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "44019708190549256234531059547598389874502292719026664056771705653944280365352",
+   "index": "37787070874914542825658695134586814177669807840652179127722304986558322537079"
+  },
+  {
+   "word0": "25643949886794373136337391936078738986616037135434944065112024179485883478296",
+   "word1": "94039626209645294616184595187840144527183058858977162204110243138417133871489",
+   "weight": "44019708190549256234531059547598389874502292719026664056771705653944280365352",
+   "index": "14419940915769872371999639710521394230520637301905412985280351563481048224377"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "70871029151696319283904012676032865236970101021861102754937086141947185762694",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "70871029151696319283904012676032865236970101021861102754937086141947185762694",
+   "index": "15451462229409883601525192598024135684008573469938234626107323849462500951407"
+  },
+  {
+   "word0": "54227446824652682625407255346030830963512776203587194768251870238332268024546",
+   "word1": "57135995466124825626840547159992770243496746817145909267081667284326109820933",
+   "weight": "70871029151696319283904012676032865236970101021861102754937086141947185762694",
+   "index": "9747394104313368654716707783841683201075788853635097894691109071922072474977"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "93295709240717639604769968054954939936127162905833832487762664759523162496968",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "93295709240717639604769968054954939936127162905833832487762664759523162496968",
+   "index": "42053041820238762271909349994833955168497134581775239029513886315642664728687"
+  },
+  {
+   "word0": "88866008739236413659218011376520306492838119863508696634710486834051363597247",
+   "word1": "10371187116114477644160024633525072265235087090399488000087261406276369319340",
+   "weight": "93295709240717639604769968054954939936127162905833832487762664759523162496968",
+   "index": "9655309543583103393873507608239875782573644711117549460844299153838665508284"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "60161900232322539973131481096888608920484904012937891878804206670945111235770",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "60161900232322539973131481096888608920484904012937891878804206670945111235770",
+   "index": "47292100485825105370004500272378736673753206543163539299561705202326270045355"
+  },
+  {
+   "word0": "115361734017337820952596343080080013333595280780530214420011641923767613940400",
+   "word1": "47742146050481042849649350102175905935594561196135371217367205680196577461265",
+   "weight": "60161900232322539973131481096888608920484904012937891878804206670945111235770",
+   "index": "26278969345153135496200446605732012468097026823366433675195725077099635167715"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "27517064998822600183048888652626660976345208560774044984475349741116628578129",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "27517064998822600183048888652626660976345208560774044984475349741116628578129",
+   "index": "15889092244796759421527071090624148900394700541731125250899246888736650001521"
+  },
+  {
+   "word0": "23456916400078540973113696474027144901346792786156284462658457012844180718973",
+   "word1": "26227458095056639608634695876758421880368833748539735610354684971895343543641",
+   "weight": "27517064998822600183048888652626660976345208560774044984475349741116628578129",
+   "index": "7325874388856510392825549090425694728371540046795649071710770398719826725227"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "54612429733886585115897452648155163271069076269614334123649946676620337134180",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "54612429733886585115897452648155163271069076269614334123649946676620337134180",
+   "index": "10638730302147251951409020493340689361783195622302192779388003759660884802655"
+  },
+  {
+   "word0": "111708170792076047523199529687687106073718073808643333144539103402283505188545",
+   "word1": "17930883431934012999331445985634974487202072260852907354161102625166143371985",
+   "weight": "54612429733886585115897452648155163271069076269614334123649946676620337134180",
+   "index": "19298252796667840468692506833596119543324545935362089316952159313943950953445"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "37451968973633996385657755343690735935327795464741103702149521577506080278242",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "37451968973633996385657755343690735935327795464741103702149521577506080278242",
+   "index": "29595496159164324815859752924926182997378210987375336841298967814769477058593"
+  },
+  {
+   "word0": "555571770991414170742180266805561900873343574142819049406963735684810536791",
+   "word1": "53963852276332849781681193134994157238251058595380561037299543771079934792314",
+   "weight": "37451968973633996385657755343690735935327795464741103702149521577506080278242",
+   "index": "34388576491959050031560529917081577625373785318435226096665486284428489315020"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "106648185147267291414257846960390970231214393473775535881908410440362190787041",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "106648185147267291414257846960390970231214393473775535881908410440362190787041",
+   "index": "38383084066621465208867274175409087431735049451979445708234253795089509291788"
+  },
+  {
+   "word0": "40537693323613272897358529035711103164553297766117950077404435101118369905303",
+   "word1": "27905488779428162180667291214344199797606670538646922963864249570560104126998",
+   "weight": "106648185147267291414257846960390970231214393473775535881908410440362190787041",
+   "index": "23807605766317048576107480489924213241691368428620577531786375651829809309061"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "58440082431847606206480917383473389269491361325025958859771549117938306675327",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "58440082431847606206480917383473389269491361325025958859771549117938306675327",
+   "index": "17250808822680686168651446715090339412508222139609288509171717653101705905059"
+  },
+  {
+   "word0": "106983508833164596549589173764548758534258194881484518492363230057623638334718",
+   "word1": "42534274693314099714032647083533024899264453447077458818781000689735102457629",
+   "weight": "58440082431847606206480917383473389269491361325025958859771549117938306675327",
+   "index": "19234303966409022520880163907447611966048990162989039706281318579642253172023"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "19558699126866879063249630298420129915507295997688177146759566080016528298498",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "19558699126866879063249630298420129915507295997688177146759566080016528298498",
+   "index": "12803577880464863019277547931451829356742659847973102267954138221571142697853"
+  },
+  {
+   "word0": "76452588620921859135987563051408496503435918981489067481468313187173134659569",
+   "word1": "15050475246783521041415023682685753829990149994653254988968346200919340837355",
+   "weight": "19558699126866879063249630298420129915507295997688177146759566080016528298498",
+   "index": "40042028804646930012015074225387577658838311819097521373586244445427124867"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "62381942025282509432548461129903923321820103588355716265641608429271377118777",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "62381942025282509432548461129903923321820103588355716265641608429271377118777",
+   "index": "46727617847726389861474998498778775506547123174113200261789541674365972684844"
+  },
+  {
+   "word0": "39711319623559358791006182259213773718977474391501796979074279803200639770581",
+   "word1": "97238958250309753534296239944868522841062192372727096593693866529789262706496",
+   "weight": "62381942025282509432548461129903923321820103588355716265641608429271377118777",
+   "index": "28205064631839269120045219016190414718524181161638681741776863538486109440223"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "72221252789569889209550854030836149725550836010170928679679594063300516264539",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "72221252789569889209550854030836149725550836010170928679679594063300516264539",
+   "index": "13741542204430785857780768864264763328933700138344312926233310444066363101526"
+  },
+  {
+   "word0": "101913416710632015514106226623326215638781973528119361288744529558522418327947",
+   "word1": "26198705079531010984824761981606019288791060002086781461241189870071404496481",
+   "weight": "72221252789569889209550854030836149725550836010170928679679594063300516264539",
+   "index": "17007687333212356150554511057895596203553723636052367989189938044061622245275"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "79072013200734670159232256036828860058506534310361975911983509431143685901138",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "79072013200734670159232256036828860058506534310361975911983509431143685901138",
+   "index": "69357192768510303275271630461045882972518273524335791420992616143891001719967"
+  },
+  {
+   "word0": "91843305493165235905938295829714567419761719957641510332465661987315270299933",
+   "word1": "32693537068265702801802166159204373553459003685770123497176102506293806419304",
+   "weight": "79072013200734670159232256036828860058506534310361975911983509431143685901138",
+   "index": "54958266617654057942112776608038550980328313053737442027759695350801763795522"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "70773145130090645241608979347371517827171378916290428512701106931152660195862",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "70773145130090645241608979347371517827171378916290428512701106931152660195862",
+   "index": "47073892574671392799221378879946427432367356838779134980448429722495598550511"
+  },
+  {
+   "word0": "101261785229799953788544740327763137539944695575172783376687673482877861429057",
+   "word1": "43635113739127413606344968109330771652742700771214995288667009716674828555869",
+   "weight": "70773145130090645241608979347371517827171378916290428512701106931152660195862",
+   "index": "21295369159527379444232162140533978249566339941283625912821953302679263016401"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "8518123473814145309594080718330300337562327103791604600361280521195573115478",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "8518123473814145309594080718330300337562327103791604600361280521195573115478",
+   "index": "6170721133966717525279038577925790910039295010589721976697782585748583981127"
+  },
+  {
+   "word0": "93622260857778563005348132521812063939245283351949565108546972255362759131343",
+   "word1": "41647758772043338157820730156771022307239386748758646237538182884084928186758",
+   "weight": "8518123473814145309594080718330300337562327103791604600361280521195573115478",
+   "index": "694761131034277599189281229895407626564048861571774527636319528838847476260"
+  },
+  {
+   "word0": "0",
+   "word1": "0",
+   "weight": "77867058778552809162327784570315675464410528048310755759468102790067415890776",
+   "index": "0"
+  },
+  {
+   "word0": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "word1": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+   "weight": "77867058778552809162327784570315675464410528048310755759468102790067415890776",
+   "index": "33837844113874804329897736944987552751278077196528913262396243246955114490359"
+  },
+  {
+   "word0": "42859375193769947747840375345533709343651211433679442734171124351608624746713",
+   "word1": "113973903794902292936840243967318243680356589752790388729574967577269503073518",
+   "weight": "77867058778552809162327784570315675464410528048310755759468102790067415890776",
+   "index": "69407360588367396962895644788237500459329087945262756734543810423434303538510"
+  }
+ ],
+ "cutoffs": [
+  {
+   "t": 0,
+   "Day": 86400,
+   "Week": 345600,
+   "Month": 2678400
+  },
+  {
+   "t": 1,
+   "Day": 86400,
+   "Week": 345600,
+   "Month": 2678400
+  },
+  {
+   "t": 86399,
+   "Day": 86400,
+   "Week": 345600,
+   "Month": 2678400
+  },
+  {
+   "t": 86400,
+   "Day": 172800,
+   "Week": 345600,
+   "Month": 2678400
+  },
+  {
+   "t": 345599,
+   "Day": 345600,
+   "Week": 345600,
+   "Month": 2678400
+  },
+  {
+   "t": 345600,
+   "Day": 432000,
+   "Week": 950400,
+   "Month": 2678400
+  },
+  {
+   "t": 1704067199,
+   "Day": 1704067200,
+   "Week": 1704067200,
+   "Month": 1704067200
+  },
+  {
+   "t": 1706745599,
+   "Day": 1706745600,
+   "Week": 1707091200,
+   "Month": 1706745600
+  },
+  {
+   "t": 1709251199,
+   "Day": 1709251200,
+   "Week": 1709510400,
+   "Month": 1709251200
+  },
+  {
+   "t": 1711929599,
+   "Day": 1711929600,
+   "Week": 1711929600,
+   "Month": 1711929600
+  },
+  {
+   "t": 1714521599,
+   "Day": 1714521600,
+   "Week": 1714953600,
+   "Month": 1714521600
+  },
+  {
+   "t": 1717199999,
+   "Day": 1717200000,
+   "Week": 1717372800,
+   "Month": 1717200000
+  },
+  {
+   "t": 1719791999,
+   "Day": 1719792000,
+   "Week": 1719792000,
+   "Month": 1719792000
+  },
+  {
+   "t": 1722470399,
+   "Day": 1722470400,
+   "Week": 1722816000,
+   "Month": 1722470400
+  },
+  {
+   "t": 1725148799,
+   "Day": 1725148800,
+   "Week": 1725235200,
+   "Month": 1725148800
+  },
+  {
+   "t": 1727740799,
+   "Day": 1727740800,
+   "Week": 1728259200,
+   "Month": 1727740800
+  },
+  {
+   "t": 1730419199,
+   "Day": 1730419200,
+   "Week": 1730678400,
+   "Month": 1730419200
+  },
+  {
+   "t": 1733011199,
+   "Day": 1733011200,
+   "Week": 1733097600,
+   "Month": 1733011200
+  },
+  {
+   "t": 1767225599,
+   "Day": 1767225600,
+   "Week": 1767571200,
+   "Month": 1767225600
+  },
+  {
+   "t": 1769903999,
+   "Day": 1769904000,
+   "Week": 1769990400,
+   "Month": 1769904000
+  },
+  {
+   "t": 1772323199,
+   "Day": 1772323200,
+   "Week": 1772409600,
+   "Month": 1772323200
+  },
+  {
+   "t": 1775001599,
+   "Day": 1775001600,
+   "Week": 1775433600,
+   "Month": 1775001600
+  },
+  {
+   "t": 1777593599,
+   "Day": 1777593600,
+   "Week": 1777852800,
+   "Month": 1777593600
+  },
+  {
+   "t": 1780271999,
+   "Day": 1780272000,
+   "Week": 1780272000,
+   "Month": 1780272000
+  },
+  {
+   "t": 1782863999,
+   "Day": 1782864000,
+   "Week": 1783296000,
+   "Month": 1782864000
+  },
+  {
+   "t": 1785542399,
+   "Day": 1785542400,
+   "Week": 1785715200,
+   "Month": 1785542400
+  },
+  {
+   "t": 1788220799,
+   "Day": 1788220800,
+   "Week": 1788739200,
+   "Month": 1788220800
+  },
+  {
+   "t": 1790812799,
+   "Day": 1790812800,
+   "Week": 1791158400,
+   "Month": 1790812800
+  },
+  {
+   "t": 1793491199,
+   "Day": 1793491200,
+   "Week": 1793577600,
+   "Month": 1793491200
+  },
+  {
+   "t": 1796083199,
+   "Day": 1796083200,
+   "Week": 1796601600,
+   "Month": 1796083200
+  },
+  {
+   "t": 4102444799,
+   "Day": 4102444800,
+   "Week": 4102704000,
+   "Month": 4102444800
+  },
+  {
+   "t": 4105123199,
+   "Day": 4105123200,
+   "Week": 4105123200,
+   "Month": 4105123200
+  },
+  {
+   "t": 4107542399,
+   "Day": 4107542400,
+   "Week": 4107542400,
+   "Month": 4107542400
+  },
+  {
+   "t": 4110220799,
+   "Day": 4110220800,
+   "Week": 4110566400,
+   "Month": 4110220800
+  },
+  {
+   "t": 4112812799,
+   "Day": 4112812800,
+   "Week": 4112985600,
+   "Month": 4112812800
+  },
+  {
+   "t": 4115491199,
+   "Day": 4115491200,
+   "Week": 4116009600,
+   "Month": 4115491200
+  },
+  {
+   "t": 4118083199,
+   "Day": 4118083200,
+   "Week": 4118428800,
+   "Month": 4118083200
+  },
+  {
+   "t": 4120761599,
+   "Day": 4120761600,
+   "Week": 4120848000,
+   "Month": 4120761600
+  },
+  {
+   "t": 4123439999,
+   "Day": 4123440000,
+   "Week": 4123872000,
+   "Month": 4123440000
+  },
+  {
+   "t": 4126031999,
+   "Day": 4126032000,
+   "Week": 4126291200,
+   "Month": 4126032000
+  },
+  {
+   "t": 4128710399,
+   "Day": 4128710400,
+   "Week": 4128710400,
+   "Month": 4128710400
+  },
+  {
+   "t": 4131302399,
+   "Day": 4131302400,
+   "Week": 4131734400,
+   "Month": 4131302400
+  },
+  {
+   "t": 2180528181,
+   "Day": 2180563200,
+   "Week": 2180649600,
+   "Month": 2182550400
+  },
+  {
+   "t": 3444729137,
+   "Day": 3444768000,
+   "Week": 3445286400,
+   "Month": 3444854400
+  },
+  {
+   "t": 820639936,
+   "Day": 820713600,
+   "Week": 821059200,
+   "Month": 823132800
+  },
+  {
+   "t": 2064550453,
+   "Day": 2064614400,
+   "Week": 2065132800,
+   "Month": 2066860800
+  },
+  {
+   "t": 2873353456,
+   "Day": 2873404800,
+   "Week": 2873750400,
+   "Month": 2874441600
+  },
+  {
+   "t": 2381961927,
+   "Day": 2382048000,
+   "Week": 2382048000,
+   "Month": 2382480000
+  },
+  {
+   "t": 2383232863,
+   "Day": 2383257600,
+   "Week": 2383257600,
+   "Month": 2385158400
+  },
+  {
+   "t": 1693391380,
+   "Day": 1693440000,
+   "Week": 1693785600,
+   "Month": 1693526400
+  },
+  {
+   "t": 1042896760,
+   "Day": 1042934400,
+   "Week": 1043020800,
+   "Month": 1044057600
+  },
+  {
+   "t": 2304342015,
+   "Day": 2304374400,
+   "Week": 2304633600,
+   "Month": 2306361600
+  },
+  {
+   "t": 1440809846,
+   "Day": 1440892800,
+   "Week": 1440979200,
+   "Month": 1441065600
+  },
+  {
+   "t": 1322834156,
+   "Day": 1322870400,
+   "Week": 1323043200,
+   "Month": 1325376000
+  },
+  {
+   "t": 2589137192,
+   "Day": 2589148800,
+   "Week": 2589494400,
+   "Month": 2590358400
+  },
+  {
+   "t": 683417652,
+   "Day": 683424000,
+   "Week": 683769600,
+   "Month": 683683200
+  },
+  {
+   "t": 3310210419,
+   "Day": 3310243200,
+   "Week": 3310416000,
+   "Month": 3310848000
+  },
+  {
+   "t": 1819731587,
+   "Day": 1819756800,
+   "Week": 1820188800,
+   "Month": 1819756800
+  },
+  {
+   "t": 3013585309,
+   "Day": 3013632000,
+   "Week": 3014064000,
+   "Month": 3013632000
+  },
+  {
+   "t": 2132183759,
+   "Day": 2132265600,
+   "Week": 2132265600,
+   "Month": 2132697600
+  },
+  {
+   "t": 1977697577,
+   "Day": 1977782400,
+   "Week": 1978041600,
+   "Month": 1980201600
+  },
+  {
+   "t": 739560957,
+   "Day": 739584000,
+   "Week": 740016000,
+   "Month": 741484800
+  },
+  {
+   "t": 2157909253,
+   "Day": 2157926400,
+   "Week": 2158272000,
+   "Month": 2158963200
+  },
+  {
+   "t": 3168277049,
+   "Day": 3168288000,
+   "Week": 3168288000,
+   "Month": 3168806400
+  },
+  {
+   "t": 673259413,
+   "Day": 673315200,
+   "Week": 673488000,
+   "Month": 675734400
+  },
+  {
+   "t": 2998786378,
+   "Day": 2998857600,
+   "Week": 2998944000,
+   "Month": 3000672000
+  },
+  {
+   "t": 2465339944,
+   "Day": 2465424000,
+   "Week": 2465510400,
+   "Month": 2466633600
+  },
+  {
+   "t": 4039055113,
+   "Day": 4039113600,
+   "Week": 4039200000,
+   "Month": 4039372800
+  },
+  {
+   "t": 1505135970,
+   "Day": 1505174400,
+   "Week": 1505692800,
+   "Month": 1506816000
+  },
+  {
+   "t": 380764978,
+   "Day": 380851200,
+   "Week": 381369600,
+   "Month": 381369600
+  },
+  {
+   "t": 2954154169,
+   "Day": 2954188800,
+   "Week": 2954188800,
+   "Month": 2955830400
+  },
+  {
+   "t": 708474911,
+   "Day": 708480000,
+   "Week": 708566400,
+   "Month": 709948800
+  },
+  {
+   "t": 145065226,
+   "Day": 145065600,
+   "Week": 145497600,
+   "Month": 147225600
+  },
+  {
+   "t": 3755957894,
+   "Day": 3755980800,
+   "Week": 3756153600,
+   "Month": 3758054400
+  },
+  {
+   "t": 974306788,
+   "Day": 974332800,
+   "Week": 974678400,
+   "Month": 975628800
+  },
+  {
+   "t": 898201041,
+   "Day": 898214400,
+   "Week": 898473600,
+   "Month": 899251200
+  },
+  {
+   "t": 3823143921,
+   "Day": 3823200000,
+   "Week": 3823286400,
+   "Month": 3823545600
+  },
+  {
+   "t": 1372798100,
+   "Day": 1372809600,
+   "Week": 1373241600,
+   "Month": 1375315200
+  },
+  {
+   "t": 481898579,
+   "Day": 481939200,
+   "Week": 482371200,
+   "Month": 483753600
+  },
+  {
+   "t": 550186844,
+   "Day": 550195200,
+   "Week": 550713600,
+   "Month": 552096000
+  },
+  {
+   "t": 3448475357,
+   "Day": 3448483200,
+   "Week": 3448915200,
+   "Month": 3450124800
+  },
+  {
+   "t": 3236430956,
+   "Day": 3236457600,
+   "Week": 3236630400,
+   "Month": 3237235200
+  },
+  {
+   "t": 3027163508,
+   "Day": 3027196800,
+   "Week": 3027369600,
+   "Month": 3029529600
+  },
+  {
+   "t": 130676243,
+   "Day": 130723200,
+   "Week": 130982400,
+   "Month": 131328000
+  },
+  {
+   "t": 773241955,
+   "Day": 773280000,
+   "Week": 773280000,
+   "Month": 775699200
+  },
+  {
+   "t": 4047765940,
+   "Day": 4047840000,
+   "Week": 4048272000,
+   "Month": 4049740800
+  },
+  {
+   "t": 3616446631,
+   "Day": 3616531200,
+   "Week": 3617049600,
+   "Month": 3618604800
+  },
+  {
+   "t": 2779772465,
+   "Day": 2779833600,
+   "Week": 2780006400,
+   "Month": 2782166400
+  },
+  {
+   "t": 1053177165,
+   "Day": 1053216000,
+   "Week": 1053302400,
+   "Month": 1054425600
+  },
+  {
+   "t": 3684028568,
+   "Day": 3684096000,
+   "Week": 3684182400,
+   "Month": 3684268800
+  },
+  {
+   "t": 2706217329,
+   "Day": 2706220800,
+   "Week": 2706220800,
+   "Month": 2708640000
+  },
+  {
+   "t": 1061606566,
+   "Day": 1061683200,
+   "Week": 1061769600,
+   "Month": 1062374400
+  },
+  {
+   "t": 3295311846,
+   "Day": 3295382400,
+   "Week": 3295900800,
+   "Month": 3297628800
+  },
+  {
+   "t": 27851077,
+   "Day": 27907200,
+   "Week": 28166400,
+   "Month": 28857600
+  },
+  {
+   "t": 1648477757,
+   "Day": 1648512000,
+   "Week": 1649030400,
+   "Month": 1648771200
+  },
+  {
+   "t": 3188855422,
+   "Day": 3188937600,
+   "Week": 3189456000,
+   "Month": 3189974400
+  },
+  {
+   "t": 2867448096,
+   "Day": 2867529600,
+   "Week": 2867702400,
+   "Month": 2869084800
+  },
+  {
+   "t": 224451832,
+   "Day": 224467200,
+   "Week": 224726400,
+   "Month": 226022400
+  },
+  {
+   "t": 909251401,
+   "Day": 909273600,
+   "Week": 909360000,
+   "Month": 909878400
+  },
+  {
+   "t": 3213690176,
+   "Day": 3213734400,
+   "Week": 3214252800,
+   "Month": 3216153600
+  },
+  {
+   "t": 2004221111,
+   "Day": 2004307200,
+   "Week": 2004652800,
+   "Month": 2006467200
+  },
+  {
+   "t": 2631107401,
+   "Day": 2631139200,
+   "Week": 2631225600,
+   "Month": 2632348800
+  },
+  {
+   "t": 3088230786,
+   "Day": 3088281600,
+   "Week": 3088454400,
+   "Month": 3089923200
+  },
+  {
+   "t": 2276236554,
+   "Day": 2276294400,
+   "Week": 2276812800,
+   "Month": 2277244800
+  },
+  {
+   "t": 95953247,
+   "Day": 95990400,
+   "Week": 96508800,
+   "Month": 97372800
+  },
+  {
+   "t": 126055422,
+   "Day": 126057600,
+   "Week": 126144000,
+   "Month": 126230400
+  },
+  {
+   "t": 862434142,
+   "Day": 862444800,
+   "Week": 862790400,
+   "Month": 862444800
+  },
+  {
+   "t": 495517375,
+   "Day": 495590400,
+   "Week": 495676800,
+   "Month": 496972800
+  },
+  {
+   "t": 2416134026,
+   "Day": 2416176000,
+   "Week": 2416521600,
+   "Month": 2416694400
+  },
+  {
+   "t": 463487984,
+   "Day": 463536000,
+   "Week": 463622400,
+   "Month": 465436800
+  },
+  {
+   "t": 479157197,
+   "Day": 479174400,
+   "Week": 479347200,
+   "Month": 481161600
+  },
+  {
+   "t": 2206768416,
+   "Day": 2206828800,
+   "Week": 2207260800,
+   "Month": 2208988800
+  },
+  {
+   "t": 2126266201,
+   "Day": 2126304000,
+   "Week": 2126822400,
+   "Month": 2127427200
+  },
+  {
+   "t": 3836091680,
+   "Day": 3836160000,
+   "Week": 3836592000,
+   "Month": 3836764800
+  },
+  {
+   "t": 2281265320,
+   "Day": 2281305600,
+   "Week": 2281651200,
+   "Month": 2282515200
+  },
+  {
+   "t": 262540027,
+   "Day": 262569600,
+   "Week": 262828800,
+   "Month": 262828800
+  },
+  {
+   "t": 207480081,
+   "Day": 207532800,
+   "Week": 207792000,
+   "Month": 207705600
+  },
+  {
+   "t": 481656375,
+   "Day": 481680000,
+   "Week": 481766400,
+   "Month": 483753600
+  },
+  {
+   "t": 2644883993,
+   "Day": 2644963200,
+   "Week": 2645136000,
+   "Month": 2645568000
+  },
+  {
+   "t": 1914572177,
+   "Day": 1914624000,
+   "Week": 1915142400,
+   "Month": 1917043200
+  },
+  {
+   "t": 518531993,
+   "Day": 518572800,
+   "Week": 518659200,
+   "Month": 520560000
+  },
+  {
+   "t": 1481889291,
+   "Day": 1481932800,
+   "Week": 1482105600,
+   "Month": 1483228800
+  },
+  {
+   "t": 2635101041,
+   "Day": 2635113600,
+   "Week": 2635459200,
+   "Month": 2637619200
+  },
+  {
+   "t": 1147137999,
+   "Day": 1147219200,
+   "Week": 1147651200,
+   "Month": 1149120000
+  },
+  {
+   "t": 124390329,
+   "Day": 124416000,
+   "Week": 124934400,
+   "Month": 126230400
+  },
+  {
+   "t": 2815951311,
+   "Day": 2816035200,
+   "Week": 2816294400,
+   "Month": 2816380800
+  },
+  {
+   "t": 1251696069,
+   "Day": 1251763200,
+   "Week": 1252281600,
+   "Month": 1251763200
+  },
+  {
+   "t": 2495889943,
+   "Day": 2495923200,
+   "Week": 2496355200,
+   "Month": 2498169600
+  },
+  {
+   "t": 935634670,
+   "Day": 935712000,
+   "Week": 935971200,
+   "Month": 936144000
+  },
+  {
+   "t": 1449011761,
+   "Day": 1449014400,
+   "Week": 1449446400,
+   "Month": 1451606400
+  },
+  {
+   "t": 730754305,
+   "Day": 730771200,
+   "Week": 730944000,
+   "Month": 730944000
+  },
+  {
+   "t": 3804554190,
+   "Day": 3804624000,
+   "Week": 3805142400,
+   "Month": 3805228800
+  },
+  {
+   "t": 3483845113,
+   "Day": 3483907200,
+   "Week": 3483993600,
+   "Month": 3484425600
+  },
+  {
+   "t": 3666460386,
+   "Day": 3666470400,
+   "Week": 3666643200,
+   "Month": 3668457600
+  },
+  {
+   "t": 2301337251,
+   "Day": 2301350400,
+   "Week": 2301609600,
+   "Month": 2303683200
+  },
+  {
+   "t": 716784388,
+   "Day": 716860800,
+   "Week": 717033600,
+   "Month": 717897600
+  },
+  {
+   "t": 2732324983,
+   "Day": 2732400000,
+   "Week": 2732832000,
+   "Month": 2734992000
+  },
+  {
+   "t": 3461271326,
+   "Day": 3461356800,
+   "Week": 3461616000,
+   "Month": 3463344000
+  },
+  {
+   "t": 1299309460,
+   "Day": 1299369600,
+   "Week": 1299456000,
+   "Month": 1301616000
+  },
+  {
+   "t": 2698855169,
+   "Day": 2698876800,
+   "Week": 2698963200,
+   "Month": 2700691200
+  },
+  {
+   "t": 3769211260,
+   "Day": 3769286400,
+   "Week": 3769459200,
+   "Month": 3771014400
+  },
+  {
+   "t": 2690301506,
+   "Day": 2690323200,
+   "Week": 2690496000,
+   "Month": 2692742400
+  }
+ ],
+ "binarySearch": [
+  {
+   "ranges": [
+    {
+     "buyer": 4,
+     "cumulativeGross": 3
+    }
+   ],
+   "cases": [
+    {
+     "index": 0,
+     "buyer": 4
+    },
+    {
+     "index": 2,
+     "buyer": 4
+    },
+    {
+     "index": 0,
+     "buyer": 4
+    },
+    {
+     "index": 2,
+     "buyer": 4
+    },
+    {
+     "index": 0,
+     "buyer": 4
+    },
+    {
+     "index": 2,
+     "buyer": 4
+    },
+    {
+     "index": 2,
+     "buyer": 4
+    }
+   ]
+  },
+  {
+   "ranges": [
+    {
+     "buyer": 2,
+     "cumulativeGross": 7
+    },
+    {
+     "buyer": 0,
+     "cumulativeGross": 9
+    },
+    {
+     "buyer": 3,
+     "cumulativeGross": 10
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 15
+    }
+   ],
+   "cases": [
+    {
+     "index": 0,
+     "buyer": 2
+    },
+    {
+     "index": 14,
+     "buyer": 1
+    },
+    {
+     "index": 13,
+     "buyer": 1
+    },
+    {
+     "index": 14,
+     "buyer": 1
+    },
+    {
+     "index": 2,
+     "buyer": 2
+    },
+    {
+     "index": 11,
+     "buyer": 1
+    },
+    {
+     "index": 4,
+     "buyer": 2
+    }
+   ]
+  },
+  {
+   "ranges": [
+    {
+     "buyer": 0,
+     "cumulativeGross": 8
+    }
+   ],
+   "cases": [
+    {
+     "index": 0,
+     "buyer": 0
+    },
+    {
+     "index": 7,
+     "buyer": 0
+    },
+    {
+     "index": 4,
+     "buyer": 0
+    },
+    {
+     "index": 0,
+     "buyer": 0
+    },
+    {
+     "index": 2,
+     "buyer": 0
+    },
+    {
+     "index": 5,
+     "buyer": 0
+    },
+    {
+     "index": 5,
+     "buyer": 0
+    }
+   ]
+  },
+  {
+   "ranges": [
+    {
+     "buyer": 2,
+     "cumulativeGross": 9
+    },
+    {
+     "buyer": 2,
+     "cumulativeGross": 11
+    },
+    {
+     "buyer": 3,
+     "cumulativeGross": 16
+    },
+    {
+     "buyer": 2,
+     "cumulativeGross": 17
+    },
+    {
+     "buyer": 2,
+     "cumulativeGross": 22
+    },
+    {
+     "buyer": 2,
+     "cumulativeGross": 31
+    },
+    {
+     "buyer": 2,
+     "cumulativeGross": 35
+    },
+    {
+     "buyer": 4,
+     "cumulativeGross": 41
+    },
+    {
+     "buyer": 2,
+     "cumulativeGross": 46
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 47
+    },
+    {
+     "buyer": 2,
+     "cumulativeGross": 51
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 56
+    }
+   ],
+   "cases": [
+    {
+     "index": 0,
+     "buyer": 2
+    },
+    {
+     "index": 55,
+     "buyer": 1
+    },
+    {
+     "index": 52,
+     "buyer": 1
+    },
+    {
+     "index": 28,
+     "buyer": 2
+    },
+    {
+     "index": 42,
+     "buyer": 2
+    },
+    {
+     "index": 21,
+     "buyer": 2
+    },
+    {
+     "index": 12,
+     "buyer": 3
+    }
+   ]
+  },
+  {
+   "ranges": [
+    {
+     "buyer": 0,
+     "cumulativeGross": 3
+    },
+    {
+     "buyer": 3,
+     "cumulativeGross": 12
+    },
+    {
+     "buyer": 2,
+     "cumulativeGross": 20
+    },
+    {
+     "buyer": 2,
+     "cumulativeGross": 25
+    },
+    {
+     "buyer": 3,
+     "cumulativeGross": 30
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 38
+    },
+    {
+     "buyer": 4,
+     "cumulativeGross": 40
+    },
+    {
+     "buyer": 3,
+     "cumulativeGross": 46
+    },
+    {
+     "buyer": 4,
+     "cumulativeGross": 47
+    },
+    {
+     "buyer": 2,
+     "cumulativeGross": 53
+    },
+    {
+     "buyer": 4,
+     "cumulativeGross": 54
+    },
+    {
+     "buyer": 2,
+     "cumulativeGross": 55
+    }
+   ],
+   "cases": [
+    {
+     "index": 0,
+     "buyer": 0
+    },
+    {
+     "index": 54,
+     "buyer": 2
+    },
+    {
+     "index": 4,
+     "buyer": 3
+    },
+    {
+     "index": 32,
+     "buyer": 1
+    },
+    {
+     "index": 5,
+     "buyer": 3
+    },
+    {
+     "index": 5,
+     "buyer": 3
+    },
+    {
+     "index": 17,
+     "buyer": 2
+    }
+   ]
+  },
+  {
+   "ranges": [
+    {
+     "buyer": 2,
+     "cumulativeGross": 3
+    },
+    {
+     "buyer": 3,
+     "cumulativeGross": 11
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 16
+    },
+    {
+     "buyer": 2,
+     "cumulativeGross": 21
+    },
+    {
+     "buyer": 3,
+     "cumulativeGross": 24
+    },
+    {
+     "buyer": 3,
+     "cumulativeGross": 30
+    },
+    {
+     "buyer": 4,
+     "cumulativeGross": 31
+    },
+    {
+     "buyer": 4,
+     "cumulativeGross": 37
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 47
+    }
+   ],
+   "cases": [
+    {
+     "index": 0,
+     "buyer": 2
+    },
+    {
+     "index": 46,
+     "buyer": 1
+    },
+    {
+     "index": 30,
+     "buyer": 4
+    },
+    {
+     "index": 29,
+     "buyer": 3
+    },
+    {
+     "index": 15,
+     "buyer": 1
+    },
+    {
+     "index": 1,
+     "buyer": 2
+    },
+    {
+     "index": 2,
+     "buyer": 2
+    }
+   ]
+  },
+  {
+   "ranges": [
+    {
+     "buyer": 2,
+     "cumulativeGross": 9
+    }
+   ],
+   "cases": [
+    {
+     "index": 0,
+     "buyer": 2
+    },
+    {
+     "index": 8,
+     "buyer": 2
+    },
+    {
+     "index": 7,
+     "buyer": 2
+    },
+    {
+     "index": 2,
+     "buyer": 2
+    },
+    {
+     "index": 8,
+     "buyer": 2
+    },
+    {
+     "index": 4,
+     "buyer": 2
+    },
+    {
+     "index": 0,
+     "buyer": 2
+    }
+   ]
+  },
+  {
+   "ranges": [
+    {
+     "buyer": 2,
+     "cumulativeGross": 2
+    },
+    {
+     "buyer": 4,
+     "cumulativeGross": 10
+    },
+    {
+     "buyer": 3,
+     "cumulativeGross": 19
+    },
+    {
+     "buyer": 0,
+     "cumulativeGross": 29
+    },
+    {
+     "buyer": 4,
+     "cumulativeGross": 34
+    }
+   ],
+   "cases": [
+    {
+     "index": 0,
+     "buyer": 2
+    },
+    {
+     "index": 33,
+     "buyer": 4
+    },
+    {
+     "index": 7,
+     "buyer": 4
+    },
+    {
+     "index": 27,
+     "buyer": 0
+    },
+    {
+     "index": 33,
+     "buyer": 4
+    },
+    {
+     "index": 7,
+     "buyer": 4
+    },
+    {
+     "index": 28,
+     "buyer": 0
+    }
+   ]
+  },
+  {
+   "ranges": [
+    {
+     "buyer": 4,
+     "cumulativeGross": 8
+    }
+   ],
+   "cases": [
+    {
+     "index": 0,
+     "buyer": 4
+    },
+    {
+     "index": 7,
+     "buyer": 4
+    },
+    {
+     "index": 6,
+     "buyer": 4
+    },
+    {
+     "index": 6,
+     "buyer": 4
+    },
+    {
+     "index": 0,
+     "buyer": 4
+    },
+    {
+     "index": 5,
+     "buyer": 4
+    },
+    {
+     "index": 4,
+     "buyer": 4
+    }
+   ]
+  },
+  {
+   "ranges": [
+    {
+     "buyer": 4,
+     "cumulativeGross": 8
+    }
+   ],
+   "cases": [
+    {
+     "index": 0,
+     "buyer": 4
+    },
+    {
+     "index": 7,
+     "buyer": 4
+    },
+    {
+     "index": 6,
+     "buyer": 4
+    },
+    {
+     "index": 3,
+     "buyer": 4
+    },
+    {
+     "index": 2,
+     "buyer": 4
+    },
+    {
+     "index": 0,
+     "buyer": 4
+    },
+    {
+     "index": 0,
+     "buyer": 4
+    }
+   ]
+  },
+  {
+   "ranges": [
+    {
+     "buyer": 2,
+     "cumulativeGross": 5
+    },
+    {
+     "buyer": 4,
+     "cumulativeGross": 7
+    },
+    {
+     "buyer": 0,
+     "cumulativeGross": 8
+    },
+    {
+     "buyer": 4,
+     "cumulativeGross": 10
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 20
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 24
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 30
+    }
+   ],
+   "cases": [
+    {
+     "index": 0,
+     "buyer": 2
+    },
+    {
+     "index": 29,
+     "buyer": 1
+    },
+    {
+     "index": 0,
+     "buyer": 2
+    },
+    {
+     "index": 10,
+     "buyer": 1
+    },
+    {
+     "index": 23,
+     "buyer": 1
+    },
+    {
+     "index": 18,
+     "buyer": 1
+    },
+    {
+     "index": 18,
+     "buyer": 1
+    }
+   ]
+  },
+  {
+   "ranges": [
+    {
+     "buyer": 2,
+     "cumulativeGross": 4
+    },
+    {
+     "buyer": 4,
+     "cumulativeGross": 9
+    },
+    {
+     "buyer": 2,
+     "cumulativeGross": 12
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 20
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 26
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 30
+    },
+    {
+     "buyer": 3,
+     "cumulativeGross": 34
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 35
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 39
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 49
+    },
+    {
+     "buyer": 4,
+     "cumulativeGross": 57
+    }
+   ],
+   "cases": [
+    {
+     "index": 0,
+     "buyer": 2
+    },
+    {
+     "index": 56,
+     "buyer": 4
+    },
+    {
+     "index": 30,
+     "buyer": 3
+    },
+    {
+     "index": 42,
+     "buyer": 1
+    },
+    {
+     "index": 16,
+     "buyer": 1
+    },
+    {
+     "index": 39,
+     "buyer": 1
+    },
+    {
+     "index": 42,
+     "buyer": 1
+    }
+   ]
+  },
+  {
+   "ranges": [
+    {
+     "buyer": 0,
+     "cumulativeGross": 1
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 5
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 12
+    },
+    {
+     "buyer": 0,
+     "cumulativeGross": 13
+    },
+    {
+     "buyer": 2,
+     "cumulativeGross": 16
+    }
+   ],
+   "cases": [
+    {
+     "index": 0,
+     "buyer": 0
+    },
+    {
+     "index": 15,
+     "buyer": 2
+    },
+    {
+     "index": 0,
+     "buyer": 0
+    },
+    {
+     "index": 8,
+     "buyer": 1
+    },
+    {
+     "index": 11,
+     "buyer": 1
+    },
+    {
+     "index": 14,
+     "buyer": 2
+    },
+    {
+     "index": 13,
+     "buyer": 2
+    }
+   ]
+  },
+  {
+   "ranges": [
+    {
+     "buyer": 2,
+     "cumulativeGross": 3
+    },
+    {
+     "buyer": 4,
+     "cumulativeGross": 11
+    },
+    {
+     "buyer": 0,
+     "cumulativeGross": 16
+    },
+    {
+     "buyer": 2,
+     "cumulativeGross": 25
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 31
+    },
+    {
+     "buyer": 4,
+     "cumulativeGross": 38
+    },
+    {
+     "buyer": 2,
+     "cumulativeGross": 47
+    },
+    {
+     "buyer": 4,
+     "cumulativeGross": 56
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 66
+    }
+   ],
+   "cases": [
+    {
+     "index": 0,
+     "buyer": 2
+    },
+    {
+     "index": 65,
+     "buyer": 1
+    },
+    {
+     "index": 29,
+     "buyer": 1
+    },
+    {
+     "index": 62,
+     "buyer": 1
+    },
+    {
+     "index": 47,
+     "buyer": 4
+    },
+    {
+     "index": 21,
+     "buyer": 2
+    },
+    {
+     "index": 22,
+     "buyer": 2
+    }
+   ]
+  },
+  {
+   "ranges": [
+    {
+     "buyer": 1,
+     "cumulativeGross": 6
+    },
+    {
+     "buyer": 2,
+     "cumulativeGross": 10
+    },
+    {
+     "buyer": 3,
+     "cumulativeGross": 12
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 14
+    },
+    {
+     "buyer": 2,
+     "cumulativeGross": 19
+    },
+    {
+     "buyer": 2,
+     "cumulativeGross": 29
+    },
+    {
+     "buyer": 3,
+     "cumulativeGross": 35
+    },
+    {
+     "buyer": 0,
+     "cumulativeGross": 41
+    }
+   ],
+   "cases": [
+    {
+     "index": 0,
+     "buyer": 1
+    },
+    {
+     "index": 40,
+     "buyer": 0
+    },
+    {
+     "index": 28,
+     "buyer": 2
+    },
+    {
+     "index": 26,
+     "buyer": 2
+    },
+    {
+     "index": 16,
+     "buyer": 2
+    },
+    {
+     "index": 27,
+     "buyer": 2
+    },
+    {
+     "index": 20,
+     "buyer": 2
+    }
+   ]
+  },
+  {
+   "ranges": [
+    {
+     "buyer": 2,
+     "cumulativeGross": 10
+    },
+    {
+     "buyer": 0,
+     "cumulativeGross": 20
+    },
+    {
+     "buyer": 0,
+     "cumulativeGross": 25
+    }
+   ],
+   "cases": [
+    {
+     "index": 0,
+     "buyer": 2
+    },
+    {
+     "index": 24,
+     "buyer": 0
+    },
+    {
+     "index": 19,
+     "buyer": 0
+    },
+    {
+     "index": 12,
+     "buyer": 0
+    },
+    {
+     "index": 20,
+     "buyer": 0
+    },
+    {
+     "index": 3,
+     "buyer": 2
+    },
+    {
+     "index": 17,
+     "buyer": 0
+    }
+   ]
+  },
+  {
+   "ranges": [
+    {
+     "buyer": 1,
+     "cumulativeGross": 5
+    },
+    {
+     "buyer": 2,
+     "cumulativeGross": 15
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 25
+    },
+    {
+     "buyer": 0,
+     "cumulativeGross": 34
+    },
+    {
+     "buyer": 0,
+     "cumulativeGross": 41
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 42
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 45
+    },
+    {
+     "buyer": 2,
+     "cumulativeGross": 50
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 58
+    },
+    {
+     "buyer": 4,
+     "cumulativeGross": 60
+    }
+   ],
+   "cases": [
+    {
+     "index": 0,
+     "buyer": 1
+    },
+    {
+     "index": 59,
+     "buyer": 4
+    },
+    {
+     "index": 36,
+     "buyer": 0
+    },
+    {
+     "index": 8,
+     "buyer": 2
+    },
+    {
+     "index": 53,
+     "buyer": 1
+    },
+    {
+     "index": 29,
+     "buyer": 0
+    },
+    {
+     "index": 18,
+     "buyer": 1
+    }
+   ]
+  },
+  {
+   "ranges": [
+    {
+     "buyer": 1,
+     "cumulativeGross": 10
+    },
+    {
+     "buyer": 2,
+     "cumulativeGross": 11
+    },
+    {
+     "buyer": 2,
+     "cumulativeGross": 17
+    },
+    {
+     "buyer": 2,
+     "cumulativeGross": 18
+    }
+   ],
+   "cases": [
+    {
+     "index": 0,
+     "buyer": 1
+    },
+    {
+     "index": 17,
+     "buyer": 2
+    },
+    {
+     "index": 15,
+     "buyer": 2
+    },
+    {
+     "index": 2,
+     "buyer": 1
+    },
+    {
+     "index": 13,
+     "buyer": 2
+    },
+    {
+     "index": 15,
+     "buyer": 2
+    },
+    {
+     "index": 12,
+     "buyer": 2
+    }
+   ]
+  },
+  {
+   "ranges": [
+    {
+     "buyer": 3,
+     "cumulativeGross": 5
+    },
+    {
+     "buyer": 3,
+     "cumulativeGross": 12
+    },
+    {
+     "buyer": 4,
+     "cumulativeGross": 15
+    },
+    {
+     "buyer": 2,
+     "cumulativeGross": 16
+    },
+    {
+     "buyer": 0,
+     "cumulativeGross": 25
+    },
+    {
+     "buyer": 2,
+     "cumulativeGross": 30
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 35
+    },
+    {
+     "buyer": 0,
+     "cumulativeGross": 44
+    }
+   ],
+   "cases": [
+    {
+     "index": 0,
+     "buyer": 3
+    },
+    {
+     "index": 43,
+     "buyer": 0
+    },
+    {
+     "index": 7,
+     "buyer": 3
+    },
+    {
+     "index": 26,
+     "buyer": 2
+    },
+    {
+     "index": 17,
+     "buyer": 0
+    },
+    {
+     "index": 4,
+     "buyer": 3
+    },
+    {
+     "index": 20,
+     "buyer": 0
+    }
+   ]
+  },
+  {
+   "ranges": [
+    {
+     "buyer": 3,
+     "cumulativeGross": 5
+    },
+    {
+     "buyer": 3,
+     "cumulativeGross": 9
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 14
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 22
+    },
+    {
+     "buyer": 0,
+     "cumulativeGross": 24
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 31
+    },
+    {
+     "buyer": 4,
+     "cumulativeGross": 34
+    },
+    {
+     "buyer": 4,
+     "cumulativeGross": 42
+    },
+    {
+     "buyer": 1,
+     "cumulativeGross": 50
+    }
+   ],
+   "cases": [
+    {
+     "index": 0,
+     "buyer": 3
+    },
+    {
+     "index": 49,
+     "buyer": 1
+    },
+    {
+     "index": 13,
+     "buyer": 1
+    },
+    {
+     "index": 32,
+     "buyer": 4
+    },
+    {
+     "index": 16,
+     "buyer": 1
+    },
+    {
+     "index": 41,
+     "buyer": 4
+    },
+    {
+     "index": 35,
+     "buyer": 4
+    }
+   ]
+  }
+ ]
+}

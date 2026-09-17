@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "template": true,
+  "name": "mainnet",
+  "environment": "mainnet",
+  "notes": "BLANK FORM, NOT A PLAN. Copy to config/deployments/56/<name>.plan.json, fill in every null with a value verified against BSC mainnet on the day, and delete the \"template\" flag; \"name\" must equal <name>. Nothing here is invented: the VRF coordinator, the key hash, the feed proxies and the token addresses are operator inputs (SPEC section 14: the operator supplies actual chain/token/feed configuration). Both scripts/validate_config.ts and DeploymentLib.readDocument refuse a document while \"template\" is true. The chain facts below are the ones already recorded in config/chains/56.json. Mainnet-only rules the validator enforces on this document: three distinct Safes with deployed code in ownership (O2/O4), nonzero makeWholeReserve and makeWholeCap, observedP999IntervalSeconds and observationWindow measured with scripts/observe_feed.ts, a non-null heartbeatSeconds, and status \"approved\" for every asset. See docs/runbooks/mainnet-launch.md.",
+  "chain": {
+    "chainId": 56,
+    "name": "bsc-mainnet",
+    "nativeSymbol": "BNB",
+    "explorerUrl": "https://bscscan.com",
+    "confirmationDepth": 200,
+    "rpcEnvVars": {
+      "public": "LUCKYDRAW_RPC_URL",
+      "operational": "LUCKYDRAW_OPS_RPC_URL"
+    }
+  },
+  "toolchain": {
+    "foundry": "1.8.1",
+    "solc": "0.8.28",
+    "evmVersion": "paris",
+    "optimizer": true,
+    "optimizerRuns": 600,
+    "viaIr": true,
+    "bytecodeHash": "none"
+  },
+  "vrf": {
+    "coordinator": null,
+    "coordinatorIsMock": false,
+    "subscriptionId": null,
+    "keyHash": null,
+    "nativeBilling": true,
+    "requestConfirmations": 200,
+    "numWords": 2,
+    "callbackGasLimit": 300000,
+    "maxRequestCostNative": null,
+    "maxRequestCostDerivation": {
+      "maxGasPriceWei": null,
+      "verificationGasOverhead": null,
+      "premiumPercentage": null,
+      "flatFeeNativeWei": null,
+      "note": "Record the lane's documented maximum gas price, the coordinator's verification overhead and the premium, each verified against the deployed coordinator on the day of the deployment (SPEC section 7.1)."
+    },
+    "keyHashGetter": "s_provingKeys(bytes32)",
+    "lowFundingThresholdNative": null,
+    "measuredCallbackGasUsed": null,
+    "source": {
+      "url": "https://docs.chain.link/vrf/v2-5/supported-networks",
+      "date": null
+    }
+  },
+  "ownership": {
+    "finalOwner": null,
+    "feeAccount": null,
+    "seedAccount": null,
+    "makeWholeReserve": null,
+    "makeWholeCap": null,
+    "note": "SPEC section 10.5: three separate Safes (owner, treasury/fee account, seed account) with 2-of-3 independently generated hardware keys, the recovery drill performed on these Safes before Deploy and recorded under custody.recoveryDrill in the release-authority record, and the make-whole reserve actually held in the treasury Safe. The final owner must accept both Ownable2Step transfers, and the seed account must call Vault.authorizeSeed itself before any seed entry."
+  },
+  "assets": [
+    {
+      "asset": "0x0000000000000000000000000000000000000000",
+      "native": true,
+      "symbol": "BNB",
+      "name": "BNB",
+      "decimals": 18,
+      "isMock": false,
+      "depositsEnabled": true,
+      "exactTransferEvidence": "Native path: the Vault credits exactly msg.value and checks the exact debit on withdrawal, so no token transfer hook can change the amount (SPEC section 3.1).",
+      "status": "candidate",
+      "source": {
+        "url": null,
+        "date": null
+      },
+      "price": {
+        "feed": null,
+        "feedIsMock": false,
+        "feedDecimals": 8,
+        "baseQuote": "BNB/USD",
+        "heartbeatSeconds": null,
+        "observedP999IntervalSeconds": null,
+        "maxPriceAge": 3600,
+        "minAnswer": null,
+        "maxAnswer": null,
+        "answerBoundsConfirmedAbsent": false,
+        "referenceKind": "ExactToken",
+        "displayLabel": null,
+        "pegAssumption": null,
+        "verifiedOn": null,
+        "source": {
+          "url": "https://docs.chain.link/data-feeds/price-feeds/addresses",
+          "date": null
+        },
+        "observationWindow": null
+      },
+      "pool": {
+        "enabled": true,
+        "seedAmount": null,
+        "seedAuthorizedMaxPerRound": null,
+        "targetsUsd": {
+          "Day100": 100,
+          "Day1k": 1000,
+          "Day10k": 10000,
+          "Week1k": 1000,
+          "Week10k": 10000,
+          "Week100k": 100000,
+          "Month100k": 100000
+        }
+      }
+    }
+  ]
+}

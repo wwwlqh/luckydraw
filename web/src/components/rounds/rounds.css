@@ -1,0 +1,289 @@
+/* Layout for the pools page, the round page and the entry panel (SPEC §9.3, §9.6, §9.7).
+ *
+ * Tokens only: every colour, space, radius and type size comes from `styles/tokens.css`, so these pages
+ * follow the light/dark themes and the 8 px grid without redefining anything. Layouts start at 360 px, the
+ * primary action sits in thumb reach on a phone (the entry panel is a bottom sheet under 600 px, SPEC §9.1
+ * X6), touch targets are at least 44 px, and no rule hides a focus ring. */
+
+.pool-grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: 1fr;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 600px) {
+  .pool-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  .pool-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.round-card__tier {
+  font-size: var(--text-14);
+  color: var(--text-muted);
+}
+
+.round-card__pot {
+  font-size: var(--text-24);
+  font-weight: var(--weight-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.round-card__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.round-card__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+/* Meters ------------------------------------------------------------------ */
+
+.meter {
+  display: block;
+  width: 100%;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunken);
+  overflow: hidden;
+}
+
+.meter__fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+}
+
+.meter__fill--share {
+  background: var(--info);
+}
+
+.meter__caption {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  justify-content: space-between;
+  font-size: var(--text-12);
+  color: var(--text-muted);
+}
+
+/* Timeline ---------------------------------------------------------------- */
+
+.timeline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.timeline__step {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-12);
+  color: var(--text-muted);
+}
+
+.timeline__step--done {
+  border-color: var(--positive);
+  color: var(--text);
+}
+
+.timeline__step--current {
+  border-color: var(--accent);
+  color: var(--text);
+  font-weight: var(--weight-strong);
+}
+
+/* Tables ------------------------------------------------------------------ */
+
+.round-table-scroll {
+  overflow-x: auto;
+}
+
+.round-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-14);
+}
+
+.round-table th,
+.round-table td {
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--border-width) solid var(--border);
+  white-space: nowrap;
+}
+
+.round-table td.amount,
+.round-table th.amount {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.round-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-3);
+}
+
+/* Entry panel ------------------------------------------------------------- */
+
+.entry-field {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: stretch;
+}
+
+.entry-field__input {
+  flex: 1 1 8rem;
+  min-width: 0;
+  min-height: var(--touch-target);
+  padding: 0 var(--space-3);
+  font: inherit;
+  font-size: var(--text-20);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  background: var(--surface);
+  border: var(--border-width) solid var(--border-strong);
+  border-radius: var(--radius);
+}
+
+.entry-field__input:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.entry-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.entry-disclosures {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-2) var(--space-3);
+  font-size: var(--text-14);
+}
+
+.entry-disclosures dt {
+  color: var(--text-muted);
+}
+
+.entry-disclosures dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.entry-facts {
+  margin: var(--space-3) 0 0;
+  padding-left: var(--space-4);
+  font-size: var(--text-12);
+  color: var(--text-muted);
+}
+
+.entry-facts li + li {
+  margin-top: var(--space-1);
+}
+
+.entry-sheet {
+  display: block;
+}
+
+/* The open control only exists on a phone, where the panel is a sheet. */
+.entry-open-bar {
+  display: none;
+}
+
+/* Under 600 px the entry panel is a bottom sheet in thumb reach (SPEC §9.1 X6, §9.4). */
+@media (max-width: 599px) {
+  .entry-sheet {
+    display: none;
+  }
+
+  .entry-sheet--open {
+    display: block;
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 30;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: var(--space-4);
+    background: var(--surface-raised);
+    border-top: var(--border-width) solid var(--border-strong);
+    border-radius: var(--radius) var(--radius) 0 0;
+    box-shadow: var(--elevation-2);
+  }
+
+  .entry-open-bar {
+    display: flex;
+    position: sticky;
+    bottom: var(--space-3);
+    z-index: 20;
+    justify-content: center;
+  }
+}
+
+.countdown {
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-20);
+}
+
+.round-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.how-it-works {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 600px) {
+  .how-it-works {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

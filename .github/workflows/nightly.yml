@@ -1,0 +1,29 @@
+name: nightly
+# SPEC section 11.2 "Stateful": CI runs fixed seeds; a nightly and release-candidate job runs fresh seeds.
+on:
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+jobs:
+  fresh-seeds:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contracts
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.1
+      - name: One fresh-seed campaign sequence (profile campaign, depth 3000)
+        run: |
+          SEED="0x$(date -u +%Y%m%d%H%M%S)"
+          echo "fuzz seed $SEED"
+          FOUNDRY_PROFILE=campaign FOUNDRY_FUZZ_SEED="$SEED" forge test --match-path "test/invariant/LuckyDrawInvariants.t.sol" -vv
+      - name: Whole suite under the ci profile with a fresh seed
+        run: |
+          SEED="0x$(date -u +%Y%m%d%H%M%S)01"
+          echo "fuzz seed $SEED"
+          FOUNDRY_PROFILE=ci FOUNDRY_FUZZ_SEED="$SEED" forge test -vv

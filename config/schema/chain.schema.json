@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://luckydraw.invalid/schema/chain.schema.json",
+  "title": "Chain record (SPEC section 15, row 'Chain')",
+  "description": "chainId, RPC endpoint *names*, explorer URL, confirmation depth 200, start block and network identity. Secret URLs are never committed, so only the environment variable names appear here.",
+  "$defs": {
+    "chainCommon": {
+      "type": "object",
+      "properties": {
+        "chainId": { "$ref": "common.schema.json#/$defs/chainId" },
+        "name": {
+          "type": "string",
+          "description": "Stable slug for the network, used in logs and in the Verify page.",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,31}$"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Human name of the network as the app says it to a player: the network guard sentence, the Switch button and the chainName handed to wallet_addEthereumChain (SPEC section 9.2). Distinct from the slug in name.",
+          "minLength": 3,
+          "maxLength": 40
+        },
+        "nativeSymbol": {
+          "type": "string",
+          "description": "Symbol of the chain's native coin; BNB on chains 56 and 97.",
+          "pattern": "^[A-Z][A-Z0-9]{1,10}$"
+        },
+        "explorerUrl": {
+          "anyOf": [{ "$ref": "common.schema.json#/$defs/httpsUrl" }, { "type": "null" }],
+          "description": "Public block explorer origin. Null when the network has none (a local anvil chain)."
+        },
+        "confirmationDepth": {
+          "type": "integer",
+          "description": "SPEC sections 10.3 and 15: display confirmation depth fallback is 200 blocks.",
+          "const": 200
+        },
+        "startBlock": {
+          "anyOf": [{ "$ref": "common.schema.json#/$defs/blockNumber" }, { "type": "null" }],
+          "description": "Verified deployment block the indexer scans from. Null in a chain record until a deployment exists on that chain."
+        },
+        "finalityTag": {
+          "type": "string",
+          "description": "SPEC section 10.3: 'finalized' where supported, falling back to 'safe' and then to the 200-block depth.",
+          "enum": ["finalized", "safe", "depth"]
+        },
+        "networkIdentity": {
+          "type": "object",
+          "description": "Verified genesis / network identity (SPEC section 15). Only public facts; nothing here is fetched at runtime.",
+          "properties": {
+            "genesisHash": {
+              "anyOf": [{ "$ref": "common.schema.json#/$defs/bytes32" }, { "type": "null" }]
+            },
+            "multicall3": {
+              "anyOf": [{ "$ref": "common.schema.json#/$defs/address" }, { "type": "null" }],
+              "description": "Canonical Multicall3 for this chain, verified in the manifest (SPEC section 10.3). Null until verified on this chain."
+            },
+            "source": { "$ref": "common.schema.json#/$defs/sourceRef" }
+          },
+          "required": ["genesisHash", "multicall3", "source"],
+          "additionalProperties": false
+        },
+        "rpcEnvVars": {
+          "type": "object",
+          "description": "Names only. The public endpoint serves the app; the operational endpoint serves keeper and indexer and requires full log history (SPEC section 10.3).",
+          "properties": {
+            "public": { "$ref": "common.schema.json#/$defs/envVarName" },
+            "operational": { "$ref": "common.schema.json#/$defs/envVarName" }
+          },
+          "required": ["public", "operational"],
+          "additionalProperties": false
+        },
+        "notes": { "type": "string" }
+      },
+      "required": ["chainId", "name", "explorerUrl", "confirmationDepth", "rpcEnvVars"],
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "allOf": [{ "$ref": "#/$defs/chainCommon" }],
+  "properties": {
+    "displayName": { "$comment": "Constrained in $defs/chainCommon; required on the chain record itself (it is what the app calls the network) but optional on the copy a manifest or plan embeds." },
+    "nativeSymbol": { "$comment": "Constrained in $defs/chainCommon; named here only so \"required\" refers to a defined property." },
+    "startBlock": { "$comment": "Constrained in $defs/chainCommon; named here only so \"required\" refers to a defined property." },
+    "networkIdentity": { "$comment": "Constrained in $defs/chainCommon; named here only so \"required\" refers to a defined property." }
+  },
+  "required": ["displayName", "nativeSymbol", "startBlock", "networkIdentity"]
+}

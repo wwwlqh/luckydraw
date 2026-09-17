@@ -1,0 +1,30 @@
+# Private operations inventory must never enter source control or release artifacts.
+/.private/
+__pycache__/
+
+# Foundry
+contracts/out/
+contracts/cache/
+contracts/broadcast/**/dry-run/
+# Node
+node_modules/
+.pnpm-store/
+dist/
+# Secrets and env
+.env
+.env.*
+!.env.example
+# Per-environment blank forms only; the `.example` suffix is what makes them committable, and a real
+# `.env.testnet` stays ignored by the rule above.
+!.env.*.example
+
+# Local deployment receipts: chain 31337 is a throwaway anvil chain and its addresses change every run
+contracts/broadcast/*/31337/
+# Scratch deployment documents written by the script test suite
+contracts/test/script/tmp/*
+!contracts/test/script/tmp/.gitkeep
+
+# Local agent working notes. Only the two shared harness files below are published.
+.claude/*
+!.claude/launch.json
+!.claude/settings.json

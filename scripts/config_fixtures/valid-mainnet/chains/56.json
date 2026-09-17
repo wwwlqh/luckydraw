@@ -1,0 +1,23 @@
+{
+  "chainId": 56,
+  "name": "bsc-mainnet",
+  "displayName": "BNB Smart Chain",
+  "nativeSymbol": "BNB",
+  "explorerUrl": "https://bscscan.com",
+  "confirmationDepth": 200,
+  "startBlock": 1000000,
+  "finalityTag": "finalized",
+  "networkIdentity": {
+    "genesisHash": "0x9999999999999999999999999999999999999999999999999999999999999999",
+    "multicall3": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "source": {
+      "url": "https://bscscan.com",
+      "date": "2026-09-16"
+    }
+  },
+  "rpcEnvVars": {
+    "public": "LUCKYDRAW_RPC_URL",
+    "operational": "LUCKYDRAW_OPS_RPC_URL"
+  },
+  "notes": "Synthetic test fixture, not a chain record in use. The genesis hash and Multicall3 address are repeated-nibble placeholders that exist only so rule CH4 has something non-null to accept; the real values are verified by the operator against the live chain."
+}

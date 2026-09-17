@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "name": "testnet",
+  "environment": "testnet",
+  "notes": "Testnet plan, filled in on 2026-09-16 from values verified against BSC testnet (chain 97). One 1-of-1 Safe created by contracts/script/TestnetSafe.s.sol holds owner, treasury and seed. Feed and coordinator facts were read from the live chain with cast the same day; the p99.9 feed interval comes from scripts/observe_feed.ts over 14 days. Extended on 2026-09-17 (ADR 038) with a second asset: the chain 97 faucet USDT token 0x337610d27c682e347c9cd60bd4b3b107c9d34ddd, so the ERC-20 path (approve, deposit, the Vault's exact-receipt and exact-debit checks, withdraw and the zero-reset allowance handling) is rehearsed on a real chain before mainnet. Its identity, issuer review, mint authority, feed and zero-reset behaviour were read off chain 97 with cast on 2026-09-17 and its feed interval measured with scripts/observe_feed.ts over 14 days; the evidence and what is still missing are in config/assets/97/usdt.json. This token is a faucet test token, not Binance-Peg USDT, and is never admissible on mainnet. The BNB entry is unchanged. Adding this pool to the deployment that is already live is not a Configure run: see the runbook section \"Adding the USDT pool\".",
+  "chain": {
+    "chainId": 97,
+    "name": "bsc-testnet",
+    "nativeSymbol": "BNB",
+    "explorerUrl": "https://testnet.bscscan.com",
+    "confirmationDepth": 200,
+    "rpcEnvVars": {
+      "public": "LUCKYDRAW_RPC_URL",
+      "operational": "LUCKYDRAW_OPS_RPC_URL"
+    }
+  },
+  "toolchain": {
+    "foundry": "1.8.1",
+    "solc": "0.8.28",
+    "evmVersion": "paris",
+    "optimizer": true,
+    "optimizerRuns": 600,
+    "viaIr": true,
+    "bytecodeHash": "none"
+  },
+  "vrf": {
+    "coordinator": "0xda3b641d438362c440ac5458c57e00a712b66700",
+    "coordinatorIsMock": false,
+    "subscriptionId": "53341058529245420530544866364539679366821500461295078074040108946677515631275",
+    "keyHash": "0x8596b430971ac45bdf6088665b9ad8e8630c9d5049ab54b14dff711bee7c0e26",
+    "nativeBilling": true,
+    "requestConfirmations": 200,
+    "numWords": 2,
+    "callbackGasLimit": 300000,
+    "maxRequestCostNative": "40000000000000000",
+    "maxRequestCostDerivation": {
+      "maxGasPriceWei": "50000000000",
+      "verificationGasOverhead": 200000,
+      "premiumPercentage": 60,
+      "flatFeeNativeWei": "0",
+      "note": "50 gwei lane (s_provingKeys maxGas = 50000000000 on the coordinator, 2026-09-16) x (300000 callback + 200000 max verification gas from docs.chain.link/vrf/v2-5/billing) x 1.60 (s_config nativePremiumPercentage = 60, fulfillmentFlatFeeNativePPM = 0, read from the coordinator 2026-09-16) = 0.04 BNB."
+    },
+    "keyHashGetter": "s_provingKeys(bytes32)",
+    "lowFundingThresholdNative": "40000000000000000",
+    "measuredCallbackGasUsed": null,
+    "source": {
+      "url": "https://docs.chain.link/vrf/v2-5/supported-networks",
+      "date": "2026-09-16"
+    }
+  },
+  "ownership": {
+    "finalOwner": "0xcde8a0e1f0d682771ec8c76da8d2bb89c89d5079",
+    "feeAccount": "0xcde8a0e1f0d682771ec8c76da8d2bb89c89d5079",
+    "seedAccount": "0xcde8a0e1f0d682771ec8c76da8d2bb89c89d5079",
+    "makeWholeReserve": "0",
+    "makeWholeCap": "0",
+    "note": "Testnet: one 1-of-1 Safe (v1.4.1, owner = the deployer keystore account) holds all three roles. No make-whole reserve on testnet; there is none, and this says so plainly. SPEC section 12.1 allows one operator Safe for owner, treasury and seed on testnet; mainnet requires three separate Safes with 2-of-3 hardware keys (SPEC section 10.5). The final owner must accept both Ownable2Step transfers, and the seed account must call Vault.authorizeSeed itself before any seed entry."
+  },
+  "assets": [
+    {
+      "asset": "0x0000000000000000000000000000000000000000",
+      "native": true,
+      "symbol": "BNB",
+      "name": "BNB",
+      "decimals": 18,
+      "isMock": false,
+      "depositsEnabled": true,
+      "exactTransferEvidence": "Native path: the Vault credits exactly msg.value and checks the exact debit on withdrawal, so no token transfer hook can change the amount (SPEC section 3.1).",
+      "status": "candidate",
+      "source": {
+        "url": "https://docs.bnbchain.org/bnb-smart-chain/",
+        "date": "2026-09-16"
+      },
+      "price": {
+        "feed": "0x2514895c72f50d8bd4b4f9b1110f0d6bd2c97526",
+        "feedIsMock": false,
+        "feedDecimals": 8,
+        "baseQuote": "BNB/USD",
+        "heartbeatSeconds": 3600,
+        "observedP999IntervalSeconds": 3661,
+        "maxPriceAge": 7200,
+        "minAnswer": "0",
+        "maxAnswer": "99999999999999999999999999999",
+        "answerBoundsConfirmedAbsent": false,
+        "referenceKind": "ExactToken",
+        "displayLabel": "BNB/USD",
+        "pegAssumption": null,
+        "verifiedOn": "2026-09-16",
+        "source": {
+          "url": "https://docs.chain.link/data-feeds/price-feeds/addresses",
+          "date": "2026-09-16"
+        },
+        "observationWindow": {
+          "fromBlock": 128705071,
+          "toBlock": 131391899,
+          "samples": 689
+        }
+      },
+      "pool": {
+        "enabled": true,
+        "seedAmount": "1000000000000000",
+        "seedAuthorizedMaxPerRound": "2000000000000000",
+        "targetsUsd": {
+          "Day100": 100,
+          "Day1k": 1000,
+          "Day10k": 10000,
+          "Week1k": 1000,
+          "Week10k": 10000,
+          "Week100k": 100000,
+          "Month100k": 100000
+        }
+      }
+    },
+    {
+      "asset": "0x337610d27c682e347c9cd60bd4b3b107c9d34ddd",
+      "native": false,
+      "symbol": "USDT",
+      "name": "USDT Token",
+      "decimals": 18,
+      "isMock": false,
+      "depositsEnabled": true,
+      "exactTransferEvidence": null,
+      "requiresZeroReset": false,
+      "status": "candidate",
+      "source": {
+        "url": "https://testnet.bscscan.com/token/0x337610d27c682e347c9cd60bd4b3b107c9d34ddd",
+        "date": "2026-09-17"
+      },
+      "price": {
+        "feed": "0xeca2605f0bcf2ba5966372c99837b1f182d3d620",
+        "feedIsMock": false,
+        "feedDecimals": 8,
+        "baseQuote": "USDT/USD",
+        "heartbeatSeconds": 86400,
+        "observedP999IntervalSeconds": 86487,
+        "maxPriceAge": 172800,
+        "minAnswer": "0",
+        "maxAnswer": "99999999999999999999999999999",
+        "answerBoundsConfirmedAbsent": false,
+        "referenceKind": "ExactToken",
+        "displayLabel": "USDT/USD",
+        "pegAssumption": null,
+        "verifiedOn": "2026-09-17",
+        "source": {
+          "url": "https://docs.chain.link/data-feeds/price-feeds/addresses",
+          "date": "2026-09-17"
+        },
+        "observationWindow": {
+          "fromBlock": 128670804,
+          "toBlock": 131455471,
+          "samples": 19
+        }
+      },
+      "pool": {
+        "enabled": true,
+        "seedAmount": "5000000000000000000",
+        "seedAuthorizedMaxPerRound": "10000000000000000000",
+        "targetsUsd": {
+          "Day100": 100,
+          "Day1k": 1000,
+          "Day10k": 10000,
+          "Week1k": 1000,
+          "Week10k": 10000,
+          "Week100k": 100000,
+          "Month100k": 100000
+        },
+        "notes": "5 USDT seed with a 10 USDT per-round cap, the same 2x seed-to-cap ratio as the BNB entry. SPEC section 5.4 asks for a seed well above USD 1: in a USDT pool the conversion is exact by construction, so 5 USDT is USD 5 at the reference price, well above the USD 1 minimum and still a twentieth of the smallest USD 100 daily target. The BNB seed of 0.001 BNB is worth well under USD 1 and is left as it is, because testnet money makes that harmless; this figure applies the section 5.4 floor rather than copying it, matching the intent recorded for mainnet in config/assets/56/usdt.json. The seed account must still call Vault.authorizeSeed(asset, cap) itself for this asset, and must hold a USDT balance in the Vault: pointing is not consent and consent does not cross assets."
+      }
+    }
+  ]
+}

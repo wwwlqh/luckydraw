@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "name": "local",
+  "environment": "local",
+  "notes": "Written by contracts/script/DeployLocal.s.sol from the mocks it had just deployed. Regenerated on every local run; the addresses change with the deployer nonce.",
+  "chain": {
+    "chainId": 31337,
+    "name": "anvil-local",
+    "nativeSymbol": "BNB",
+    "explorerUrl": null,
+    "confirmationDepth": 200,
+    "rpcEnvVars": {
+      "public": "LUCKYDRAW_RPC_URL",
+      "operational": "LUCKYDRAW_OPS_RPC_URL"
+    }
+  },
+  "vrf": {
+    "coordinator": "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+    "coordinatorIsMock": true,
+    "subscriptionId": "1",
+    "keyHash": "0x20e855e1fcb98dcb7b9cdff7dfcdecae125843fe336c52aa8a128462c9f4dec1",
+    "nativeBilling": true,
+    "requestConfirmations": 200,
+    "numWords": 2,
+    "callbackGasLimit": 300000,
+    "maxRequestCostNative": "3612500000000000",
+    "maxRequestCostDerivation": {
+      "maxGasPriceWei": "5000000000",
+      "verificationGasOverhead": 115000,
+      "premiumPercentage": 50,
+      "flatFeeNativeWei": "500000000000000",
+      "note": "Local placeholder, not a BSC lane: 5 gwei x (300000 + 115000) x 1.5 + 0.0005 BNB"
+    },
+    "keyHashGetter": "s_provingKeys(bytes32)",
+    "lowFundingThresholdNative": "36125000000000000",
+    "measuredCallbackGasUsed": null,
+    "source": {
+      "url": null,
+      "date": null
+    }
+  },
+  "ownership": {
+    "finalOwner": "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+    "feeAccount": "0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc",
+    "seedAccount": "0x90f79bf6eb2c4f870365e785982e1f101e93b906",
+    "makeWholeReserve": null,
+    "makeWholeCap": null,
+    "note": "Local mocks: labeled anvil accounts stand in for the owner, treasury and seed Safes. The final owner must accept both transfers and the seed account calls Vault.authorizeSeed itself."
+  },
+  "assets": [
+    {
+      "asset": "0x0000000000000000000000000000000000000000",
+      "native": true,
+      "symbol": "BNB",
+      "name": "Local mock native BNB",
+      "decimals": 18,
+      "isMock": true,
+      "depositsEnabled": true,
+      "exactTransferEvidence": "Native path: the Vault credits exactly msg.value and checks the exact debit on withdrawal, so no token transfer hook can change the amount (SPEC section 3.1).",
+      "status": "mock-local",
+      "source": {
+        "url": null,
+        "date": null
+      },
+      "price": {
+        "feed": "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
+        "feedIsMock": true,
+        "feedDecimals": 8,
+        "baseQuote": "BNB/USD",
+        "heartbeatSeconds": null,
+        "observedP999IntervalSeconds": null,
+        "maxPriceAge": 3600,
+        "minAnswer": "0",
+        "maxAnswer": "0",
+        "answerBoundsConfirmedAbsent": true,
+        "referenceKind": "ExactToken",
+        "displayLabel": null,
+        "pegAssumption": null,
+        "verifiedOn": null,
+        "source": {
+          "url": null,
+          "date": null
+        }
+      },
+      "pool": {
+        "enabled": true,
+        "seedAmount": "10000000000000000",
+        "seedAuthorizedMaxPerRound": null,
+        "targetsUsd": {
+          "Day100": 100,
+          "Day1k": 1000,
+          "Day10k": 10000,
+          "Week1k": 1000,
+          "Week10k": 10000,
+          "Week100k": 100000,
+          "Month100k": 100000
+        }
+      }
+    },
+    {
+      "asset": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+      "native": false,
+      "symbol": "TEST2",
+      "name": "Local mock two-decimal ERC-20 for the second pool",
+      "decimals": 2,
+      "isMock": true,
+      "depositsEnabled": true,
+      "exactTransferEvidence": "test/mocks/MockERC20.sol is a plain OpenZeppelin ERC-20: it transfers the exact amount and does not rebase.",
+      "status": "mock-local",
+      "source": {
+        "url": null,
+        "date": null
+      },
+      "price": {
+        "feed": "0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9",
+        "feedIsMock": true,
+        "feedDecimals": 8,
+        "baseQuote": "TEST2/USD",
+        "heartbeatSeconds": 1800,
+        "observedP999IntervalSeconds": null,
+        "maxPriceAge": 3600,
+        "minAnswer": "0",
+        "maxAnswer": "0",
+        "answerBoundsConfirmedAbsent": true,
+        "referenceKind": "ExactToken",
+        "displayLabel": null,
+        "pegAssumption": null,
+        "verifiedOn": null,
+        "source": {
+          "url": null,
+          "date": null
+        }
+      },
+      "pool": {
+        "enabled": true,
+        "seedAmount": "500",
+        "seedAuthorizedMaxPerRound": null,
+        "targetsUsd": {
+          "Day100": 100,
+          "Day1k": 1000,
+          "Day10k": 10000,
+          "Week1k": 1000,
+          "Week10k": 10000,
+          "Week100k": 100000,
+          "Month100k": 100000
+        }
+      }
+    }
+  ]
+}

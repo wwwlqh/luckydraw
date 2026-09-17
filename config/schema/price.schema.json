@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://luckydraw.invalid/schema/price.schema.json",
+  "title": "Price record (SPEC section 15, row 'Price')",
+  "description": "The reference feed for one asset on one chain. Mirrors the frozen on-chain PricingConfig (Types.sol) plus the evidence section 15 requires: heartbeat, observed p99.9 update interval, aggregator bounds, reference kind, display label, peg assumption and verification date.",
+  "$defs": {
+    "priceCommon": {
+      "type": "object",
+      "properties": {
+        "feed": {
+          "anyOf": [{ "$ref": "common.schema.json#/$defs/address" }, { "type": "null" }],
+          "description": "Chainlink AggregatorV3-compatible feed proxy. PricingConfig.feed. Null only in a standalone record for a local mock aggregator whose address is assigned when the mock is deployed; a deployment manifest always narrows this to an address."
+        },
+        "feedIsMock": {
+          "type": "boolean",
+          "description": "True only for a labeled local mock aggregator. Must be false outside the local environment."
+        },
+        "feedDecimals": {
+          "$ref": "common.schema.json#/$defs/decimals",
+          "description": "PricingConfig.feedDecimals; must equal the feed's decimals() when read, 0-18."
+        },
+        "baseQuote": {
+          "type": "string",
+          "description": "Quote direction of the feed. The reference valuation is always in USD (SPEC section 3.1).",
+          "pattern": "^[A-Za-z0-9.]{1,16}/USD$"
+        },
+        "heartbeatSeconds": {
+          "anyOf": [
+            { "type": "integer", "minimum": 1, "maximum": 86400 },
+            { "type": "null" }
+          ],
+          "description": "Documented feed heartbeat H. Null only for a local mock with no published heartbeat; the validator then checks maxPriceAge against the bounds alone, and rejects null under rule P1 in any document whose environment is not local (SPEC sections 3.1 and 15)."
+        },
+        "observedP999IntervalSeconds": {
+          "anyOf": [{ "type": "integer", "minimum": 0 }, { "type": "null" }],
+          "description": "Measured p99.9 update interval (SPEC sections 3.1 and 15). Null until measured on this chain."
+        },
+        "observationWindow": {
+          "anyOf": [
+            {
+              "type": "object",
+              "description": "The block range and sample count observedP999IntervalSeconds was computed over, as printed by scripts/observe_feed.ts. Without it the interval is an unattributable number.",
+              "properties": {
+                "fromBlock": { "$ref": "common.schema.json#/$defs/blockNumber" },
+                "toBlock": { "$ref": "common.schema.json#/$defs/blockNumber" },
+                "samples": {
+                  "type": "integer",
+                  "description": "Number of aggregator rounds read in the window. A p99.9 needs enough rounds to mean anything.",
+                  "minimum": 1
+                }
+              },
+              "required": ["fromBlock", "toBlock", "samples"],
+              "additionalProperties": false
+            },
+            { "type": "null" }
+          ],
+          "description": "Provenance of observedP999IntervalSeconds. Required by rule P8 on mainnet; null or absent elsewhere."
+        },
+        "maxPriceAge": {
+          "type": "integer",
+          "description": "PricingConfig.maxPriceAge = max(2H, 3600), never outside MIN_PRICE_AGE..MAX_PRICE_AGE (Types.sol 60..172800, ADR 020).",
+          "minimum": 60,
+          "maximum": 172800
+        },
+        "minAnswer": {
+          "$ref": "common.schema.json#/$defs/uint256String",
+          "description": "Aggregator minAnswer circuit-breaker bound, or \"0\" when the aggregator has none. PriceReader.validateConfig rejects negative bounds, so this is unsigned."
+        },
+        "maxAnswer": {
+          "$ref": "common.schema.json#/$defs/uint256String",
+          "description": "Aggregator maxAnswer circuit-breaker bound, or \"0\" when the aggregator has none."
+        },
+        "answerBoundsConfirmedAbsent": {
+          "type": "boolean",
+          "description": "Explicit confirmation that the aggregator exposes no minAnswer/maxAnswer, as opposed to the bounds simply not having been checked (SPEC section 15)."
+        },
+        "referenceKind": {
+          "type": "string",
+          "description": "PricingConfig.referenceKind. UnderlyingAsset requires a recorded peg assumption and a visible label (SPEC section 3.1).",
+          "enum": ["ExactToken", "UnderlyingAsset"]
+        },
+        "displayLabel": {
+          "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }],
+          "description": "Wording the app and Verify page must show for an UnderlyingAsset reference. The manifest supplies the wording; the frozen enum makes it mandatory."
+        },
+        "pegAssumption": {
+          "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }],
+          "description": "The recorded peg assumption behind an UnderlyingAsset reference."
+        },
+        "verifiedOn": {
+          "anyOf": [{ "$ref": "common.schema.json#/$defs/isoDate" }, { "type": "null" }],
+          "description": "Date the chain, quote direction, decimals, heartbeat, status and asset association were verified at deployment."
+        },
+        "source": { "$ref": "common.schema.json#/$defs/sourceRef" }
+      },
+      "required": [
+        "feed",
+        "feedIsMock",
+        "feedDecimals",
+        "baseQuote",
+        "heartbeatSeconds",
+        "maxPriceAge",
+        "minAnswer",
+        "maxAnswer",
+        "referenceKind",
+        "displayLabel",
+        "pegAssumption",
+        "verifiedOn",
+        "source"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "allOf": [{ "$ref": "#/$defs/priceCommon" }]
+}

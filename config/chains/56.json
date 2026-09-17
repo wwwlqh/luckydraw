@@ -1,0 +1,20 @@
+{
+  "chainId": 56,
+  "name": "bsc-mainnet",
+  "displayName": "BNB Smart Chain",
+  "nativeSymbol": "BNB",
+  "explorerUrl": "https://bscscan.com",
+  "confirmationDepth": 200,
+  "startBlock": null,
+  "finalityTag": "finalized",
+  "networkIdentity": {
+    "genesisHash": null,
+    "multicall3": null,
+    "source": { "url": null, "date": null }
+  },
+  "rpcEnvVars": {
+    "public": "LUCKYDRAW_RPC_URL",
+    "operational": "LUCKYDRAW_OPS_RPC_URL"
+  },
+  "notes": "BSC mainnet. No mainnet deployment exists yet and none is implied by this file: startBlock is null and the section 14 gates are unmet; BSC mainnet is the first deployment target under ADR 034, and validator rule CH4 requires networkIdentity.multicall3 and genesisHash (verified with scripts/check_chain_record.ts) once a mainnet manifest exists. A mainnet manifest may reference no mock artifact and needs separate owner, treasury and seed Safes (SPEC sections 10.5 and 12.1). Multicall3, the genesis hash, the VRF coordinator, the key hash and every feed proxy are recorded only after the operator verifies them against the live chain."
+}

@@ -1,0 +1,130 @@
+name: pages
+# Publishes web/dist to GitHub Pages as a project site: https://<owner>.github.io/<repo>/.
+#
+# This is the publishing path of docs/runbooks/mainnet-launch.md, not the §10.3 production hosting.
+# Pages is a plain static host: no response headers of our own, so the §9.6 `frame-ancestors` and
+# `X-Frame-Options` headers are still absent (web/README.md already lists them as deferred), and the SPA
+# fallback is the dist/404.html copy written by web/scripts/pages-postbuild.mjs.
+#
+# No secret is used or needed. Everything the build is pinned to is public by construction: a chain id, a
+# contract address, a public RPC origin and the operator's jurisdiction sentence, all of which ship inside
+# the bundle anyway. They come from repository *variables* (Settings -> Secrets and variables -> Actions ->
+# Variables) so the operator can point the site at a deployment without editing this file.
+#
+# A run with `LUCKYDRAW_CHAIN_ID` set to `56` is a real-customer publication and passes the mainnet release
+# gate (web/src/lib/build/releaseGate.ts) before a single file is emitted: the manifest must be
+# `environment: mainnet`, carry no mock, and set `release.customerLaunch: true`; `node
+# scripts/validate_config.ts` must pass; and `LUCKYDRAW_JURISDICTION_NOTICE` must be non-empty. Any of those
+# failing prints one reason line and fails this job, so the deploy job never runs (SPEC §14, ADR 034).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time, and never cancel one in flight: a cancelled deploy-pages run can leave the
+# site on a half-applied version.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # forge-std, OpenZeppelin and the Chainlink contracts are submodules; `forge build` needs them.
+          submodules: recursive
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.1
+      # Mirrors the `client` job in ci.yml: the shared client package checks its generated ABIs against the
+      # compiled artifacts, so the contracts are compiled before anything JavaScript runs.
+      - run: forge build
+        working-directory: contracts
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      # The committed local anvil fallback is all-or-nothing. Once `LUCKYDRAW_CHAIN_ID` names a real chain,
+      # a forgotten Draw address or RPC variable would otherwise let the fallback part-fill the build and
+      # publish a page that claims that chain while pointing at the anvil contract on 127.0.0.1. The build
+      # itself refuses that (web/src/lib/build/releaseGate.ts, checkFallbackPairing); this step says so in
+      # one line before ten minutes of compiling, and names the variable to go and set.
+      - name: Check the publication variables
+        env:
+          CHAIN_ID: ${{ vars.LUCKYDRAW_CHAIN_ID }}
+          DRAW_ADDRESS: ${{ vars.LUCKYDRAW_DRAW_ADDRESS }}
+          RPC_URL: ${{ vars.LUCKYDRAW_RPC_URL }}
+          JURISDICTION_NOTICE: ${{ vars.LUCKYDRAW_JURISDICTION_NOTICE }}
+        run: |
+          set -eu
+          if [ -z "$CHAIN_ID" ]; then
+            echo "No LUCKYDRAW_CHAIN_ID variable: publishing the committed local anvil deployment (31337)."
+            exit 0
+          fi
+          missing=""
+          if [ -z "$DRAW_ADDRESS" ]; then missing="$missing LUCKYDRAW_DRAW_ADDRESS"; fi
+          if [ -z "$RPC_URL" ]; then missing="$missing LUCKYDRAW_RPC_URL"; fi
+          if [ "$CHAIN_ID" = "56" ] && [ -z "$JURISDICTION_NOTICE" ]; then
+            missing="$missing LUCKYDRAW_JURISDICTION_NOTICE"
+          fi
+          if [ -n "$missing" ]; then
+            echo "Refusing to publish: LUCKYDRAW_CHAIN_ID is $CHAIN_ID but these repository variables are unset:$missing"
+            exit 1
+          fi
+          echo "Publishing chain $CHAIN_ID."
+
+      - name: Build the web app
+        run: pnpm --filter @luckydraw/web build
+        env:
+          # With no `LUCKYDRAW_CHAIN_ID` variable the three values below are the committed local anvil
+          # manifest (config/deployments/31337/0x610178da211fef7d417bc0e6fed39f05609ad788.json), so this
+          # workflow is green before any deployment exists and the Pages setup can be proved end to end
+          # first. A site built on those defaults renders the shell and then reports that it cannot reach its
+          # RPC, which is the honest state of a repository with no deployment. The moment the chain id
+          # variable is set, the anvil defaults stop applying to the other two — an unset variable stays
+          # unset and fails the build — so the fallback can never part-fill a chain 56 or chain 97 publish.
+          # web/vite.config.ts also fails the build loudly if the pair does not name a manifest that is
+          # actually committed, so a typo in a variable cannot publish a broken page.
+          VITE_LUCKYDRAW_CHAIN_ID: ${{ vars.LUCKYDRAW_CHAIN_ID || '31337' }}
+          VITE_LUCKYDRAW_DRAW_ADDRESS: ${{ vars.LUCKYDRAW_CHAIN_ID == '' && '0x610178da211fef7d417bc0e6fed39f05609ad788' || vars.LUCKYDRAW_DRAW_ADDRESS }}
+          VITE_LUCKYDRAW_RPC_URL: ${{ vars.LUCKYDRAW_CHAIN_ID == '' && 'http://127.0.0.1:8545' || vars.LUCKYDRAW_RPC_URL }}
+          # `LUCKYDRAW_JURISDICTION_NOTICE` is a repository variable like the three above, copied here into
+          # the `VITE_` name the build reads. It is one or two plain sentences stating the outcome of the
+          # operator's own jurisdiction advice (SPEC §14); the repository chooses no wording. The app renders
+          # it as text, never as HTML. Empty is allowed on chains 31337 and 97 and refused on chain 56, so
+          # this variable has to be set before the first mainnet publish and not a moment later.
+          VITE_LUCKYDRAW_JURISDICTION_NOTICE: ${{ vars.LUCKYDRAW_JURISDICTION_NOTICE }}
+          # Derived, not configured: a project site is served under the repository's own name, and this is
+          # the same string in the URL the deploy job prints. It becomes `import.meta.env.BASE_URL`, which
+          # web/src/app/App.tsx gives BrowserRouter as its basename.
+          VITE_LUCKYDRAW_BASE: /${{ github.event.repository.name }}/
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist
+
+  deploy:
+    needs: build
+    # Only the reviewed default branch reaches customers (SPEC 10.5). `workflow_dispatch` can be started
+    # from any branch that carries this file, and that branch's config/ tree is what the build read, so a
+    # manual run from anywhere else builds (useful for a dry run) and never deploys.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://luckydraw.invalid/schema/asset.schema.json",
+  "title": "Asset record (SPEC section 15, row 'Asset'), embedding the Price record",
+  "description": "One admitted asset on one chain: identity and decimals, the issuer/upgrade/transfer review, exact-transfer evidence, status and source, its reference feed, and (inside a deployment manifest) its pool configuration. Admission is an operator process (SPEC section 3.1): no testnet or mainnet asset record is invented here.",
+  "$defs": {
+    "poolConfig": {
+      "type": "object",
+      "description": "Draw pool configuration for this asset (SPEC sections 5.1 and 5.4).",
+      "properties": {
+        "poolId": {
+          "$ref": "common.schema.json#/$defs/uint256String",
+          "description": "Pool id assigned by addPool. Unique within a manifest."
+        },
+        "enabled": { "type": "boolean" },
+        "seedAmount": {
+          "$ref": "common.schema.json#/$defs/uint256String",
+          "description": "Fixed operator seed in raw asset units; \"0\" disables seeding for this pool (SPEC section 5.4)."
+        },
+        "seedAuthorizedMaxPerRound": {
+          "anyOf": [{ "$ref": "common.schema.json#/$defs/uint256String" }, { "type": "null" }],
+          "description": "Cap the seed account itself set with Vault.authorizeSeed for THIS asset, in this asset's raw units. Null when not yet authorized. Pointing is not consent and consent does not cross assets (SPEC section 5.4)."
+        },
+        "targetsUsd": {
+          "type": "object",
+          "description": "Whole-USD target per schedule kind; at least MIN_TARGET_USD (10) and an integer (SPEC sections 6.1 and 8.1, LuckyDraw.MIN_TARGET_USD). Defaults are 100 / 1,000 / 10,000 daily, 1,000 / 10,000 / 100,000 weekly and 100,000 monthly (ADR 036).",
+          "properties": {
+            "Day100": { "$ref": "#/$defs/targetUsd" },
+            "Day1k": { "$ref": "#/$defs/targetUsd" },
+            "Day10k": { "$ref": "#/$defs/targetUsd" },
+            "Week1k": { "$ref": "#/$defs/targetUsd" },
+            "Week10k": { "$ref": "#/$defs/targetUsd" },
+            "Week100k": { "$ref": "#/$defs/targetUsd" },
+            "Month100k": { "$ref": "#/$defs/targetUsd" }
+          },
+          "required": ["Day100", "Day1k", "Day10k", "Week1k", "Week10k", "Week100k", "Month100k"],
+          "additionalProperties": false
+        },
+        "firstRoundIds": {
+          "type": "array",
+          "description": "The seven round ids addPool created, in Kind order Day100, Day1k, Day10k, Week1k, Week10k, Week100k, Month100k (Types.sol Kind).",
+          "items": { "$ref": "common.schema.json#/$defs/uint256String" },
+          "minItems": 7,
+          "maxItems": 7
+        },
+        "notes": { "type": "string" }
+      },
+      "required": ["enabled", "seedAmount", "targetsUsd"],
+      "additionalProperties": false
+    },
+    "targetUsd": {
+      "type": "integer",
+      "minimum": 10,
+      "maximum": 4294967295
+    },
+    "issuerReview": {
+      "type": "object",
+      "description": "SPEC section 3.1: review issuer/upgrade/freeze powers before admitting an ERC-20.",
+      "properties": {
+        "upgradeable": { "type": "boolean" },
+        "freezeOrBlocklist": { "type": "boolean" },
+        "mintAuthority": { "type": "string", "minLength": 1 },
+        "rebasing": { "type": "boolean" },
+        "reviewedOn": {
+          "anyOf": [{ "$ref": "common.schema.json#/$defs/isoDate" }, { "type": "null" }]
+        },
+        "source": { "$ref": "common.schema.json#/$defs/sourceRef" }
+      },
+      "required": ["upgradeable", "freezeOrBlocklist", "mintAuthority", "rebasing", "reviewedOn", "source"],
+      "additionalProperties": false
+    },
+    "assetCommon": {
+      "type": "object",
+      "properties": {
+        "chainId": {
+          "$ref": "common.schema.json#/$defs/chainId",
+          "description": "Present in a standalone config/assets/<chainId>/<symbol>.json record; forbidden inside a manifest, whose chain record already carries it."
+        },
+        "asset": {
+          "anyOf": [{ "$ref": "common.schema.json#/$defs/address" }, { "type": "null" }],
+          "description": "ERC-20 address, or the zero-address native sentinel for BNB (Types.sol NATIVE_ASSET). Null is allowed only in a standalone record for a local mock whose address is assigned when the mock is deployed; a deployment manifest always narrows this to an address."
+        },
+        "native": { "type": "boolean" },
+        "symbol": { "type": "string", "pattern": "^[A-Za-z0-9._-]{1,16}$" },
+        "name": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+        "decimals": { "$ref": "common.schema.json#/$defs/decimals" },
+        "isMock": {
+          "type": "boolean",
+          "description": "True only for a labeled local mock token. Must be false outside the local environment."
+        },
+        "listed": {
+          "type": "boolean",
+          "description": "Vault.listAsset has been called for this asset. A deployed fact, so it is absent from a plan."
+        },
+        "depositsEnabled": {
+          "type": "boolean",
+          "description": "Vault's mutable depositsEnabled flag. Disabling never blocks withdrawal (SPEC section 3.1)."
+        },
+        "exactTransferEvidence": {
+          "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }],
+          "description": "Evidence that the token transfers exactly, is non-rebasing and exposes callable balance/transfer APIs. Null only while admission is still in progress."
+        },
+        "requiresZeroReset": {
+          "type": "boolean",
+          "description": "True for a token whose approve() reverts unless the current allowance is zero (the USDT pattern). SPEC section 9.5: such a token is offered approve(0) then approve(amount) as two explicit steps instead of a single approve(amount). Optional; absent means false, and a native asset has no approve so it may never be true."
+        },
+        "issuerReview": { "$ref": "#/$defs/issuerReview" },
+        "status": {
+          "type": "string",
+          "description": "Admission status. 'mock-local' marks a clearly labeled local mock; only local manifests may carry one.",
+          "enum": ["mock-local", "candidate", "approved", "suspended", "rejected"]
+        },
+        "source": { "$ref": "common.schema.json#/$defs/sourceRef" },
+        "price": { "$ref": "price.schema.json" },
+        "pool": { "$ref": "#/$defs/poolConfig" },
+        "notes": { "type": "string" }
+      },
+      "required": [
+        "asset",
+        "native",
+        "symbol",
+        "name",
+        "decimals",
+        "isMock",
+        "depositsEnabled",
+        "exactTransferEvidence",
+        "status",
+        "source",
+        "price"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "allOf": [{ "$ref": "#/$defs/assetCommon" }],
+  "required": ["chainId", "issuerReview"],
+  "properties": {
+    "chainId": { "$comment": "Constrained in $defs/assetCommon; named here only so \"required\" refers to a defined property." },
+    "issuerReview": { "$comment": "Constrained in $defs/assetCommon; named here only so \"required\" refers to a defined property." },
+    "listed": false,
+    "pool": false
+  }
+}

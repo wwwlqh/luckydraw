@@ -1,0 +1,20 @@
+{
+  "chainId": 97,
+  "name": "bsc-testnet",
+  "displayName": "BNB Smart Chain Testnet",
+  "nativeSymbol": "BNB",
+  "explorerUrl": "https://testnet.bscscan.com",
+  "confirmationDepth": 200,
+  "startBlock": null,
+  "finalityTag": "finalized",
+  "networkIdentity": {
+    "genesisHash": null,
+    "multicall3": null,
+    "source": { "url": null, "date": null }
+  },
+  "rpcEnvVars": {
+    "public": "LUCKYDRAW_RPC_URL",
+    "operational": "LUCKYDRAW_OPS_RPC_URL"
+  },
+  "notes": "BSC testnet. The faucet coin is displayed as tBNB by some explorers; the native symbol at protocol level is BNB. startBlock stays null until a deployment exists. The VRF coordinator, the key hash and every feed proxy are deployment inputs that the operator verifies against the live chain and records in the manifest; none of them are guessed here. Multicall3 and the genesis hash stay null until verified against a node with scripts/check_chain_record.ts; the Multicall3 address is an operator input to that script, and recording it here without that check would be an unverified claim."
+}

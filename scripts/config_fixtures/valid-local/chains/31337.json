@@ -1,0 +1,19 @@
+{
+  "chainId": 31337,
+  "name": "anvil-local",
+  "displayName": "Local anvil",
+  "nativeSymbol": "BNB",
+  "explorerUrl": null,
+  "confirmationDepth": 200,
+  "startBlock": 1,
+  "networkIdentity": {
+    "genesisHash": null,
+    "multicall3": null,
+    "source": { "url": null, "date": null }
+  },
+  "rpcEnvVars": {
+    "public": "LUCKYDRAW_RPC_URL",
+    "operational": "LUCKYDRAW_OPS_RPC_URL"
+  },
+  "notes": "Synthetic test fixture, not a chain record in use."
+}

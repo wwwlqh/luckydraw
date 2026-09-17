@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://luckydraw.invalid/schema/operations.schema.json",
+  "title": "Operations record (SPEC section 15, row 'Operations')",
+  "description": "Keeper account, RPC providers with history coverage, alert destinations and on-call owner, subscription low threshold, per-round cost model, backup RPO/RTO and last restore drill, recovery contacts, deployed UI build hash, DB schema and derivation versions, and the finality tag or depth in use. Endpoints and contact details live in environment variables and the private inventory; only names and roles are recorded here.",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "deploymentId": { "type": "string", "pattern": "^[1-9][0-9]{0,18}:0x[0-9a-f]{40}$" },
+    "environment": { "$ref": "common.schema.json#/$defs/environment" },
+    "keeperAccount": {
+      "$ref": "common.schema.json#/$defs/address",
+      "description": "Dedicated low-balance operational wallet (SPEC section 10.2). Public address only; never a key."
+    },
+    "rpcProviders": {
+      "type": "array",
+      "description": "At least two independent providers, one operator-run or paid with full log history (SPEC section 10.3). URLs are never committed.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+          "role": { "type": "string", "enum": ["public", "operational"] },
+          "historyCoverage": { "type": "string", "enum": ["full", "partial", "unknown"] },
+          "operatorRun": { "type": "boolean" },
+          "urlEnvVar": { "$ref": "common.schema.json#/$defs/envVarName" }
+        },
+        "required": ["name", "role", "historyCoverage", "operatorRun", "urlEnvVar"],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "alertDestinations": {
+      "type": "array",
+      "description": "Logical channels only. The address, webhook or phone number lives in an environment variable.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "channel": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+          "kind": { "type": "string", "enum": ["chat", "email", "page", "webhook"] },
+          "targetEnvVar": { "$ref": "common.schema.json#/$defs/envVarName" },
+          "severity": { "type": "string", "enum": ["info", "warning", "critical"] }
+        },
+        "required": ["channel", "kind", "targetEnvVar", "severity"],
+        "additionalProperties": false
+      }
+    },
+    "onCallOwnerRole": {
+      "$ref": "common.schema.json#/$defs/nonEmptyString",
+      "description": "Role that owns response, not a person's name or contact details."
+    },
+    "subscriptionLowThresholdNative": { "$ref": "common.schema.json#/$defs/uint256String" },
+    "perRoundCostModel": {
+      "type": "object",
+      "properties": {
+        "seedGas": { "type": "integer", "minimum": 0 },
+        "closeGas": { "type": "integer", "minimum": 0 },
+        "requestGas": { "type": "integer", "minimum": 0 },
+        "settleGas": { "type": "integer", "minimum": 0 },
+        "vrfCostNative": { "$ref": "common.schema.json#/$defs/uint256String" },
+        "assumedGasPriceWei": { "$ref": "common.schema.json#/$defs/uint256String" },
+        "note": { "$ref": "common.schema.json#/$defs/nonEmptyString" }
+      },
+      "required": ["seedGas", "closeGas", "requestGas", "settleGas", "vrfCostNative", "assumedGasPriceWei"],
+      "additionalProperties": false
+    },
+    "backup": {
+      "type": "object",
+      "properties": {
+        "rpoSeconds": { "type": "integer", "minimum": 0 },
+        "rtoSeconds": { "type": "integer", "minimum": 0 },
+        "lastRestoreDrill": {
+          "anyOf": [{ "$ref": "common.schema.json#/$defs/isoDate" }, { "type": "null" }]
+        },
+        "note": { "$ref": "common.schema.json#/$defs/publicSafeText" }
+      },
+      "required": ["rpoSeconds", "rtoSeconds", "lastRestoreDrill"],
+      "additionalProperties": false
+    },
+    "recoveryContactRoles": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/nonEmptyString" }
+    },
+    "uiBuildHash": {
+      "anyOf": [{ "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }, { "type": "null" }]
+    },
+    "dbSchemaVersion": { "type": "integer", "minimum": 0 },
+    "derivationVersion": { "type": "integer", "minimum": 0 },
+    "finality": {
+      "type": "object",
+      "description": "SPEC sections 10.3 and 15: the tag or depth in use, and the observed included-to-finalized latency. A presentation parameter, not a promise of economic finality.",
+      "properties": {
+        "tag": { "type": "string", "enum": ["finalized", "safe", "depth"] },
+        "depth": {
+          "anyOf": [{ "type": "integer", "minimum": 1 }, { "type": "null" }]
+        },
+        "observedIncludedToFinalizedMs": {
+          "anyOf": [{ "type": "integer", "minimum": 0 }, { "type": "null" }]
+        }
+      },
+      "required": ["tag", "depth", "observedIncludedToFinalizedMs"],
+      "additionalProperties": false
+    },
+    "notes": { "$ref": "common.schema.json#/$defs/publicSafeText" }
+  },
+  "required": [
+    "schemaVersion",
+    "deploymentId",
+    "environment",
+    "keeperAccount",
+    "rpcProviders",
+    "subscriptionLowThresholdNative",
+    "finality"
+  ],
+  "additionalProperties": false
+}

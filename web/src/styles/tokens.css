@@ -1,0 +1,180 @@
+/*
+ * Design tokens (SPEC §9.3, §9.7).
+ *
+ * "design tokens (color, type, spacing) live in one shared file" — this one. Nothing else in the app writes
+ * a raw colour, a raw size or a raw duration.
+ *
+ * Colour roles are fixed by §9.3 and are never used for anything else: amber is the one accent for primary
+ * actions, green means won or credited, red means failed or lost, orange means pending or attention, blue
+ * means information. Every state that uses a colour also carries an icon and a label (see StateBadge), so
+ * colour is never the only signal.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Type: the six sizes of §9.3, line height 1.5. */
+  --font-sans:
+    system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji";
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --text-12: 0.75rem;
+  --text-14: 0.875rem;
+  --text-16: 1rem;
+  --text-20: 1.25rem;
+  --text-24: 1.5rem;
+  --text-32: 2rem;
+  --line-height: 1.5;
+  --weight-regular: 400;
+  --weight-medium: 550;
+  --weight-strong: 650;
+
+  /* Spacing: an 8 px grid, with one half step for dense rows. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+  --space-6: 48px;
+  --space-7: 64px;
+
+  /* Shape: 12 px radius on cards and inputs, content up to 1200 px, two elevation levels. */
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-pill: 999px;
+  --content-max: 1200px;
+  --touch-target: 44px;
+  --border-width: 1px;
+
+  /* Breakpoints, for reference in media queries. 360 / 600 / 900 / 1200 (§9.3). */
+  --bp-xs: 360px;
+  --bp-sm: 600px;
+  --bp-md: 900px;
+  --bp-lg: 1200px;
+
+  /* Motion: at most 200 ms, and nothing decorative. */
+  --motion-fast: 120ms;
+  --motion-base: 200ms;
+  --motion-ease: cubic-bezier(0.2, 0, 0.2, 1);
+
+  /* Neutral surfaces and text. Body text sits at 4.5:1 or better on --surface. */
+  --bg: #f7f7f8;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-sunken: #f0f0f2;
+  --border: #d9d9de;
+  --border-strong: #b4b4bd;
+  --text: #17171c;
+  --text-muted: #56565f;
+  --text-inverse: #ffffff;
+
+  /* Role colours. */
+  --accent: #b26a00;
+  --accent-hover: #8f5500;
+  --accent-contrast: #ffffff;
+  --accent-soft: #fdf3e2;
+  --positive: #1a6b3c;
+  --positive-soft: #e6f4ec;
+  --negative: #a3251f;
+  --negative-soft: #fbeceb;
+  --pending: #97540b;
+  --pending-soft: #fdf1e3;
+  --info: #14558f;
+  --info-soft: #e7f0f9;
+
+  /* Focus: at least 3:1 against both the control and the background (§9.7). */
+  --focus-ring: 0 0 0 2px var(--surface), 0 0 0 4px #14558f;
+
+  /* Two elevation levels, no more (§9.3). */
+  --elevation-1: 0 1px 2px rgba(16, 16, 24, 0.08);
+  --elevation-2: 0 8px 24px rgba(16, 16, 24, 0.14);
+}
+
+/*
+ * Dark theme. Applied when the system asks for it and the user has not overridden it, or when the user
+ * picked dark explicitly. The two selectors carry the same block so a manual choice always wins.
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --bg: #101014;
+    --surface: #1a1a20;
+    --surface-raised: #22222a;
+    --surface-sunken: #131318;
+    --border: #33333d;
+    --border-strong: #4d4d5a;
+    --text: #f2f2f5;
+    --text-muted: #a8a8b4;
+    --text-inverse: #101014;
+
+    --accent: #f0b258;
+    --accent-hover: #f7c67c;
+    --accent-contrast: #1c1200;
+    --accent-soft: #2e2313;
+    --positive: #6cd39a;
+    --positive-soft: #14281d;
+    --negative: #f28b85;
+    --negative-soft: #2e1a19;
+    --pending: #f0ad62;
+    --pending-soft: #2d2013;
+    --info: #85bdf0;
+    --info-soft: #14212e;
+
+    --focus-ring: 0 0 0 2px var(--surface), 0 0 0 4px #85bdf0;
+    --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.5);
+    --elevation-2: 0 8px 24px rgba(0, 0, 0, 0.6);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #101014;
+  --surface: #1a1a20;
+  --surface-raised: #22222a;
+  --surface-sunken: #131318;
+  --border: #33333d;
+  --border-strong: #4d4d5a;
+  --text: #f2f2f5;
+  --text-muted: #a8a8b4;
+  --text-inverse: #101014;
+
+  --accent: #f0b258;
+  --accent-hover: #f7c67c;
+  --accent-contrast: #1c1200;
+  --accent-soft: #2e2313;
+  --positive: #6cd39a;
+  --positive-soft: #14281d;
+  --negative: #f28b85;
+  --negative-soft: #2e1a19;
+  --pending: #f0ad62;
+  --pending-soft: #2d2013;
+  --info: #85bdf0;
+  --info-soft: #14212e;
+
+  --focus-ring: 0 0 0 2px var(--surface), 0 0 0 4px #85bdf0;
+  --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --elevation-2: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+/* §9.3: "prefers-reduced-motion removes all non-essential animation". */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0ms;
+    --motion-base: 0ms;
+  }
+
+  *,
+  *::before,
+  *::after {
+    /* biome-ignore lint/complexity/noImportantStyles: the WCAG reduced-motion reset must beat every component rule (SPEC 9.3). */
+    animation-duration: 0.001ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: the WCAG reduced-motion reset must beat every component rule (SPEC 9.3). */
+    animation-iteration-count: 1 !important;
+    /* biome-ignore lint/complexity/noImportantStyles: the WCAG reduced-motion reset must beat every component rule (SPEC 9.3). */
+    transition-duration: 0.001ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: the WCAG reduced-motion reset must beat every component rule (SPEC 9.3). */
+    scroll-behavior: auto !important;
+  }
+}

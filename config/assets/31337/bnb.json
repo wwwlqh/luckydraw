@@ -1,0 +1,39 @@
+{
+  "chainId": 31337,
+  "asset": "0x0000000000000000000000000000000000000000",
+  "native": true,
+  "symbol": "BNB",
+  "name": "Local mock native BNB",
+  "decimals": 18,
+  "isMock": true,
+  "depositsEnabled": true,
+  "exactTransferEvidence": "Native path: Vault credits exactly msg.value and withdrawal checks the exact Vault debit, so no token transfer hook can change the amount (SPEC section 3.1). No issuer exists on a local chain.",
+  "issuerReview": {
+    "upgradeable": false,
+    "freezeOrBlocklist": false,
+    "mintAuthority": "anvil pre-funded accounts; local development chain only",
+    "rebasing": false,
+    "reviewedOn": null,
+    "source": { "url": null, "date": null }
+  },
+  "status": "mock-local",
+  "source": { "url": null, "date": null },
+  "price": {
+    "feed": null,
+    "feedIsMock": true,
+    "feedDecimals": 8,
+    "baseQuote": "BNB/USD",
+    "heartbeatSeconds": null,
+    "observedP999IntervalSeconds": null,
+    "maxPriceAge": 3600,
+    "minAnswer": "0",
+    "maxAnswer": "0",
+    "answerBoundsConfirmedAbsent": true,
+    "referenceKind": "ExactToken",
+    "displayLabel": null,
+    "pegAssumption": null,
+    "verifiedOn": null,
+    "source": { "url": null, "date": null }
+  },
+  "notes": "Labeled local mock, never admissible outside chain 31337. The feed is a mock aggregator whose address is assigned when the local deployment runs, so it is null here and recorded in the manifest. A mock aggregator publishes no heartbeat, so maxPriceAge falls back to the 3600-second floor, inside the 60..172800 bounds in Types.sol."
+}

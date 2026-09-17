@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <!--
+      SPEC §9.6 client security: no inline scripts, connect-src limited to the configured RPCs, every asset
+      self-hosted, no third-party script on any page that can sign. The connect-src list below is written at
+      build time by web/vite.config.ts: 'self' plus the origin of each configured RPC URL.
+
+      style-src stays 'self' with no 'unsafe-inline': React sets the `style` prop through CSSOM
+      (element.style.setProperty), which CSP does not gate, so dynamic widths still work. Never reach for
+      setAttribute("style") in this app.
+
+      frame-ancestors is deliberately absent: a browser ignores it in a <meta> policy and logs an error, so
+      it must be served as a Content-Security-Policy response header by whatever hosts the static build,
+      together with X-Frame-Options. That belongs to the §10.3 hosting work, not to this document.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src %CSP_CONNECT_SRC%; frame-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'"
+    />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content="LuckyDraw: on-chain lucky draws paid in BNB." />
+    <title>LuckyDraw</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <!--
+      Root-relative on purpose: Vite rewrites this and every emitted asset URL with the configured `base`
+      (`VITE_LUCKYDRAW_BASE`), so a project site under /luckydraw/ loads /luckydraw/assets/…. There is no
+      <base> element and there must not be one — the CSP above sets `base-uri 'none'`, and an injected
+      <base> is exactly what that directive exists to stop.
+
+      This document is also copied verbatim to dist/404.html by web/scripts/pages-postbuild.mjs, which is
+      how a static host with no rewrite rule serves a deep link such as /luckydraw/round/97/1.
+    -->
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://luckydraw.invalid/schema/common.schema.json",
+  "title": "Shared definitions for the LuckyDraw section 15 records",
+  "description": "Primitive shapes reused by every record schema. The host luckydraw.invalid is the RFC 2606 reserved TLD: these identifiers are never fetched, they only give each schema a stable base URI for $ref resolution.",
+  "$defs": {
+    "address": {
+      "type": "string",
+      "description": "EVM address, lowercase hex. Addresses are compared lowercase everywhere (SPEC section 10.3).",
+      "pattern": "^0x[0-9a-f]{40}$"
+    },
+    "zeroAddress": {
+      "type": "string",
+      "description": "The native BNB sentinel and the 'no pending owner' value (SPEC section 4.2, Types.sol NATIVE_ASSET).",
+      "const": "0x0000000000000000000000000000000000000000"
+    },
+    "bytes32": {
+      "type": "string",
+      "description": "32-byte value, lowercase hex.",
+      "pattern": "^0x[0-9a-f]{64}$"
+    },
+    "txHash": {
+      "$ref": "#/$defs/bytes32"
+    },
+    "uint256String": {
+      "type": "string",
+      "description": "Unsigned 256-bit integer as a decimal string, never a JSON number (SPEC section 10.3). The validator additionally checks the value against 2^256-1.",
+      "pattern": "^(0|[1-9][0-9]{0,77})$"
+    },
+    "positiveUint256String": {
+      "type": "string",
+      "description": "uint256String that is not zero.",
+      "pattern": "^[1-9][0-9]{0,77}$"
+    },
+    "isoDate": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "isoDateTime": {
+      "type": "string",
+      "description": "UTC instant, seconds precision, explicit Z. No local offsets.",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    },
+    "httpsUrl": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://[^\\s]+$"
+    },
+    "sourceRef": {
+      "type": "object",
+      "description": "Where a fact was verified and when (SPEC section 15). Null on both sides means 'not yet verified'.",
+      "properties": {
+        "url": {
+          "anyOf": [{ "$ref": "#/$defs/httpsUrl" }, { "type": "null" }]
+        },
+        "date": {
+          "anyOf": [{ "$ref": "#/$defs/isoDate" }, { "type": "null" }]
+        }
+      },
+      "required": ["url", "date"],
+      "additionalProperties": false
+    },
+    "chainId": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "environment": {
+      "type": "string",
+      "description": "SPEC section 12: environment in {local, testnet, mainnet}.",
+      "enum": ["local", "testnet", "mainnet"]
+    },
+    "decimals": {
+      "type": "integer",
+      "description": "Token or feed decimals, 0-18 (SPEC section 3.1, PriceReader.MAX_DECIMALS).",
+      "minimum": 0,
+      "maximum": 18
+    },
+    "blockNumber": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "envVarName": {
+      "type": "string",
+      "description": "Name of the environment variable that carries a URL or secret. The value itself is never committed (SPEC section 15 'Secret URLs not committed').",
+      "pattern": "^[A-Z][A-Z0-9_]{2,63}$"
+    },
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "publicSafeText": {
+      "type": "string",
+      "description": "Free text that may be published. Rejects IP literals, cloud region codes, OCIDs and provider host names, because section 15 Hosting forbids IP/region/instance identifiers in any published spec or build.",
+      "minLength": 1,
+      "allOf": [
+        {
+          "not": { "pattern": "\\b[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\b" },
+          "$comment": "IPv4 literal"
+        },
+        {
+          "not": { "pattern": "[0-9a-fA-F]{1,4}:[0-9a-fA-F]{1,4}:[0-9a-fA-F]{1,4}" },
+          "$comment": "IPv6 literal"
+        },
+        {
+          "not": { "pattern": "\\b[Oo][Cc][Ii][Dd]1\\." },
+          "$comment": "Oracle Cloud resource identifier"
+        },
+        {
+          "not": { "pattern": "[Oo][Rr][Aa][Cc][Ll][Ee][Cc][Ll][Oo][Uu][Dd]\\.[Cc][Oo][Mm]" },
+          "$comment": "provider host name"
+        },
+        {
+          "not": { "pattern": "\\b[a-z]{2}-[a-z]{3,}-[1-9]\\b" },
+          "$comment": "cloud region code such as a region-availability-domain pair"
+        },
+        {
+          "not": { "pattern": "\\b[Ii]nstance[-_][0-9a-fA-F]{6,}\\b" },
+          "$comment": "instance identifier"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "_comment": [
+    "Slither configuration for the LuckyDraw contracts. Run from `contracts/`:",
+    "  FOUNDRY_OUT=out/slither FOUNDRY_CACHE_PATH=cache/slither slither . --config-file slither.config.json",
+    "Triage of every finding lives in docs/REVIEW.md, section 'Static analysis (Slither) and Codex cross-check preparation (2026-09-16)'.",
+    "detectors_to_exclude is empty on purpose: no detector is silenced. A detector may only be added here together",
+    "with a one-line reason appended to this comment and the matching per-finding triage in docs/REVIEW.md;",
+    "per-finding triage in REVIEW.md is always preferred over silencing a whole detector.",
+    "fail_on is 'none' while the CI job is non-blocking (.github/workflows/ci.yml, job 'slither'); raise it to",
+    "'medium' once every Medium finding is triaged as fixed or accepted with an owner and the triage is checked in.",
+    "Slither 0.11.6 cannot resolve `import {Name as Alias}` for custom errors and then drops the enclosing",
+    "functions from the analysis, so a run is only trustworthy when it logs no 'ERROR:ContractSolcParsing' line.",
+    "The CI job greps for that line and fails on it; do not remove that guard."
+  ],
+  "solc_remaps": [
+    "forge-std/=lib/forge-std/src/",
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+    "@chainlink/contracts/=lib/chainlink-brownie-contracts/contracts/"
+  ],
+  "filter_paths": "lib/|test/|script/",
+  "exclude_dependencies": true,
+  "exclude_informational": false,
+  "exclude_low": false,
+  "exclude_medium": false,
+  "exclude_high": false,
+  "exclude_optimization": false,
+  "detectors_to_exclude": "",
+  "fail_on": "none",
+  "disable_color": true,
+  "legacy_ast": false
+}

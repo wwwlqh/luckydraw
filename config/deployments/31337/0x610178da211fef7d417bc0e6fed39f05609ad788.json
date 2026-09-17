@@ -1,0 +1,221 @@
+{
+  "schemaVersion": 1,
+  "deploymentId": "31337:0x610178da211fef7d417bc0e6fed39f05609ad788",
+  "environment": "local",
+  "createdAtUtc": "2026-09-17T01:52:56Z",
+  "notes": "Local mock deployment written by contracts/script/DeployLocal.s.sol. Every asset, price feed and the VRF coordinator is a labeled mock and none of them may appear in a testnet or mainnet manifest.",
+  "chain": {
+    "chainId": 31337,
+    "name": "anvil-local",
+    "nativeSymbol": "BNB",
+    "explorerUrl": null,
+    "confirmationDepth": 200,
+    "startBlock": 10,
+    "rpcEnvVars": {
+      "public": "LUCKYDRAW_RPC_URL",
+      "operational": "LUCKYDRAW_OPS_RPC_URL"
+    }
+  },
+  "toolchain": {
+    "foundry": "1.8.1",
+    "solc": "0.8.28",
+    "evmVersion": "paris",
+    "optimizer": true,
+    "optimizerRuns": 600,
+    "viaIr": true,
+    "bytecodeHash": "none"
+  },
+  "contracts": {
+    "vault": {
+      "address": "0x8a791620dd6260079bf849dc5567adc3f2fdc318",
+      "codeHash": "0xb75270ba5311c3263d0c0c9076abd412792a4834a1d945472c6464e5a30e3f9b",
+      "deployBlock": 10,
+      "deployTx": "0x48bd14b01e3ce29afc41a27e1dbd35a2a3e555da394bc970fc5d2eee39254e9f",
+      "owner": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+      "pendingOwner": "0x70997970c51812dc3a010c7d01b50e0d17dc79c8"
+    },
+    "draw": {
+      "address": "0x610178da211fef7d417bc0e6fed39f05609ad788",
+      "codeHash": "0x7fffe9b1feee674cecf6116b8d3f73cf0a920ed2b4018d967d0d3c50d508f4d1",
+      "deployBlock": 11,
+      "deployTx": "0x6a77fa6adfcdf082c4aee34283c480d247a931e05c72e5149cac233d481b6d6e",
+      "owner": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+      "pendingOwner": "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+      "constructorArgs": {
+        "vault": "0x8a791620dd6260079bf849dc5567adc3f2fdc318",
+        "coordinator": "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+        "subscriptionId": "1",
+        "keyHash": "0x20e855e1fcb98dcb7b9cdff7dfcdecae125843fe336c52aa8a128462c9f4dec1",
+        "requestConfirmations": 200,
+        "callbackGasLimit": 300000,
+        "maxRequestCostNative": "3612500000000000",
+        "feeAccount": "0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc",
+        "initialOwner": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+      }
+    }
+  },
+  "vrf": {
+    "coordinator": "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+    "coordinatorIsMock": true,
+    "subscriptionId": "1",
+    "subscriptionOwner": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+    "keyHash": "0x20e855e1fcb98dcb7b9cdff7dfcdecae125843fe336c52aa8a128462c9f4dec1",
+    "nativeBilling": true,
+    "requestConfirmations": 200,
+    "numWords": 2,
+    "callbackGasLimit": 300000,
+    "maxRequestCostNative": "3612500000000000",
+    "maxRequestCostDerivation": {
+      "maxGasPriceWei": "5000000000",
+      "verificationGasOverhead": 115000,
+      "premiumPercentage": 50,
+      "flatFeeNativeWei": "500000000000000",
+      "note": "Local placeholder, not a BSC lane: 5 gwei x (300000 + 115000) x 1.5 + 0.0005 BNB"
+    },
+    "consumerRegistered": true,
+    "consumerRegistrationTx": null,
+    "keyHashGetter": "s_provingKeys(bytes32)",
+    "lowFundingThresholdNative": "36125000000000000",
+    "measuredCallbackGasUsed": null,
+    "source": {
+      "url": null,
+      "date": null
+    }
+  },
+  "ownership": {
+    "finalOwner": "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+    "feeAccount": "0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc",
+    "seedAccount": "0x90f79bf6eb2c4f870365e785982e1f101e93b906",
+    "ownershipAccepted": false,
+    "makeWholeReserve": null,
+    "makeWholeCap": null,
+    "note": "Local mocks: labeled anvil accounts stand in for the owner, treasury and seed Safes. The final owner must accept both transfers and the seed account calls Vault.authorizeSeed itself."
+  },
+  "assets": [
+    {
+      "asset": "0x0000000000000000000000000000000000000000",
+      "native": true,
+      "symbol": "BNB",
+      "name": "Local mock native BNB",
+      "decimals": 18,
+      "isMock": true,
+      "listed": true,
+      "depositsEnabled": true,
+      "exactTransferEvidence": "Native path: the Vault credits exactly msg.value and checks the exact debit on withdrawal, so no token transfer hook can change the amount (SPEC section 3.1).",
+      "status": "mock-local",
+      "source": {
+        "url": null,
+        "date": null
+      },
+      "price": {
+        "feed": "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
+        "feedIsMock": true,
+        "feedDecimals": 8,
+        "baseQuote": "BNB/USD",
+        "heartbeatSeconds": null,
+        "observedP999IntervalSeconds": null,
+        "maxPriceAge": 3600,
+        "minAnswer": "0",
+        "maxAnswer": "0",
+        "answerBoundsConfirmedAbsent": true,
+        "referenceKind": "ExactToken",
+        "displayLabel": null,
+        "pegAssumption": null,
+        "verifiedOn": null,
+        "source": {
+          "url": null,
+          "date": null
+        }
+      },
+      "pool": {
+        "poolId": "1",
+        "enabled": true,
+        "seedAmount": "10000000000000000",
+        "seedAuthorizedMaxPerRound": "10000000000000000",
+        "targetsUsd": {
+          "Day100": 100,
+          "Day1k": 1000,
+          "Day10k": 10000,
+          "Week1k": 1000,
+          "Week10k": 10000,
+          "Week100k": 100000,
+          "Month100k": 100000
+        },
+        "firstRoundIds": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7"
+        ]
+      }
+    },
+    {
+      "asset": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+      "native": false,
+      "symbol": "TEST2",
+      "name": "Local mock two-decimal ERC-20 for the second pool",
+      "decimals": 2,
+      "isMock": true,
+      "listed": true,
+      "depositsEnabled": true,
+      "exactTransferEvidence": "test/mocks/MockERC20.sol is a plain OpenZeppelin ERC-20: it transfers the exact amount and does not rebase.",
+      "status": "mock-local",
+      "source": {
+        "url": null,
+        "date": null
+      },
+      "price": {
+        "feed": "0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9",
+        "feedIsMock": true,
+        "feedDecimals": 8,
+        "baseQuote": "TEST2/USD",
+        "heartbeatSeconds": 1800,
+        "observedP999IntervalSeconds": null,
+        "maxPriceAge": 3600,
+        "minAnswer": "0",
+        "maxAnswer": "0",
+        "answerBoundsConfirmedAbsent": true,
+        "referenceKind": "ExactToken",
+        "displayLabel": null,
+        "pegAssumption": null,
+        "verifiedOn": null,
+        "source": {
+          "url": null,
+          "date": null
+        }
+      },
+      "pool": {
+        "poolId": "2",
+        "enabled": true,
+        "seedAmount": "500",
+        "seedAuthorizedMaxPerRound": "500",
+        "targetsUsd": {
+          "Day100": 100,
+          "Day1k": 1000,
+          "Day10k": 10000,
+          "Week1k": 1000,
+          "Week10k": 10000,
+          "Week100k": 100000,
+          "Month100k": 100000
+        },
+        "firstRoundIds": [
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14"
+        ]
+      }
+    }
+  ],
+  "mocks": [
+    "MockERC20",
+    "MockAggregatorV3",
+    "MockVRFCoordinatorV2Plus"
+  ]
+}

@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://luckydraw.invalid/schema/acceptance.schema.json",
+  "title": "Acceptance record (SPEC section 15, row 'Acceptance')",
+  "description": "Measured release evidence for one deployment: suite results, fuzz runs/depth/seeds/per-action counts, the gas table against the section 11.2 targets, cutoff-to-settled and included-to-finalized latency, one-year rebuild time, Lighthouse budget results, public testnet receipts, external review and the risk/jurisdiction decisions. A passing record is evidence, not a promise of safety (SPEC section 14).",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "deploymentId": { "type": "string", "pattern": "^[1-9][0-9]{0,18}:0x[0-9a-f]{40}$" },
+    "environment": { "$ref": "common.schema.json#/$defs/environment" },
+    "recordedAtUtc": { "$ref": "common.schema.json#/$defs/isoDateTime" },
+    "suites": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+          "status": { "type": "string", "enum": ["passed", "failed", "pending", "not-applicable"] },
+          "evidenceRef": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+          "date": {
+            "anyOf": [{ "$ref": "common.schema.json#/$defs/isoDate" }, { "type": "null" }]
+          }
+        },
+        "required": ["name", "status", "evidenceRef", "date"],
+        "additionalProperties": false
+      }
+    },
+    "fuzzCampaign": {
+      "type": "object",
+      "description": "Section 11.2 'Stateful': at least 100,000 recorded non-reverting handler actions, reverted calls at or below 20%, no-target calls published as a separate bucket.",
+      "properties": {
+        "runs": { "type": "integer", "minimum": 0 },
+        "depth": { "type": "integer", "minimum": 0 },
+        "seeds": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^0x[0-9a-f]{1,64}$" }
+        },
+        "nonRevertingActions": { "type": "integer", "minimum": 0 },
+        "revertedCalls": { "type": "integer", "minimum": 0 },
+        "noTargetCalls": { "type": "integer", "minimum": 0 },
+        "perActionCounts": {
+          "type": "object",
+          "propertyNames": { "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$" },
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        }
+      },
+      "required": ["runs", "depth", "seeds", "nonRevertingActions", "revertedCalls", "noTargetCalls"],
+      "additionalProperties": false
+    },
+    "gasTable": {
+      "type": "array",
+      "description": "Execution gas under the pinned compiler, excluding intrinsic and calldata costs (SPEC section 11.2).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "operation": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+          "measured": { "type": "integer", "minimum": 0 },
+          "target": { "type": "integer", "minimum": 0 },
+          "condition": { "$ref": "common.schema.json#/$defs/nonEmptyString" }
+        },
+        "required": ["operation", "measured", "target"],
+        "additionalProperties": false
+      }
+    },
+    "latency": {
+      "type": "object",
+      "properties": {
+        "cutoffToSettledP50Ms": {
+          "anyOf": [{ "type": "integer", "minimum": 0 }, { "type": "null" }]
+        },
+        "cutoffToSettledP95Ms": {
+          "anyOf": [{ "type": "integer", "minimum": 0 }, { "type": "null" }]
+        },
+        "includedToFinalizedMs": {
+          "anyOf": [{ "type": "integer", "minimum": 0 }, { "type": "null" }]
+        },
+        "observationWindowDays": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["cutoffToSettledP50Ms", "cutoffToSettledP95Ms", "includedToFinalizedMs"],
+      "additionalProperties": false
+    },
+    "oneYearRebuildSeconds": {
+      "anyOf": [{ "type": "integer", "minimum": 0 }, { "type": "null" }]
+    },
+    "lighthouse": {
+      "type": "object",
+      "properties": {
+        "performance": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "accessibility": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "bestPractices": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "seo": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "budgetPassed": { "type": "boolean" }
+      },
+      "required": ["budgetPassed"],
+      "additionalProperties": false
+    },
+    "testnetReceipts": {
+      "type": "array",
+      "description": "Public testnet transaction hashes proving a real two-word request, callback and public settlement (SPEC section 11.2).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "what": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+          "txHash": { "$ref": "common.schema.json#/$defs/txHash" }
+        },
+        "required": ["what", "txHash"],
+        "additionalProperties": false
+      }
+    },
+    "externalReview": {
+      "type": "object",
+      "properties": {
+        "status": { "type": "string", "enum": ["not-started", "in-progress", "complete"] },
+        "date": {
+          "anyOf": [{ "$ref": "common.schema.json#/$defs/isoDate" }, { "type": "null" }]
+        },
+        "criticalHighResolved": { "type": "boolean" },
+        "reportRef": { "$ref": "common.schema.json#/$defs/nonEmptyString" }
+      },
+      "required": ["status", "date", "criticalHighResolved"],
+      "additionalProperties": false
+    },
+    "riskDecisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "topic": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+          "decision": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+          "acceptedBy": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+          "date": { "$ref": "common.schema.json#/$defs/isoDate" }
+        },
+        "required": ["topic", "decision", "acceptedBy", "date"],
+        "additionalProperties": false
+      }
+    },
+    "notes": { "$ref": "common.schema.json#/$defs/publicSafeText" }
+  },
+  "required": ["schemaVersion", "deploymentId", "environment", "recordedAtUtc", "suites"],
+  "additionalProperties": false
+}

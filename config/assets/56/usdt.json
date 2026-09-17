@@ -1,0 +1,50 @@
+{
+  "chainId": 56,
+  "asset": "0x55d398326f99059ff775485246999027b3197955",
+  "native": false,
+  "symbol": "USDT",
+  "name": "Tether USD",
+  "decimals": 18,
+  "isMock": false,
+  "depositsEnabled": false,
+  "exactTransferEvidence": null,
+  "requiresZeroReset": false,
+  "issuerReview": {
+    "upgradeable": false,
+    "freezeOrBlocklist": false,
+    "mintAuthority": "The contract's owner, 0xf68a4b64162906eff0ff6ae34e2bb1cd42fef62d, which has no code on chain 56 (an externally owned account, checked 2026-09-17) and is the Binance-Peg custodian. It can mint(uint256) and burn(uint256) to its own balance and can transferOwnership/renounceOwnership; it cannot move or freeze anyone else's balance. Tether's own freeze, blacklist and upgrade powers act on Tether's contracts and on the reserves behind the peg, not on this BEP-20, so a Tether action reaches a holder here through the peg rather than through this contract.",
+    "rebasing": false,
+    "reviewedOn": "2026-09-17",
+    "source": {
+      "url": "https://bscscan.com/token/0x55d398326f99059ff775485246999027b3197955",
+      "date": "2026-09-17"
+    }
+  },
+  "status": "candidate",
+  "source": {
+    "url": "https://bscscan.com/token/0x55d398326f99059ff775485246999027b3197955",
+    "date": "2026-09-17"
+  },
+  "price": {
+    "feed": "0xb97ad0e74fa7d920791e90258a6e2085088b4320",
+    "feedIsMock": false,
+    "feedDecimals": 8,
+    "baseQuote": "USDT/USD",
+    "heartbeatSeconds": 900,
+    "observedP999IntervalSeconds": null,
+    "observationWindow": null,
+    "maxPriceAge": 3600,
+    "minAnswer": "1",
+    "maxAnswer": "105000000",
+    "answerBoundsConfirmedAbsent": false,
+    "referenceKind": "ExactToken",
+    "displayLabel": "USDT/USD",
+    "pegAssumption": null,
+    "verifiedOn": "2026-09-17",
+    "source": {
+      "url": "https://docs.chain.link/data-feeds/price-feeds/addresses?network=bnb-chain",
+      "date": "2026-09-17"
+    }
+  },
+  "notes": "ADR 037. Candidate, not approved: this record holds what was verified read-only against chain 56 on 2026-09-17 and names what is still missing, so nothing here should be read as a completed admission. VERIFIED ON CHAIN (cast, public RPCs https://bsc-dataseed.bnbchain.org and https://bsc-rpc.publicnode.com, eth_chainId 56 on both): symbol() \"USDT\", name() \"Tether USD\" (BscScan labels the contract \"Binance-Peg BSC-USD (BSC-USD)\"), decimals() 18. The EIP-1967 implementation and admin storage slots are both zero and the runtime code is a single 4,413-byte BEP-20, so this is not a proxy and issuerReview.upgradeable is false. The runtime carries approve/increaseAllowance/decreaseAllowance, mint(uint256), burn(uint256), owner/getOwner/transferOwnership/renounceOwnership and no blacklist, freeze, pause or fund-destruction selector (isBlackListed, addBlackList, destroyBlackFunds, pause, paused all absent), so freezeOrBlocklist is false for this contract. FEED: Chainlink USDT/USD proxy 0xb97ad0e74fa7d920791e90258a6e2085088b4320, taken from the Chainlink BNB Chain address page and confirmed on chain: decimals() 8, description() \"USDT / USD\", version() 6, aggregator() 0x63f4ff1c8c16c312f4b9792bdfde149622293934, whose minAnswer is 1 and maxAnswer is 105000000 (USD 1.05, the documented stablecoin cap), so answerBoundsConfirmedAbsent is false and the bounds are recorded rather than assumed absent. latestRoundData at read time answered 99901410 (USD 0.99901410) with updatedAt 1789624916, 361 seconds old against the documented 900-second heartbeat and 0.1% deviation threshold, identical on both RPCs. maxPriceAge is max(2 x 900, 3600) = 3600 (ADR 020). ZERO RESET: requiresZeroReset is false because it was checked, not because it was skipped. An eth_call of approve(spender, 123456789) from an owner whose current allowance to that spender is already nonzero (1.157e77) returned true without reverting, so this contract does not carry Ethereum-mainnet USDT's nonzero-to-nonzero approval guard. web/src/components/wallet/zeroReset.ts still lists this address in its fallback map, so the app will offer approve(0) then approve(amount) anyway; that is the safe direction (one extra transaction rather than a reverted approval) and it is left alone until the mainnet shakedown observes the real approval against the real token. STILL MISSING before this can become \"approved\" and appear in a mainnet manifest: (1) observedP999IntervalSeconds and observationWindow are null - scripts/observe_feed.ts must be run over at least 14 days of this feed's own mainnet round history (pnpm observe:feed --feed 0xb97ad0e74fa7d920791e90258a6e2085088b4320 --days 14 --heartbeat 900) and its printed fragment pasted in; validator rules P6 to P8 make a mainnet manifest fail until then, which is the intended gate. (2) exactTransferEvidence is null - the section 3.1 checks are pending: what has been read is the bytecode (a plain BEP-20 transfer/transferFrom with no fee or rebase hook and no rebase/elastic-supply selector), not an observed transfer, so an exact receipt into the Vault and an exact debit out of it must still be observed against the real token before the field is filled. (3) status stays \"candidate\" until both are done. OPERATOR SEED (intent, not a deployed fact): pool configuration belongs in config/deployments/56/, which does not exist yet, and this schema forbids a \"pool\" object in a standalone record, so the figure is recorded here. Intended seedAmount \"5000000000000000000\" = 5.000000 USDT, with seedAuthorizedMaxPerRound \"10000000000000000000\" = 10 USDT, keeping the 2x seed-to-cap ratio of config/deployments/97/testnet.plan.json. The chain-97 BNB seed is 0.001 BNB, which the mainnet BNB/USD feed 0x0567f2323251f0aab15c8dfb1967e4e8a7d42aee valued at USD 0.73 when it was read on 2026-09-17 (answer 72512757245, 8 decimals); that sits below section 5.4's \"well above USD 1\" floor, which testnet money makes harmless and mainnet money does not, so the USDT figure applies the floor instead of copying the number: USD 5 is well above USD 1 and still a small fraction of the smallest USD 100 daily target, which is what the runbook's sizing note asks for. In USDT the conversion is exact because the pool's unit is the quoted unit: 5 USDT is USD 5 at the reference price by construction, with none of the drift the BNB seed carries. The operator settles the final figure in the mainnet plan; nothing here authorizes a debit, which only Vault.authorizeSeed from the seed Safe can."
+}

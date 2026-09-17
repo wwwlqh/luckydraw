@@ -1,0 +1,39 @@
+{
+  "chainId": 31337,
+  "asset": null,
+  "native": false,
+  "symbol": "TEST2",
+  "name": "Local mock two-decimal ERC-20 for the second pool",
+  "decimals": 2,
+  "isMock": true,
+  "depositsEnabled": true,
+  "exactTransferEvidence": "Mock token transfers the exact amount and does not rebase; the Vault's exact-receipt and exact-debit checks are exercised against it, together with the deliberately taxed and rebasing mocks that must be rejected (SPEC section 3.1).",
+  "issuerReview": {
+    "upgradeable": false,
+    "freezeOrBlocklist": false,
+    "mintAuthority": "test deployer; local development chain only",
+    "rebasing": false,
+    "reviewedOn": null,
+    "source": { "url": null, "date": null }
+  },
+  "status": "mock-local",
+  "source": { "url": null, "date": null },
+  "price": {
+    "feed": null,
+    "feedIsMock": true,
+    "feedDecimals": 8,
+    "baseQuote": "TEST2/USD",
+    "heartbeatSeconds": 1800,
+    "observedP999IntervalSeconds": null,
+    "maxPriceAge": 3600,
+    "minAnswer": "0",
+    "maxAnswer": "0",
+    "answerBoundsConfirmedAbsent": true,
+    "referenceKind": "ExactToken",
+    "displayLabel": null,
+    "pegAssumption": null,
+    "verifiedOn": null,
+    "source": { "url": null, "date": null }
+  },
+  "notes": "Labeled local mock, never admissible outside chain 31337. Its address is assigned when the local deployment runs, so it is null here and recorded in the manifest. The declared heartbeat of 1800 seconds exercises the maxPriceAge = max(2H, 3600) rule at the point where the floor still wins."
+}
