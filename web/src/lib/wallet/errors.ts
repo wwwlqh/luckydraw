@@ -32,12 +32,24 @@ export class WalletError extends Error {
   readonly code: WalletErrorCode;
   /** The provider's numeric code, when it reported one. */
   readonly providerCode: number | null;
+  /**
+   * The hash of a transaction that was already broadcast when this failure was raised, when there is one.
+   *
+   * It exists so a post-broadcast failure never reads as "Nothing sent" (SPEC §9.6: once a hash exists the
+   * funds effect is "Unknown until receipt"). Null for every failure raised before a signature.
+   */
+  readonly sendTransactionHash: string | null;
 
-  constructor(code: WalletErrorCode, message: string, options?: {cause?: unknown; providerCode?: number}) {
+  constructor(
+    code: WalletErrorCode,
+    message: string,
+    options?: {cause?: unknown; providerCode?: number; sendTransactionHash?: string},
+  ) {
     super(message, options?.cause === undefined ? undefined : {cause: options.cause});
     this.name = "WalletError";
     this.code = code;
     this.providerCode = options?.providerCode ?? null;
+    this.sendTransactionHash = options?.sendTransactionHash ?? null;
   }
 }
 

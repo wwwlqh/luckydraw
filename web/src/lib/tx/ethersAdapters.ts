@@ -16,6 +16,26 @@ import type {TxRequest, TxSignerLike, TxWatcherLike} from "./types.ts";
  * that names one is refused by the wallet instead (SPEC §9.2 network guard, §12 chain-id assertion). The
  * response is checked too, for a wallet that accepts the field and signs on another chain anyway.
  */
+/**
+ * The chain the wallet's node reported for a broadcast transaction, or `null` when it did not report one.
+ *
+ * `JsonRpcSigner.sendTransaction` polls `eth_getTransactionByHash` through the *wallet's* provider, not this
+ * app's read RPC, and ethers' formatter maps a missing `chainId` field to `null` (`allowNull(getBigInt,
+ * null)`). MetaMask's default BSC-testnet endpoint is a bnbchain data seed, which omits it, so a perfectly
+ * good chain-97 transaction comes back with `chainId: null`. That is "the node did not say", not "another
+ * chain". The pre-EIP-1559 `v` still encodes the chain for legacy transactions, and ethers exposes it as
+ * `signature.legacyChainId`, so that is tried before giving up.
+ */
+function reportedChainId(response: {chainId?: bigint | null; signature?: unknown}): bigint | null {
+  if (response.chainId !== null && response.chainId !== undefined) return response.chainId;
+  const signature = response.signature;
+  if (signature !== null && typeof signature === "object") {
+    const legacy = (signature as {legacyChainId?: unknown}).legacyChainId;
+    if (typeof legacy === "bigint") return legacy;
+  }
+  return null;
+}
+
 export function toTxSigner(signer: JsonRpcSigner, chainId: bigint): TxSignerLike {
   return {
     async estimateGas(tx: TxRequest): Promise<bigint> {
@@ -29,11 +49,18 @@ export function toTxSigner(signer: JsonRpcSigner, chainId: bigint): TxSignerLike
         gasLimit: tx.gasLimit,
         chainId,
       });
-      if (response.chainId !== chainId) {
+      // Only a chain the node positively named and that differs is a wrong chain. An unknown chain is left
+      // alone because the real guard is downstream and does not depend on this field at all: the tracking
+      // watcher polls the *deployment* chain's read provider, so a transaction genuinely signed for another
+      // chain is never found there and ends as `dropped` rather than being narrated as confirmed.
+      const reported = reportedChainId(response);
+      if (reported !== null && reported !== chainId) {
+        // The hash exists, so this is not "Nothing sent": SPEC §9.6 requires "Unknown until receipt" from the
+        // moment a hash exists. It travels on the error so the machine can keep it (see `broadcastHashOf`).
         throw new WalletError(
           "WrongChain",
-          `This action was prepared for chain ${chainId}, but your wallet signed it for chain ` +
-            `${response.chainId}.`,
+          `This action was prepared for chain ${chainId}, but your wallet signed it for chain ${reported}.`,
+          {sendTransactionHash: response.hash},
         );
       }
       return {hash: response.hash, nonce: response.nonce};

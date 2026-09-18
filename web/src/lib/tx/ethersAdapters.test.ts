@@ -6,7 +6,9 @@
 
 import type {JsonRpcSigner} from "ethers";
 import {describe, expect, it} from "vitest";
+import type {WalletError} from "../wallet/errors.ts";
 import {toTxSigner} from "./ethersAdapters.ts";
+import {wrongChainWithHashFailure} from "./failure.ts";
 import type {TxRequest} from "./types.ts";
 
 const REQUEST: TxRequest & {gasLimit: bigint} = {
@@ -17,13 +19,15 @@ const REQUEST: TxRequest & {gasLimit: bigint} = {
   gasLimit: 125_000n,
 };
 
-function fakeSigner(responseChainId: bigint) {
+const HASH = `0x${"ab".repeat(32)}`;
+
+function fakeSigner(responseChainId: bigint | null, signature?: {legacyChainId?: bigint}) {
   const sent: Record<string, unknown>[] = [];
   const signer = {
     estimateGas: () => Promise.resolve(100_000n),
     sendTransaction: (tx: Record<string, unknown>) => {
       sent.push(tx);
-      return Promise.resolve({hash: `0x${"ab".repeat(32)}`, nonce: 7, chainId: responseChainId});
+      return Promise.resolve({hash: HASH, nonce: 7, chainId: responseChainId, signature});
     },
   };
   return {signer: signer as unknown as JsonRpcSigner, sent};
@@ -43,6 +47,56 @@ describe("toTxSigner", () => {
 
     await expect(toTxSigner(signer, 31_337n).sendTransaction(REQUEST)).rejects.toMatchObject({
       code: "WrongChain",
+    });
+  });
+
+  it("accepts a response whose chain id matches the deployment chain", async () => {
+    const {signer} = fakeSigner(97n);
+
+    await expect(toTxSigner(signer, 97n).sendTransaction(REQUEST)).resolves.toEqual({hash: HASH, nonce: 7});
+  });
+
+  // Field-found on chain 97: MetaMask's default BSC-testnet RPC is a bnbchain data seed, whose
+  // `eth_getTransactionByHash` omits `chainId`, and ethers' formatter turns that into `null`. The old guard
+  // read null as "another chain" and told the operator nothing was sent while the transaction was mining.
+  it("proceeds when the wallet's node did not report a chain id at all", async () => {
+    const {signer} = fakeSigner(null);
+
+    await expect(toTxSigner(signer, 97n).sendTransaction(REQUEST)).resolves.toEqual({hash: HASH, nonce: 7});
+  });
+
+  it("proceeds when the response omits chainId entirely", async () => {
+    const signer = {
+      estimateGas: () => Promise.resolve(100_000n),
+      sendTransaction: () => Promise.resolve({hash: HASH, nonce: 7}),
+    } as unknown as JsonRpcSigner;
+
+    await expect(toTxSigner(signer, 97n).sendTransaction(REQUEST)).resolves.toEqual({hash: HASH, nonce: 7});
+  });
+
+  it("falls back to the legacy chain id in the signature when the node omitted the field", async () => {
+    const {signer} = fakeSigner(null, {legacyChainId: 56n});
+
+    await expect(toTxSigner(signer, 97n).sendTransaction(REQUEST)).rejects.toMatchObject({
+      code: "WrongChain",
+      sendTransactionHash: HASH,
+    });
+  });
+
+  it("keeps the hash on a positively different chain so the funds effect is not 'Nothing sent'", async () => {
+    const {signer} = fakeSigner(56n);
+
+    const error = await toTxSigner(signer, 97n)
+      .sendTransaction(REQUEST)
+      .then(
+        () => null,
+        (thrown: unknown) => thrown as WalletError,
+      );
+
+    expect(error).toMatchObject({code: "WrongChain", sendTransactionHash: HASH});
+    expect(error?.message).toContain("chain 56");
+    expect(wrongChainWithHashFailure(error as WalletError)).toMatchObject({
+      funds: "Unknown until receipt",
     });
   });
 });

@@ -373,6 +373,29 @@ describe("runWrite", () => {
     expect(stored).toMatchObject({hash: HASH, nonce: null, account: ACCOUNT});
   });
 
+  it("never says 'Nothing sent' for a WrongChain raised after the hash exists", async () => {
+    const deployment = await verified();
+    const prepared = prepareDepositNative(deployment, 1_000n);
+    const {runtime} = makeRuntime(
+      {},
+      {
+        sendError: new WalletError(
+          "WrongChain",
+          "This action was prepared for chain 97, but your wallet signed it for chain 56.",
+          {sendTransactionHash: HASH},
+        ),
+      },
+    );
+
+    const state = await runWrite(prepared, {account: ACCOUNT, label: "Deposit"}, runtime, () => undefined);
+
+    expect(state.hash).toBe(HASH);
+    expect(state.failure?.funds).toBe("Unknown until receipt");
+    expect(state.failure?.funds).not.toBe(catalogEntryFor("WrongChain").funds);
+    expect(state.failure?.message).toContain("chain 56");
+    expect(state.steps.find((entry) => entry.name === "submitted")?.hash).toBe(HASH);
+  });
+
   it("backs the receipt poll off exponentially to the ceiling", async () => {
     const deployment = await verified();
     const prepared = prepareDepositNative(deployment, 1_000n);

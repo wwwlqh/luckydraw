@@ -143,6 +143,25 @@ export function walletUnreachableWithHashFailure(error: WalletError): TxFailure 
   return {...failureFromWalletError(error), catalogKey: null, message: en.tx.walletUnreachableWithHash};
 }
 
+/**
+ * The wrong-chain row for the one case where a hash is already known: the wallet accepted the request's
+ * `chainId`, signed on another chain anyway, and told us so only after broadcasting.
+ *
+ * The catalog `WrongChain` row says "Nothing sent", which is right for the §9.2 network guard that fires
+ * before the wallet is ever opened and wrong here: a hash exists, so §9.6 requires "Unknown until receipt".
+ * The message stays the wallet layer's, because only it knows which two chain ids to name.
+ */
+export function wrongChainWithHashFailure(error: WalletError): TxFailure {
+  return {
+    catalogKey: null,
+    message: error.message,
+    funds: "Unknown until receipt",
+    nextAction: "Check the transaction by its hash on that chain before sending anything again",
+    selector: null,
+    data: null,
+  };
+}
+
 /** The `NonceOrReplacement` row: the outcome is unknown until a receipt says otherwise (SPEC §9.6). */
 export function nonceOrReplacementFailure(): TxFailure {
   return fromKey("NonceOrReplacement", {});

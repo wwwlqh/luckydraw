@@ -32,6 +32,7 @@ import {
   type RevertParamFormatter,
   unknownRevertFailure,
   walletUnreachableWithHashFailure,
+  wrongChainWithHashFailure,
 } from "./failure.ts";
 import {clearIntent, clearIntentFor, type IntentStorage, type PendingIntent, saveIntent} from "./intent.ts";
 import {
@@ -98,6 +99,9 @@ function withHeadroom(estimate: bigint): bigint {
  */
 export function broadcastHashOf(error: unknown): string | null {
   if (error === null || typeof error !== "object") return null;
+  // The adapters raise their own post-broadcast failures (a wallet node that named a different chain) and
+  // carry the hash on the `WalletError` itself rather than in ethers' error envelope.
+  if (error instanceof WalletError && error.sendTransactionHash !== null) return error.sendTransactionHash;
   const info = (error as {info?: unknown}).info;
   if (info === null || typeof info !== "object") return null;
   const hash = (info as {sendTransactionHash?: unknown}).sendTransactionHash;
@@ -458,11 +462,12 @@ export async function runWrite(
     const broadcast = phase === "walletUnreachable" ? broadcastHashOf(error) : null;
     if (broadcast !== null) {
       saveIntent(runtime.storage, intentFor(broadcast, null));
-      state = step(
-        {...state, phase, hash: broadcast, failure: walletUnreachableWithHashFailure(walletError)},
-        "submitted",
-        runtime.now(),
-      );
+      // Whatever went wrong, a hash exists, so neither row may say "Nothing sent" (SPEC §9.6).
+      const failure =
+        walletError.code === "WrongChain"
+          ? wrongChainWithHashFailure(walletError)
+          : walletUnreachableWithHashFailure(walletError);
+      state = step({...state, phase, hash: broadcast, failure}, "submitted", runtime.now());
       state = {
         ...state,
         steps: state.steps.map((entry) => (entry.name === "submitted" ? {...entry, hash: broadcast} : entry)),
