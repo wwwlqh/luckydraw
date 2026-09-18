@@ -1,6 +1,6 @@
 {
   "spec": "v8",
-  "checkedAtUtc": "2026-09-18T04:42:46.210153+00:00",
+  "checkedAtUtc": "2026-09-18T07:18:06.562896+00:00",
   "referenceResult": "PASS",
   "referenceAssertions": 216117,
   "referenceSeed": 20260911,
@@ -16,7 +16,7 @@
   "documentResult": "PASS",
   "sections": 17,
   "propertyIds": 15,
-  "sourceSha256": "a7ce4066b1da8639d73687c66f5fe4d7e36d290b362c7ea359fdcda03c1421af",
+  "sourceSha256": "85b57d23d2a334ccce3553ba6df29b070ca33a1d529d1a28a182ae416c7ae079",
   "referenceSha256": "c7c89377b98edcd8100239f4dfd6a59928de4cdaa021d0fb188c02455cb3907a",
   "limitations": "Math reference and document validation only. Contracts, UI, live VRF, security audit and operational checks have not been implemented or run."
 }
