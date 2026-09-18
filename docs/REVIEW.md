@@ -579,3 +579,109 @@ with nothing due.
 
 The Draw on chain 97 is untouched; no view was added and no deployed contract changed.
 
+## Slither triage on the real tree (2026-09-18)
+
+Wave 8 item 2. The input is the **CI run's own artifact**, not a new local run: `gh run download 35298031260 -n
+slither-report` gives `slither.log` and `slither-report.json` from the Ubuntu job (Slither 0.11.6, solc 0.8.28,
+`contracts/slither.config.json`, `filter_paths` dropping `lib/`, `test/` and `script/`, no detector excluded).
+The log carries no `ERROR:` line of any kind and ends `. analyzed (25 contracts with 102 detectors), 35 result(s)
+found`: **0 High, 6 Medium, 14 Low, 15 Informational**, all against the post-ADR-036 seven-kind source. This
+retires both stale triages: the 2026-09-16 scratch alias-free copy and its 8 Medium / 15 Low. **Nothing was
+fixed, because nothing needed fixing: no finding survived contact with the code as a defect.** No contract
+source, no `slither.config.json` key and no detector exclusion changed in this pass, so there is no regression
+test to add; the regression guard that matters here is the CI step that fails on `^ERROR:ContractSolcParsing`,
+which stays.
+
+Every finding was reproduced in the source before it was classified, per `contracts/README.md`. One line each.
+
+**Medium (6).**
+
+1. `reentrancy-no-eth`, `LuckyDraw.ensureCurrent` (`src/LuckyDraw.sol#657-666`): `_current[poolId][kind]` written
+   at #665 after `_openRound` calls `VAULT.registerRound` at #962, cross-function target `getCurrent` —
+   **false positive** (shared reason below; `getCurrent` is a `view`).
+2. `reentrancy-no-eth`, `LuckyDraw.buy` (`#409-461`): the eleven `_rounds` fields the successor round writes in
+   `_advanceCurrent` (#950-960) after `VAULT.lockSeed` (#1056), `VAULT.lock` (#437), `VAULT.closeEscrow` (#996)
+   and `VAULT.registerRound` (#962); cross-function targets `_fulfillRandomWords`, `_requireRound`, `quoteBuy` —
+   **false positive**.
+3. `reentrancy-no-eth`, `LuckyDraw.closeRound` (`#515-556`): the same successor-round writes after
+   `VAULT.closeEscrow` (#996), `VAULT.release` (#551) and `VAULT.registerRound` (#962) — **false positive**.
+4. `reentrancy-no-eth`, `LuckyDraw.buy` (`#409-461`): the `_appendEntry` writes at #1070-1075 (`grossTotal`,
+   `feeReserved`, `prizePot`, `playerCount`, `grossByUser`, `ranges`) after `VAULT.lockSeed` (#1056) —
+   **false positive**.
+5. `uninitialized-local`, `LuckyDraw.closeRound(uint256).refunding` (`#526`) — **false positive**.
+6. `uninitialized-local`, `LuckyDraw.closeRound(uint256).refundReason` (`#525`) — **false positive**.
+
+*Why findings 1 to 4 are false, about this code and not about the detector in general.* Every external call the
+four cite is to `VAULT`, the single `ILuckyVault public immutable VAULT` fixed in the constructor at
+`src/LuckyDraw.sol#158` and #230, and the five methods named — `registerRound` (`LuckyVault.sol#276`), `lock`
+(#297), `lockSeed` (#313), `closeEscrow` (#328) and `release` (#345) — are each `nonReentrant onlyDraw` and were
+read line by line for this triage: they write storage, emit and revert, and **make no external call of any kind**.
+The Vault's only outbound interactions are the native `.call` in `withdraw` and the `SafeERC20` transfers in
+`deposit`/`withdraw`, and none of those is in these call graphs. There is no untrusted code in the path to hand
+control to, so the "state written after the call" cannot be observed by anyone. Independently, the guard is closed
+anyway: every state-mutating external entry point of the Draw carries `nonReentrant` — re-checked one by one for
+this run, `addPool` (#253-258), `setNextPricing`, `setFeeAccount`, `setSeedAccount`, `setSeedAmount`,
+`setTargetUsd`, `setPoolEnabled`, `setBuysPaused`, `setPoolBuysPaused`, `seedRound`, `buy` (#409-412),
+`closeRound`, `requestDraw`, `expireUnrequested`, `settle`, `claimRefund` and `ensureCurrent` — and so does
+`_fulfillRandomWords` (#676). Of the four cross-function targets Slither names, `getCurrent` (#776) and `quoteBuy`
+(#845) are `view`, `_requireRound` (#1130) is `private view`, and `_fulfillRandomWords` is unreachable while the
+guard is held. `rawFulfillRandomWords` in `ImmutableVRFConsumer` is deliberately unguarded so a VRF delivery can
+never revert on the guard, and it delegates into the guarded `_fulfillRandomWords`; a callback arriving during
+`_requestRandomWords` finds no `_byRequest` entry — written only after that call returns — and emits
+`CallbackIgnored(UnknownRequest)`.
+
+*Why findings 5 and 6 are false.* `refunding` and `refundReason` are declared at `#525-526` and read only under
+`if (refunding)` at #541 and #543. `refunding` is set `true` in exactly the two branches that also assign
+`refundReason` (`InsufficientPlayers` at #531-533, `RequestDeadlineExpired` at #537-539). Solidity
+zero-initialises both, and the zero `RefundReason` is never written to storage on a path where `refunding` is
+false.
+
+**Low (14).**
+
+- `timestamp` x9 (`buy`, `closeRound`, `requestDraw`, `expireUnrequested`, `quoteBuy`, `_seedStatus`,
+  `LuckyVault.registerRound`, `LuckyVault._requireLockable`, `settle`) — **accepted, owner: the product design,
+  unchanged.** SPEC §6.1 cutoffs are UTC wall-clock instants and the §6.2 windows are timestamp windows, so these
+  comparisons are the specification. A validator moving a timestamp by seconds buys at most one further block of
+  entries before a cutoff and cannot touch the outcome, which comes from VRF words stored after the close over
+  ranges frozen at the close. Two of the nine are detector noise: under `settle` the comparisons listed are
+  `prize != 0` and `fee != 0`. What would change it: a rule that made a money outcome depend on a timestamp.
+- `missing-zero-check` x2 (`setFeeAccount#301`, `setSeedAccount#312`) — **false positive.** Both call
+  `_requirePayable(account)` on the first line, which reverts `InvalidRecipient` for `address(0)`, for the Vault
+  and for the Draw itself; the detector does not follow private helpers.
+- `reentrancy-benign` x2 (`buy`, `closeRound`, the `_current[poolId][kind]` successor pointers) — **false
+  positive**, for the reason given for findings 1 to 4.
+- `calls-loop` x1 (`_openRound` at `#938-977`, reached from `addPool`) — **false positive.** The loop is
+  `for (i = 0; i < KIND_COUNT; ++i)` at #280-282: exactly seven iterations, a compile-time constant since
+  ADR 036, in an `onlyOwner nonReentrant` function that runs once per pool. The detector's concern is an
+  unbounded loop whose external call can be made to fail; there is no attacker-controlled bound here and the
+  callee is the immutable Vault.
+
+**Informational (15).**
+
+- `naming-convention` x8 — **accepted, cosmetic.** Six are the Draw's `immutable`s in SCREAMING_SNAKE_CASE, which
+  is exactly what `forge lint`'s `screaming-snake-case-immutable` (in CI) requires and what Slither dislikes; the
+  other two are `IVRFCoordinatorV2_5Views` and `s_provingKeys(bytes32)`, whose name must match the deployed
+  coordinator's getter exactly.
+- `unindexed-event-address` x4 (`FeeAccountSet`, `SeedAccountSet`, `BuysPausedSet`, `DepositsPausedSet`) —
+  **accepted and still open, owner: the lead, post-MVP indexer wave.** Indexing `actor` is an ABI change to
+  events read by address and topic0, and the actor is always the owner Safe. What would change it: an indexer or
+  alerting rule that filters administrative actions by actor.
+- `costly-loop` x1 (`roundId = ++roundCount` inside `_openRound`, reached from `addPool`) — **accepted, owner:
+  contracts.** Same seven-iteration constant loop; the storage increment is the round identifier itself, and
+  ADR 036 is the decision that made it seven. The cost is one owner transaction per pool.
+- `cyclomatic-complexity` x1 (`quoteBuy`, 14) — **accepted, owner: contracts.** `quoteBuy` mirrors `buy` branch
+  for branch on purpose; the seventeen-knob differential fuzz between them and the client's 40-row differential
+  walk both depend on that shape. Revisit only if `buy` is restructured.
+- `low-level-calls` x1 (`LuckyVault.withdraw`) — **false positive.** `.call{value: amount}("")` is the correct
+  way to send BNB, the result is checked (`if (!ok) revert TransferFailed()`), the caller is debited first, the
+  function is `nonReentrant` and the recipient is always `msg.sender` (V4).
+
+With that, §12.1's "Slither triage with no untriaged medium-or-higher finding" is met: 0 High, and all 6 Medium
+classified as false positives with the reason each detector is wrong about this code. `continue-on-error` in the
+`slither` CI job and `fail_on: none` in `slither.config.json` can now come off together; they are left as they
+are in this commit so that flip stays one reviewable change rather than a side effect of a documentation pass.
+
+What this run still does not cover, unchanged from the 2026-09-16 statement: only `src/` was analysed, `lib/`,
+`script/` and `test/` are out of scope, and a static analyser finds none of the classes this product's risk lives
+in — money conservation, schedule arithmetic, selection fairness, VRF lifecycle races — which are the unit,
+vector, integration, D7 progress, scale and stateful invariant suites' job. It is not an audit.
