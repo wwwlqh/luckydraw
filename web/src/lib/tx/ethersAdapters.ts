@@ -13,8 +13,12 @@ import type {TxRequest, TxSignerLike, TxWatcherLike} from "./types.ts";
  * The chain is checked twice before this point — the write gate on React state, and `useSigner`'s own live
  * `eth_chainId` — but both are checks, and a wallet can switch network in the moment between the last check
  * and the prompt. A request with no `chainId` is signed for whatever chain the wallet is on *then*; a request
- * that names one is refused by the wallet instead (SPEC §9.2 network guard, §12 chain-id assertion). The
- * response is checked too, for a wallet that accepts the field and signs on another chain anyway.
+ * that names one carries the chain into the prompt, because ethers 6.17's `JsonRpcSigner.sendTransaction`
+ * passes the field straight through to `eth_sendTransaction` without asserting on it itself. Enforcement is
+ * therefore the wallet's, not ethers' and not this app's, and wallets differ in whether they refuse a
+ * mismatch or sign it anyway. The guard that matters is the deployment-chain watcher (SPEC §9.2 network
+ * guard, §12 chain-id assertion); the response is checked too, for a wallet that took the field and signed
+ * on another chain regardless.
  */
 /**
  * The chain the wallet's node reported for a broadcast transaction, or `null` when it did not report one.

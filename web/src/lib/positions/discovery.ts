@@ -38,6 +38,7 @@ import {
   drawEventTopics,
   type Hex32,
   providerErrorText,
+  prunedEvidence,
   type RawLog,
   rateLimitDelayMs,
 } from "@luckydraw/client";
@@ -60,6 +61,7 @@ export const MAX_RATE_LIMIT_RETRIES = 6;
 export {
   classifyProviderError,
   type ProviderErrorKind,
+  prunedEvidence,
   RATE_LIMIT_BACKOFF_MAX_MS,
   RATE_LIMIT_BACKOFF_MS,
   rateLimitDelayMs,
@@ -94,9 +96,10 @@ export type ScanProgress = {
   /**
    * The lowest block this RPC still serves logs for, or null when it served every window it was asked.
    *
-   * Non-null means the node refused one or more windows as pruned, so no entry below this block can be seen
-   * through this endpoint — not that no entry exists there. It is the height the surface labels; it is never
-   * a reason to call the list complete.
+   * Non-null means the node refused a *prefix* of the span as pruned, so no entry below this block can be
+   * seen through this endpoint — not that no entry exists there. It is the height the surface labels; it is
+   * never a reason to call the list complete. Only an unbroken run of refusals from `fromBlock` raises it:
+   * once a window has been served, a refusal above it is a failure and stops the scan instead.
    */
   historyUnavailableBelow: bigint | null;
 };
@@ -250,6 +253,11 @@ export async function scanEntryRounds(options: ScanOptions): Promise<ScanResult>
   // The highest "everything below here is gone" the node has told us. Monotonic: windows are read in
   // ascending order, so a later refusal always names a higher boundary than an earlier one.
   let historyUnavailableBelow: bigint | null = null;
+  // Has any window actually been answered yet? Pruning is a *prefix* of the span: a node drops the oldest
+  // blocks, so the windows it refuses are the ones before the first it serves. Once a window has come back,
+  // a later "pruned"-looking refusal cannot be pruning — the node is serving blocks above it — so it is
+  // handled as an unknown failure and made loud rather than recorded as a boundary under served history.
+  let served = false;
 
   const stop = (error: Error | null): ScanResult => ({
     scannedTo,
@@ -262,6 +270,10 @@ export async function scanEntryRounds(options: ScanOptions): Promise<ScanResult>
   while (cursor <= toBlock) {
     if (options.cancelled?.() === true) return stop(null);
     let end = cursor + window - 1n > toBlock ? toBlock : cursor + window - 1n;
+    // The window this range started at. A wording-only pruning verdict is only believed after halving down
+    // to the floor, and that halving is evidence about *this* range, not a lasting property of the node, so
+    // the next range starts wide again instead of crawling the rest of the span 64 blocks at a time.
+    const windowAtRangeStart = window;
 
     let logs: readonly RawLog[] | null = null;
     let halvings = 0;
@@ -281,14 +293,26 @@ export async function scanEntryRounds(options: ScanOptions): Promise<ScanResult>
         // start *must* move: the node has dropped these blocks, so neither a narrower window nor a wait can
         // produce them, and both would only spend budget that the rest of the span needs.
         const kind = classifyProviderError(error);
-        if (kind === "pruned") {
+        // `pruned` is the only verdict that moves the cursor over blocks nobody read, so it is the only one
+        // that can lose entries while still reporting `complete`. It is therefore believed under two
+        // conditions, both necessary:
+        //
+        //   - nothing has been served yet. Pruning is a prefix; a refusal above a window the node answered is
+        //     something else wearing the same words, and is handled below as an unknown failure;
+        //   - the node either named a pruning code, or the wording survived halving to `MIN_LOG_WINDOW`. A
+        //     range cap does not: it is answered by a narrower window, and a scan that took the first
+        //     "older than" sentence at face value stepped over ranges the node would have served.
+        if (kind === "pruned" && !served && (prunedEvidence(error) === "code" || window <= MIN_LOG_WINDOW)) {
           // Everything up to and including `end` is unreachable through this RPC, so the first block it can
-          // still serve is `end + 1`. The window is left alone: the next one is a normal read, and it will
-          // usually succeed, because the pruning boundary is a height and not a property of this query.
+          // still serve is `end + 1`. Only what was actually refused is claimed: if this verdict took a
+          // halving to reach, `end` is the narrowed end, not the one the range started with.
           const boundary = end + 1n;
           if (historyUnavailableBelow === null || boundary > historyUnavailableBelow) {
             historyUnavailableBelow = boundary;
           }
+          // The pruning boundary is a height, not a property of this query, so the next range is a normal
+          // read at the width this one started with.
+          window = windowAtRangeStart;
           // An empty page, not a failure: the loop below adds no round ids, advances the cursor past `end`
           // and reports progress, so the newest history is still read.
           logs = [];
@@ -322,6 +346,10 @@ export async function scanEntryRounds(options: ScanOptions): Promise<ScanResult>
         end = cursor + window - 1n > toBlock ? toBlock : cursor + window - 1n;
         continue;
       }
+      // The node answered this range in full. From here on nothing below `end` can be pruned, because the
+      // node is serving blocks above it; `served` is what makes a later pruning verdict loud instead of
+      // silent.
+      served = true;
       logs = page;
     }
 

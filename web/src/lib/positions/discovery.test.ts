@@ -14,6 +14,7 @@ import {
   LogScanError,
   LogScanRateLimitError,
   MAX_RATE_LIMIT_RETRIES,
+  MIN_LOG_WINDOW,
   RATE_LIMIT_BACKOFF_MAX_MS,
   rateLimitDelayMs,
   scanEntryRounds,
@@ -323,6 +324,105 @@ describe("scanEntryRounds", () => {
     });
 
     expect(seen).toEqual([110n, 110n]);
+  });
+
+  // The bug this guards, reproduced by the 2026-09-18 review: a provider that caps the range at 5 blocks and
+  // words the cap with "older than". Classified as pruned, that sentence made the scan step over every
+  // window it could have read by halving, so a real entry at block 102 vanished and the result still said
+  // `complete: true`. A range cap is answered by a narrower window and must never raise a boundary.
+  it("halves a range cap whose sentence says 'older than' instead of calling it pruned", async () => {
+    const manifest = testManifest();
+    const draw = manifest.contracts.draw.address;
+    const provider: LogProvider = {
+      getLogs: (filter) => {
+        const from = BigInt(filter.fromBlock);
+        const to = BigInt(filter.toBlock);
+        if (to - from + 1n > 100n) {
+          return Promise.reject({
+            code: -32000,
+            message: "block range too large: cannot query logs older than 100 blocks",
+          });
+        }
+        return Promise.resolve(from <= 99_102n && 99_102n <= to ? [entryLog(draw, 7n, ME, 99_102, 0)] : []);
+      },
+    };
+
+    const result = await scanEntryRounds({
+      provider,
+      manifest,
+      account: ME,
+      fromBlock: 99_000n,
+      toBlock: 99_999n,
+      windowBlocks: 2_000n,
+    });
+
+    expect(result.roundIds).toEqual([7n]);
+    expect(result.historyUnavailableBelow).toBeNull();
+    expect(result.complete).toBe(true);
+    expect(result.error).toBeNull();
+  });
+
+  // A pruning verdict that rests on wording alone is a guess, and the guess is only acted on once a range
+  // cap has been ruled out the only way it can be: by shrinking the window to the floor and being refused
+  // there too. A genuinely pruned range refuses identically at 64 blocks; a range cap does not.
+  it("believes a wording-only pruning verdict only after halving to the floor", async () => {
+    const manifest = testManifest();
+    const spans: bigint[] = [];
+    const provider: LogProvider = {
+      getLogs: (filter) => {
+        const from = BigInt(filter.fromBlock);
+        const to = BigInt(filter.toBlock);
+        if (from < 99_064n) {
+          spans.push(to - from + 1n);
+          return Promise.reject(new Error("logs have been pruned for this range"));
+        }
+        return Promise.resolve([]);
+      },
+    };
+
+    const result = await scanEntryRounds({
+      provider,
+      manifest,
+      account: ME,
+      fromBlock: 99_000n,
+      toBlock: 100_999n,
+      windowBlocks: 2_000n,
+    });
+
+    // 2,000 blocks halved down to the 64-block floor before the sentence was taken at its word.
+    expect(spans).toEqual([2_000n, 1_000n, 500n, 250n, 125n, MIN_LOG_WINDOW]);
+    // Only what was actually refused is claimed: the narrowed window ended at 99,063.
+    expect(result.historyUnavailableBelow).toBe(99_000n + MIN_LOG_WINDOW);
+    // And the window is wide again for the next range, so the rest of the span is not crawled at 64 blocks.
+    expect(result.complete).toBe(true);
+  });
+
+  // Pruning is a prefix of the span. A node that has already served a window is serving blocks above the
+  // one it now refuses, so whatever that refusal is, it is not "these blocks are gone" — and answering it
+  // by stepping over the range would punch a hole in the middle of a history the page calls readable.
+  it("refuses to record a pruning boundary under a window that was already served", async () => {
+    const manifest = testManifest();
+    const provider: LogProvider = {
+      getLogs: (filter) =>
+        BigInt(filter.fromBlock) < 110n
+          ? Promise.resolve([])
+          : Promise.reject({code: -32701, message: "History has been pruned for this block."}),
+    };
+
+    const result = await scanEntryRounds({
+      provider,
+      manifest,
+      account: ME,
+      fromBlock: 100n,
+      toBlock: 129n,
+      windowBlocks: 10n,
+    });
+
+    expect(result.historyUnavailableBelow).toBeNull();
+    expect(result.complete).toBe(false);
+    expect(result.error).not.toBeNull();
+    // The scan kept what it read below the failure and stopped there rather than walking past it.
+    expect(result.scannedTo).toBe(109n);
   });
 
   it("leaves the boundary null when every window is served", async () => {

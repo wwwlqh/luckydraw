@@ -5,7 +5,12 @@
 
 import assert from "node:assert/strict";
 import test from "node:test";
-import {classifyProviderError, RATE_LIMIT_BACKOFF_MAX_MS, rateLimitDelayMs} from "./providerError.ts";
+import {
+  classifyProviderError,
+  prunedEvidence,
+  RATE_LIMIT_BACKOFF_MAX_MS,
+  rateLimitDelayMs,
+} from "./providerError.ts";
 
 test("a bare JSON-RPC -32005 is a rate limit, at any depth ethers wraps it", () => {
   assert.strictEqual(classifyProviderError({code: -32005, message: "limit exceeded"}), "rateLimit");
@@ -38,28 +43,64 @@ test("a range refusal is a range cap even when it says 'limit exceeded'", () => 
 });
 
 test("publicnode's -32701 is pruned history, whatever the sentence around it says", () => {
-  // The shape measured against https://bsc-testnet-rpc.publicnode.com on 2026-09-18, for any range below
-  // about block 131,577,900.
+  // The exact body `https://bsc-testnet-rpc.publicnode.com` returned for `eth_getLogs` over any range below
+  // its rolling retention height, measured 2026-09-18 (that day the height was about block 131,577,900).
+  const publicnode = {
+    code: -32701,
+    message:
+      "History has been pruned for this block. To remove restrictions, order a dedicated full node here: " +
+      "https://www.allnodes.com/bsc-testnet/host",
+  };
+  assert.strictEqual(classifyProviderError(publicnode), "pruned");
   assert.strictEqual(
-    classifyProviderError({code: -32701, message: "requested block is before the earliest available block"}),
-    "pruned",
+    prunedEvidence(publicnode),
+    "code",
+    "the node named the code, so nothing else is needed",
   );
   assert.strictEqual(
     classifyProviderError(
-      Object.assign(new Error("could not coalesce error"), {
-        info: {error: {code: -32701, message: "history unavailable for the requested range"}},
-      }),
+      // The shape ethers produces around it: its own message on top, the node's body on `info`.
+      Object.assign(new Error("could not coalesce error"), {info: {error: publicnode}}),
     ),
     "pruned",
   );
-  // The code wins even when the node also mentions the block range, which a halving would otherwise chase.
+  // Constructed, not measured: the point is that the code decides even when the sentence reads like a range
+  // cap, which is exactly the sentence a halving would otherwise chase.
   assert.strictEqual(
     classifyProviderError({code: -32701, message: "block range too large for pruned history"}),
     "pruned",
   );
 });
 
-test("the pruning wordings are pruned without a code, and do not steal a plain range cap", () => {
+test("a pruning wording never steals a range cap or a rate limit", () => {
+  // The three probes from the 2026-09-18 review of the pruned-log handling. Each is a refusal that is NOT
+  // about pruning but contains a pruning wording, and reading any of them as pruned makes the web scan step
+  // over blocks the node would have served while still reporting a complete history.
+  assert.strictEqual(
+    // A provider capping the range at 5 blocks. "older than" here counts blocks, not age.
+    classifyProviderError({
+      code: -32000,
+      message: "block range too large: cannot query logs older than 5 blocks",
+    }),
+    "rangeCap",
+  );
+  assert.strictEqual(
+    classifyProviderError({code: 429, message: "history unavailable, please retry"}),
+    "rateLimit",
+  );
+  assert.strictEqual(
+    classifyProviderError({
+      code: -32600,
+      message: "eth_getLogs is limited to 3000 blocks; query older than the limit",
+    }),
+    "rangeCap",
+  );
+});
+
+test("the pruning wordings are pruned without a code, but only as wording", () => {
+  // Constructed sentences, not transcripts: no node in this repo's evidence produced them. They stand for
+  // the shapes a node might use when it has no dedicated code, and `prunedEvidence` marks every one of them
+  // as wording-only so a caller can demand corroboration before acting.
   for (const message of [
     "logs have been pruned for this range",
     "history is not available before block 131577900",
@@ -67,19 +108,32 @@ test("the pruning wordings are pruned without a code, and do not steal a plain r
     "blocks older than 128 are not retained by this node",
   ]) {
     assert.strictEqual(classifyProviderError(new Error(message)), "pruned", message);
+    assert.strictEqual(prunedEvidence(new Error(message)), "text", message);
   }
   // Regression: an ordinary range cap and an ordinary rate limit must not drift into the new kind.
   assert.strictEqual(classifyProviderError({code: -32000, message: "block range is too large"}), "rangeCap");
   assert.strictEqual(classifyProviderError({code: -32005, message: "limit exceeded"}), "rateLimit");
+  assert.strictEqual(prunedEvidence({code: -32000, message: "block range is too large"}), null);
 });
 
-test("drpc's free-plan refusal of every eth_getLogs is unknown, not pruned", () => {
-  // Measured 2026-09-18: drpc answers JSON-RPC code 3 for eth_getLogs on the free plan. Nothing about it
-  // says the blocks are gone, so the scan must not record a history boundary from it.
+test("drpc's free-plan refusals are a range cap or unknown, never pruned", () => {
+  // Re-probed 2026-09-18 against https://bsc-testnet.drpc.org with curl, `eth_getLogs` on the chain-97 Draw
+  // 0x25c4…1d41. The earlier note in this repo said code 3; that is not what it answers today. A span of
+  // 102 blocks or more is refused with code 35 and the sentence below — whatever the span actually is, so
+  // the "10000" in it is not the real cap — and a span of 101 blocks or fewer, down to a single block, is
+  // refused with code 19. Either way not one log came back, on any range.
   assert.strictEqual(
-    classifyProviderError({code: 3, message: "method eth_getLogs is not available on your plan"}),
-    "unknown",
+    classifyProviderError({code: 35, message: "ranges over 10000 blocks are not supported on free plan"}),
+    "rangeCap",
   );
+  const temporary = {
+    code: 19,
+    message: "Temporary internal error. Please retry, trace-id: 269e25762d741c0436cbfe521870ad18",
+  };
+  // Nothing in it says the blocks are gone and nothing says this caller is throttled, so the scan must not
+  // record a history boundary from it and must not wait it out as a rate limit: it halves, then reports.
+  assert.strictEqual(classifyProviderError(temporary), "unknown");
+  assert.strictEqual(prunedEvidence(temporary), null);
 });
 
 test("anything else is unknown, so callers keep their previous behaviour", () => {

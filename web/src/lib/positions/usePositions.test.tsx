@@ -192,7 +192,7 @@ describe("a scan that stopped short", () => {
     );
   }
 
-  it("resumes from its cursor on Scan again instead of restarting at the start block", async () => {
+  it("resumes from its cursor when the scan re-runs instead of restarting at the start block", async () => {
     let failing = true;
     const chain = fakeChain({
       blockNumber: 5_000,
@@ -227,9 +227,126 @@ describe("a scan that stopped short", () => {
     await waitFor(() => expect(screen.getByTestId("status").textContent).toBe("ready"));
 
     const resumed = chain.logCalls.slice(before);
-    // Scan again is a resume: the first read after it starts at 2,010, and `startBlock` is never re-read.
+    // `refresh()` is a resume: the first read after it starts at 2,010, and `startBlock` is never re-read.
     expect(resumed[0]?.fromBlock).toBe("0x7da");
     expect(resumed.map((entry) => entry.fromBlock)).not.toContain("0xa");
     expect(screen.getByTestId("scannedTo").textContent).toBe("5000");
+  });
+});
+
+// The pruning boundary is the one thing a cursor carries that a resume can never unlearn: `mergeBoundary`
+// only ever raises it, because a resumed run reads the tail and never revisits the blocks it names. That is
+// right while the endpoint stays the same and wrong the moment the operator points the app at an archive
+// RPC, so the explicit retry is a restart rather than a resume. All three halves are pinned here.
+describe("the pruning boundary across scans", () => {
+  beforeEach(() => clearPositionScanCache());
+
+  /** The pruning height the fake node enforces; the tests move it between scans. */
+  let prunedBelow = 0n;
+
+  function prunedChain(blockNumber: number) {
+    return fakeChain({
+      blockNumber,
+      rounds: {"1": roundFixture(1n)},
+      positions: {"1": positionFixture()},
+      getLogs: (filter) => {
+        if (BigInt(filter.fromBlock) < prunedBelow) {
+          throw {
+            code: -32701,
+            message: "History has been pruned for this block. To remove restrictions, order a dedicated ",
+          };
+        }
+        return [];
+      },
+    });
+  }
+
+  function BoundaryRows() {
+    const positions = usePositions({windowBlocks: 1_000n});
+    return (
+      <>
+        <p data-testid="status">{positions.status}</p>
+        <p data-testid="boundary">{(positions.historyUnavailableBelow ?? -1n).toString()}</p>
+        <p data-testid="scannedTo">{(positions.scan?.scannedTo ?? -1n).toString()}</p>
+        <button type="button" onClick={positions.refresh}>
+          refresh-positions
+        </button>
+        <button type="button" onClick={positions.rescan}>
+          rescan-positions
+        </button>
+      </>
+    );
+  }
+
+  function boundary(): string {
+    return screen.getByTestId("boundary").textContent ?? "";
+  }
+
+  async function mountBoundary(blockNumber: number) {
+    const chain = prunedChain(blockNumber);
+    renderSurface(
+      <>
+        <ConnectButton />
+        <BoundaryRows />
+      </>,
+      chain.base,
+    );
+    await connectTestWallet();
+    await waitFor(() => expect(screen.getByTestId("status").textContent).toBe("ready"));
+    return chain;
+  }
+
+  it("keeps a boundary an earlier run recorded when a later run only reads the tail", async () => {
+    prunedBelow = 2_010n;
+    const chain = await mountBoundary(5_000);
+    expect(boundary()).toBe("2010");
+
+    // Blocks are mined and the page re-renders: a resume, reading only above the cached cursor. Nothing in
+    // that tail can say anything about the pruned prefix, so the label must survive it.
+    chain.node.advance(100);
+    const before = chain.logCalls.length;
+    await act(async () => {
+      screen.getByText("refresh-positions").click();
+    });
+    await waitFor(() => expect(screen.getByTestId("scannedTo").textContent).toBe("5100"));
+
+    expect(chain.logCalls.slice(before).map((entry) => entry.fromBlock)).toEqual(["0x1389"]);
+    expect(boundary()).toBe("2010");
+  });
+
+  it("raises the boundary when the node has pruned further by the next scan", async () => {
+    prunedBelow = 2_010n;
+    const chain = await mountBoundary(5_000);
+    expect(boundary()).toBe("2010");
+
+    // Hours later the rolling retention window has moved past the blocks this scan already read.
+    prunedBelow = 8_000n;
+    chain.node.advance(4_000);
+    await act(async () => {
+      screen.getByText("refresh-positions").click();
+    });
+    await waitFor(() => expect(screen.getByTestId("scannedTo").textContent).toBe("9000"));
+
+    // The resume starts at 5,001 and is refused up to 8,000, so the first block still served is 8,001.
+    expect(boundary()).toBe("8001");
+  });
+
+  it("clears the boundary on an explicit rescan and reads the span again from the start block", async () => {
+    prunedBelow = 2_010n;
+    const chain = await mountBoundary(5_000);
+    expect(boundary()).toBe("2010");
+
+    // The operator switches the deployment to an archive-capable RPC. A resume would never find out; only
+    // the reader's own retry, which drops the cached cursor, can.
+    prunedBelow = 0n;
+    const before = chain.logCalls.length;
+    await act(async () => {
+      screen.getByText("rescan-positions").click();
+    });
+    await waitFor(() => expect(boundary()).toBe("-1"));
+
+    // It starts over at `startBlock`, which is exactly what `refresh()` must never do.
+    expect(chain.logCalls.slice(before)[0]?.fromBlock).toBe("0xa");
+    expect(screen.getByTestId("status").textContent).toBe("ready");
   });
 });

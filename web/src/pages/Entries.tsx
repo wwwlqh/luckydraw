@@ -165,13 +165,16 @@ export function EntriesPage({txRuntime}: EntriesPageProps = {}) {
               funds={scanFailure.funds}
               nextAction={scanFailure.nextAction}
               detail={scanFailure.detail}
-              onRetry={positions.refresh}
+              /* "Scan again" is a restart, not a resume: it drops the memoized cursor and reads the span
+                 from `startBlock`, which is the only way a pruning height learned from one endpoint is
+                 unlearned after the operator switches to another. */
+              onRetry={positions.rescan}
               retryLabel={walletEn.entries.errorRetry}
             />
           ) : null}
 
           {positions.historyUnavailableBelow !== null ? (
-            <div className="notice notice--warning">
+            <div className="notice notice--warning" role="status">
               <p className="notice__title">{walletEn.entries.prunedTitle}</p>
               <p className="small">
                 {fill(walletEn.entries.prunedBody, {
@@ -182,7 +185,7 @@ export function EntriesPage({txRuntime}: EntriesPageProps = {}) {
           ) : null}
 
           {positions.partial && positions.scan !== null ? (
-            <div className="notice notice--info">
+            <div className="notice notice--info" role="status">
               <p className="notice__title">{walletEn.entries.partialTitle}</p>
               <p className="small">{walletEn.entries.partialBody}</p>
               <p className="small muted">

@@ -19,9 +19,16 @@
 // every entry made since (an entry would not appear on `/entries` until the wallet reconnected), and wiping
 // it rescans the whole deployment from `startBlock`, which SPEC §10.1 forbids ("do not rescan genesis or
 // every historical round on each page load").
+//
+// One thing the cursor carries is not recoverable by extending it: `historyUnavailableBelow`, the height an
+// endpoint said it had pruned below. Every later run may only raise it, because a resume never reads those
+// blocks again to find out otherwise — so a single bad endpoint would pin "no history below N" on the
+// account for the rest of the session even after the operator switched the app to an archive RPC. That is
+// what `rescan()` is for, and it is the only thing in this file that starts over at `startBlock`: it drops
+// the account's entry outright. It runs when a reader presses the retry, never on a mount or a claim.
 
 import type {Address, Snapshot} from "@luckydraw/client";
-import {useCallback, useEffect, useMemo, useState} from "react";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {useSnapshot} from "../data/useSnapshot.ts";
 import {useDeployment} from "../deployment/DeploymentProvider.tsx";
 import {useWallet} from "../wallet/WalletProvider.tsx";
@@ -98,7 +105,15 @@ export type PositionsHandle = {
   historyUnavailableBelow: bigint | null;
   scan: ScanState | null;
   error: Error | null;
+  /** Extend the scan from its cursor and re-read the confirmations: a claim, a route change, a poll. */
   refresh: () => void;
+  /**
+   * Throw the memoized scan away and read the whole span again from `startBlock`.
+   *
+   * The retry a reader presses. Only this clears `historyUnavailableBelow`, which is otherwise monotonic
+   * for the life of the account epoch.
+   */
+  rescan: () => void;
 };
 
 const EMPTY_IDS: readonly bigint[] = [];
@@ -116,6 +131,9 @@ export function usePositions(options?: UsePositionsOptions): PositionsHandle {
   const [scan, setScan] = useState<ScanState | null>(null);
   const [scanError, setScanError] = useState<Error | null>(null);
   const [attempt, setAttempt] = useState(0);
+  // Set by `rescan()` only, and consumed by the next run of the effect. A ref rather than state because it
+  // is an instruction to that one run, not a value anything renders.
+  const restartRef = useRef(false);
 
   // One narrow adapter rather than passing the ethers provider straight through: an ethers signature change
   // is then a compile error here instead of a silent behaviour change in the scan.
@@ -158,12 +176,20 @@ export function usePositions(options?: UsePositionsOptions): PositionsHandle {
     for (const existing of [...scanCache.keys()]) {
       if (existing !== key) scanCache.delete(existing);
     }
-    // A cached scan is the base every later run extends, complete or not. `scanEntryRounds` never moves its
-    // cursor past a window it could not read in full, so `scannedTo` is contiguous from `fromBlock` in both
-    // cases: an incomplete scan has a *tail* it never reached, not a hole behind the cursor. Resuming from
-    // the cursor is therefore safe, and it is what makes "Scan again" a resume rather than a restart from
-    // `startBlock` after a rate-limited first window (SPEC §10.1: "do not rescan genesis ... on each page
-    // load"). Only `complete` is not inherited: this run recomputes it.
+    // A cached scan is the base every later run extends, complete or not. The invariant that makes resuming
+    // from `scannedTo` safe is narrow and worth stating exactly: `scanEntryRounds` moves its cursor past a
+    // window either because the node answered it in full, or because the node refused an unbroken prefix of
+    // the span as pruned — so the only hole below the cursor is that recorded prefix, everything below
+    // `historyUnavailableBelow`, and the boundary is carried across runs precisely so the page keeps saying
+    // so. Above it the range is contiguous and read. A run that stopped for any other reason left a *tail*
+    // it never reached, which the next run picks up. Only `complete` is not inherited: this run recomputes
+    // it. An explicit rescan does not come here at all — it drops the entry first, so `base` is null and the
+    // span starts at `startBlock` again (SPEC §10.1: "do not rescan genesis ... on each page load" governs
+    // page loads, not a retry the reader asked for).
+    if (restartRef.current) {
+      restartRef.current = false;
+      scanCache.delete(key);
+    }
     const cached = scanCache.get(key);
     const base = cached ?? null;
     if (base !== null) setScan(base);
@@ -274,6 +300,19 @@ export function usePositions(options?: UsePositionsOptions): PositionsHandle {
     confirmedRefresh();
   }, [confirmedRefresh]);
 
+  // The reader's own "Scan again", which is a different request from the one above: start over at
+  // `startBlock` with nothing inherited. It exists because everything the cached cursor carries is
+  // monotonic, `historyUnavailableBelow` above all — it may only rise, so one endpoint that refused the
+  // early history pins that claim on the account for the rest of the session even after the operator points
+  // the app at an archive RPC. A resume can never unlearn it; only a scan that starts from `startBlock`
+  // again can, so the entry is dropped rather than extended. This is not the page-load rescan SPEC §10.1
+  // rules out: it happens when a reader asks, never on a mount, a route change or a claim.
+  const rescan = useCallback(() => {
+    restartRef.current = true;
+    setAttempt((value) => value + 1);
+    confirmedRefresh();
+  }, [confirmedRefresh]);
+
   return useMemo<PositionsHandle>(() => {
     if (account === null) {
       return {
@@ -285,6 +324,7 @@ export function usePositions(options?: UsePositionsOptions): PositionsHandle {
         scan: null,
         error: null,
         refresh,
+        rescan,
       };
     }
     const partial = scan !== null && !scan.complete;
@@ -307,6 +347,7 @@ export function usePositions(options?: UsePositionsOptions): PositionsHandle {
       scan,
       error,
       refresh,
+      rescan,
     };
-  }, [account, scan, scanError, confirmed, roundIds.length, refresh]);
+  }, [account, scan, scanError, confirmed, roundIds.length, refresh, rescan]);
 }
