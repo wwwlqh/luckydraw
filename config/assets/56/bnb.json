@@ -1,0 +1,53 @@
+{
+  "chainId": 56,
+  "asset": "0x0000000000000000000000000000000000000000",
+  "native": true,
+  "symbol": "BNB",
+  "name": "BNB",
+  "decimals": 18,
+  "isMock": false,
+  "depositsEnabled": true,
+  "exactTransferEvidence": "Native path: the Vault credits exactly msg.value and checks the exact debit on withdrawal, so no token transfer hook can change the amount (SPEC section 3.1). There is no token contract and no issuer in the path at all.",
+  "issuerReview": {
+    "upgradeable": false,
+    "freezeOrBlocklist": false,
+    "mintAuthority": "None reachable from this contract. BNB is the chain's own native coin, not a contract: it has no implementation to upgrade, no owner, no mint or burn entry point a holder's balance can be reached through, and no blacklist. Issuance and burning are protocol-level and are performed by the BNB Smart Chain validator set under consensus rules, which is a property of the chain this deployment already depends on for every transaction, not a party with a key over a holder's balance.",
+    "rebasing": false,
+    "reviewedOn": "2026-09-18",
+    "source": {
+      "url": "https://docs.bnbchain.org/bnb-smart-chain/",
+      "date": "2026-09-18"
+    }
+  },
+  "status": "approved",
+  "source": {
+    "url": "https://docs.bnbchain.org/bnb-smart-chain/",
+    "date": "2026-09-18"
+  },
+  "price": {
+    "feed": "0x0567f2323251f0aab15c8dfb1967e4e8a7d42aee",
+    "feedIsMock": false,
+    "feedDecimals": 8,
+    "baseQuote": "BNB/USD",
+    "heartbeatSeconds": 27,
+    "observedP999IntervalSeconds": 44,
+    "observationWindow": {
+      "fromBlock": 122376299,
+      "toBlock": 122568202,
+      "samples": 2628
+    },
+    "maxPriceAge": 3600,
+    "minAnswer": "1",
+    "maxAnswer": "95780971304118053647396689196894323976171195136475135",
+    "answerBoundsConfirmedAbsent": false,
+    "referenceKind": "ExactToken",
+    "displayLabel": "BNB/USD",
+    "pegAssumption": null,
+    "verifiedOn": "2026-09-18",
+    "source": {
+      "url": "https://reference-data-directory.vercel.app/feeds-bsc-mainnet.json",
+      "date": "2026-09-18"
+    }
+  },
+  "notes": "The reference asset for the chain 56 BNB pool of config/deployments/56/mainnet.plan.json (ADR 040 leaves the ADR 037 Binance-Peg USDT admission deferred, so BNB is the only mainnet asset). Everything below was read read-only on 2026-09-18, with no key and no transaction, against BOTH public endpoints https://bsc-dataseed.bnbchain.org and https://bsc-rpc.publicnode.com; every value agreed byte for byte on the two, which is the two-RPC rule ADR 037 used. FEED: Chainlink BNB/USD proxy 0x0567f2323251f0aab15c8dfb1967e4e8a7d42aee. decimals() 8, description() \"BNB / USD\", version() 6, aggregator() 0xa6e8fee84f9bd528ad71917c9ddbb1fd3214f280, phaseId() 3, 19,072 bytes of proxy code - identical on both endpoints. latestRoundData at read time answered 75497306000 (USD 754.97306000) with updatedAt 1789717293, 26 seconds old when it was read at 1789717319, identical on both endpoints. AGGREGATOR BOUNDS, read on the aggregator the proxy points at rather than assumed: minAnswer() 1 and maxAnswer() 95780971304118053647396689196894323976171195136475135, the same pair on both endpoints and the same maxSubmissionValue the Chainlink feed directory publishes for this feed, so answerBoundsConfirmedAbsent is false because the bounds are present and were read, not because the check was skipped. WHICH PROXY, and why not the other one: the Chainlink feed directory lists two BNB/USD feeds on chain 56 - path \"bnb-usd\" at this address with 8 decimals, and path \"bnb-usd-shared-svr\" at 0xd5d290fe2ae6b55f385ab9c14d2ceb91dd3d9022 with 18 decimals (a Smart Value Recapture variant). PricingConfig.feedDecimals is checked against the feed's own decimals() and the repository's arithmetic and every existing record are on the 8-decimal reference feed, so the 8-decimal proxy is the one recorded; the SVR variant is named here so the choice is visible rather than accidental. DOCUMENTED HEARTBEAT: the directory publishes heartbeat 27 seconds and a 0.1% deviation threshold for this feed, and 27 is recorded as heartbeatSeconds because it is the documented figure. maxPriceAge is max(2 x 27, 3600) = 3600 (ADR 020), and it would be 3600 for any documented heartbeat below 1,800 seconds, so nothing downstream turns on the exact figure. Worth an operator's eye all the same: the measurement below found a p50 interval of 33 seconds, above the 27 the directory documents, so the documented heartbeat is the tighter of the two numbers and the observed behaviour is what maxPriceAge is actually checked against. OBSERVED INTERVAL: measured, not assumed. node scripts/observe_feed.ts --rpc-url <bsc-dataseed.bnbchain.org> --feed 0x0567f2323251f0aab15c8dfb1967e4e8a7d42aee --days 1 --heartbeat 27 --concurrency 8 walked phase 3 aggregator rounds 3438169 to 3440796 and reported p50 33 s, p99 34 s, p99.9 44 s, min 1 s, max 46 s over 2,628 samples in blocks 122376299 to 122568202, answers between USD 720.26701304 and USD 758.20160000, with 0 missing and 0 non-monotonic rounds. p99.9 44 s sits far inside maxPriceAge 3600 s, so the feed is eligible under ADR 020 and rules P6 to P8 are satisfied. WHY THE WINDOW IS ONE DAY AND NOT THE THIRTY OF RUNBOOK SECTION 1.6: the script reads the round history with eth_call pinned to the head block it started from, and neither public endpoint is archive-capable. bsc-dataseed.bnbchain.org serves state for roughly the last 128 blocks - a read at head-100 answers and a read at head-200 fails with \"missing trie node\" - which is about 95 seconds of BSC blocks, and bsc-rpc.publicnode.com refuses any historical block tag with \"Archive requests require a personal token\". A 2-day walk was attempted first and died with \"missing trie node\" at 58 seconds, which is the pinned block ageing out mid-walk and not a gap in the feed. So one day, 2,628 samples, is the largest window a public endpoint can actually deliver for a feed that updates every 33 seconds; it is a real 24-hour window with no missing rounds, not a shortened one. The archive-capable RPC that would allow the 30-day window is itself deferred per ADR 040, and the operator can re-run the same command against a keyed archive endpoint and paste a longer window in without changing anything else. A p99.9 of 44 s has two orders of magnitude of headroom against maxPriceAge, so a longer window would have to find a stall eighty times the observed maximum before the conclusion moved. NO TRANSACTION was sent and no key was used to produce this record."
+}
