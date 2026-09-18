@@ -149,6 +149,14 @@ export const walletEn = {
     partialBody:
       "The history scan is still running, so a round you entered may not be listed yet. Nothing shown is " +
       "wrong; the list only grows.",
+    // SPEC §10.1: partial history is labelled, never served as complete. The free public BSC endpoints keep
+    // only a rolling window of logs, so an account that entered before that window sees this instead of a
+    // silently short list. The node's own refusal text never appears here (SPEC §9.7).
+    prunedTitle: "Older entries cannot be read from this network provider",
+    prunedBody:
+      "This provider no longer keeps the event history below block {block}, so any round entered before " +
+      "then is missing from the list. Everything shown is real; the list is not the whole story. Your funds " +
+      "are unaffected, and an older entry is still visible from the round page if you have its link.",
     errorTitle: "Your entries could not be read",
     errorRetry: "Scan again",
     rowRound: "Round {roundId}",

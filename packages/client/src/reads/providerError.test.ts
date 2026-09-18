@@ -37,6 +37,51 @@ test("a range refusal is a range cap even when it says 'limit exceeded'", () => 
   );
 });
 
+test("publicnode's -32701 is pruned history, whatever the sentence around it says", () => {
+  // The shape measured against https://bsc-testnet-rpc.publicnode.com on 2026-09-18, for any range below
+  // about block 131,577,900.
+  assert.strictEqual(
+    classifyProviderError({code: -32701, message: "requested block is before the earliest available block"}),
+    "pruned",
+  );
+  assert.strictEqual(
+    classifyProviderError(
+      Object.assign(new Error("could not coalesce error"), {
+        info: {error: {code: -32701, message: "history unavailable for the requested range"}},
+      }),
+    ),
+    "pruned",
+  );
+  // The code wins even when the node also mentions the block range, which a halving would otherwise chase.
+  assert.strictEqual(
+    classifyProviderError({code: -32701, message: "block range too large for pruned history"}),
+    "pruned",
+  );
+});
+
+test("the pruning wordings are pruned without a code, and do not steal a plain range cap", () => {
+  for (const message of [
+    "logs have been pruned for this range",
+    "history is not available before block 131577900",
+    "requested range is beyond the archive window",
+    "blocks older than 128 are not retained by this node",
+  ]) {
+    assert.strictEqual(classifyProviderError(new Error(message)), "pruned", message);
+  }
+  // Regression: an ordinary range cap and an ordinary rate limit must not drift into the new kind.
+  assert.strictEqual(classifyProviderError({code: -32000, message: "block range is too large"}), "rangeCap");
+  assert.strictEqual(classifyProviderError({code: -32005, message: "limit exceeded"}), "rateLimit");
+});
+
+test("drpc's free-plan refusal of every eth_getLogs is unknown, not pruned", () => {
+  // Measured 2026-09-18: drpc answers JSON-RPC code 3 for eth_getLogs on the free plan. Nothing about it
+  // says the blocks are gone, so the scan must not record a history boundary from it.
+  assert.strictEqual(
+    classifyProviderError({code: 3, message: "method eth_getLogs is not available on your plan"}),
+    "unknown",
+  );
+});
+
 test("anything else is unknown, so callers keep their previous behaviour", () => {
   assert.strictEqual(classifyProviderError(new Error("connect ECONNREFUSED")), "unknown");
   assert.strictEqual(classifyProviderError(null), "unknown");

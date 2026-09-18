@@ -37,6 +37,13 @@ export type ScanState = {
   scannedTo: bigint;
   complete: boolean;
   roundIds: readonly bigint[];
+  /**
+   * The lowest block this RPC still serves logs for, or null when it served everything it was asked.
+   *
+   * It survives across runs in the cache: a resumed scan reads only the tail, so it would otherwise forget
+   * that the head of the span was never readable and the page would quietly stop saying so.
+   */
+  historyUnavailableBelow: bigint | null;
 };
 
 type CacheEntry = ScanState;
@@ -82,6 +89,13 @@ export type PositionsHandle = {
   snapshot: Snapshot<readonly PositionRow[]> | null;
   /** True while the log scan is still running: the list is correct but incomplete (SPEC §9.6). */
   partial: boolean;
+  /**
+   * Non-null when the RPC has pruned the logs below this block, so no entry older than it can be listed.
+   *
+   * Distinct from `partial`: that one clears when the scan finishes, this one does not, because the history
+   * is missing for good on this endpoint. SPEC §10.1 requires it to be labelled rather than papered over.
+   */
+  historyUnavailableBelow: bigint | null;
   scan: ScanState | null;
   error: Error | null;
   refresh: () => void;
@@ -172,12 +186,21 @@ export function usePositions(options?: UsePositionsOptions): PositionsHandle {
       // incremental scan does not report "3 of 12 blocks" over a deployment of thousands.
       const spanFrom = base?.fromBlock ?? fromBlock;
       const merge = (found: readonly bigint[]): readonly bigint[] => mergeRoundIds(base?.roundIds, found);
+      // A boundary an earlier run learned is kept, and a later run may only raise it: the blocks below it
+      // did not come back.
+      const mergeBoundary = (found: bigint | null): bigint | null => {
+        const previous = base?.historyUnavailableBelow ?? null;
+        if (found === null) return previous;
+        if (previous === null) return found;
+        return found > previous ? found : previous;
+      };
       const initial: ScanState = {
         fromBlock: spanFrom,
         toBlock,
         scannedTo: base === null ? fromBlock : base.scannedTo,
         complete: false,
         roundIds: base?.roundIds ?? [],
+        historyUnavailableBelow: base?.historyUnavailableBelow ?? null,
       };
       setScan(initial);
       const result = await scanEntryRounds({
@@ -196,6 +219,7 @@ export function usePositions(options?: UsePositionsOptions): PositionsHandle {
             scannedTo: progress.scannedTo,
             roundIds: merge(progress.roundIds),
             complete: false,
+            historyUnavailableBelow: mergeBoundary(progress.historyUnavailableBelow),
           });
         },
       });
@@ -207,6 +231,7 @@ export function usePositions(options?: UsePositionsOptions): PositionsHandle {
         scannedTo: base !== null && result.scannedTo < base.scannedTo ? base.scannedTo : result.scannedTo,
         roundIds: merge(result.roundIds),
         complete: result.complete,
+        historyUnavailableBelow: mergeBoundary(result.historyUnavailableBelow),
       };
       // Partial progress is memoized too, so a scan that a rate limit stopped after n blocks resumes at
       // block n+1 on the next mount or on "Scan again" instead of starting over at `startBlock`. The entry
@@ -256,6 +281,7 @@ export function usePositions(options?: UsePositionsOptions): PositionsHandle {
         rows: null,
         snapshot: null,
         partial: false,
+        historyUnavailableBelow: null,
         scan: null,
         error: null,
         refresh,
@@ -277,6 +303,7 @@ export function usePositions(options?: UsePositionsOptions): PositionsHandle {
       rows: scan === null ? null : roundIds.length === 0 ? [] : confirmed.value,
       snapshot: confirmed.snapshot,
       partial,
+      historyUnavailableBelow: scan?.historyUnavailableBelow ?? null,
       scan,
       error,
       refresh,

@@ -9,6 +9,13 @@
 // loud rather than papered over with a spinner, because a user who sees four of their five rounds and no
 // notice would reasonably conclude the fifth is gone.
 //
+// Partial history has two causes and they need different sentences. A scan still running is temporary and
+// the list only grows, so that notice is informational and goes away by itself. A provider that has *pruned*
+// the old logs is permanent on that endpoint: the scan finished, and the missing rounds will never arrive
+// however long the reader waits. The second notice therefore names the block below which nothing can be
+// read and stays put, with no retry offered, because retrying is not the fix — an archive RPC or the indexer
+// is (SPEC §10.1, and the §14 mainnet gate).
+//
 // Everything about which row belongs in which tab is `lib/positions/classify.ts`, which is a pure function of
 // the round and the position and is tested directly against the §6.2 state table.
 
@@ -161,6 +168,17 @@ export function EntriesPage({txRuntime}: EntriesPageProps = {}) {
               onRetry={positions.refresh}
               retryLabel={walletEn.entries.errorRetry}
             />
+          ) : null}
+
+          {positions.historyUnavailableBelow !== null ? (
+            <div className="notice notice--warning">
+              <p className="notice__title">{walletEn.entries.prunedTitle}</p>
+              <p className="small">
+                {fill(walletEn.entries.prunedBody, {
+                  block: positions.historyUnavailableBelow.toString(),
+                })}
+              </p>
+            </div>
           ) : null}
 
           {positions.partial && positions.scan !== null ? (

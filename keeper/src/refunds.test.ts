@@ -305,6 +305,34 @@ test("a page that still fails, or still fills, at one block is a named scan fail
   assert.strictEqual(MAX_LOGS_PER_PAGE, 10_000, "the documented public-RPC result cap");
 });
 
+// The shared classifier grew a `pruned` kind for the web app on 2026-09-18. The keeper does not act on it
+// yet: a partial buyer list would credit some refunds and silently skip others, so a pruned range must stay
+// the loud failure `unknown` already was, and only an archive RPC or the indexer fixes it.
+test("a pruned range is treated exactly like an unknown failure: halve, then fail loudly", async () => {
+  const windows: bigint[] = [];
+  const query: LogQuery = async (range) => {
+    windows.push(range.toBlock - range.fromBlock + 1n);
+    throw Object.assign(new Error("could not coalesce error"), {
+      info: {error: {code: -32701, message: "requested block is before the earliest available block"}},
+    });
+  };
+  await assert.rejects(
+    () =>
+      discoverBuyers({
+        deployment: deployment(),
+        roundId: 7n,
+        fromBlock: 10n,
+        toBlock: 4_009n,
+        window: 2_000n,
+        query,
+      }),
+    LogScanError,
+    "the keeper never advances past a range it could not read",
+  );
+  // It halved rather than waited, which is the `unknown` path and not the `rateLimit` one.
+  assert.ok(windows.length > 1 && windows[1] === 1_000n, `halved the window: ${windows.join(",")}`);
+});
+
 test("the refunded set is per round and forgettable", () => {
   const tracker = new RefundTracker();
   assert.strictEqual(tracker.isRefunded(1n, PLAYER_A), false);

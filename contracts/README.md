@@ -122,9 +122,10 @@ prints `ERROR:ContractSolcParsing: Missing function Variable not found: <Alias>(
 functions from its analysis. The result is not a smaller finding set but a *wrong* one — live state variables are
 reported as never used or constant, and the reentrancy and complexity findings that the same code produces once the
 alias is gone never appear at all. **A run that logs `ERROR:ContractSolcParsing` is not evidence.** The CI job greps
-for that line and fails on it; keep that guard. `src/LuckyDraw.sol` (`BuysPaused as BuysArePaused`) and
-`src/LuckyVault.sol` (`EscrowClosed as EscrowIsClosed`) currently trigger it, and `docs/REVIEW.md` records how the
-2026-09-16 triage was taken on an equivalent alias-free tree.
+for that line and fails on it; keep that guard. No file under `src/` imports a custom error under an alias any more
+(the last two, in `LuckyDraw.sol` and `LuckyVault.sol`, were dropped on 2026-09-18), so the CI run is taken on the
+real tree and is the authoritative one; `docs/REVIEW.md` records the 2026-09-16 triage that a scratch alias-free
+copy had to stand in for. Do not reintroduce an alias: prefer renaming the error in `src/Errors.sol`.
 
 Triage procedure, per finding, recorded in the newest `docs/REVIEW.md` section and nowhere else:
 
@@ -138,8 +139,8 @@ Triage procedure, per finding, recorded in the newest `docs/REVIEW.md` section a
    triage is always preferred.
 4. When the Slither pin moves, re-triage in the same commit. Findings change between versions.
 
-`fail_on` is `none` and the CI job is `continue-on-error` while the parser error above stands. Both come off
-together, before the operator signs `Deploy` for mainnet (SPEC §14).
+`fail_on` is `none` and the CI job is `continue-on-error` until every Medium finding in the triage is fixed or
+accepted with a named owner. Both come off together, before the operator signs `Deploy` for mainnet (SPEC §14).
 
 ## Rules
 

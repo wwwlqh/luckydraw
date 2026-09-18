@@ -478,3 +478,36 @@ Still open. No passing chain-56 build has run. The Slither CI job has not run on
 brief has not been run. Actions are tag-pinned, recorded honestly as `actionsPinnedToCommitSha: false`. The
 keeper has one RPC URL and no failover, so nothing re-checks `eth_chainId` after a failover. The
 `frame-ancestors` gap on GitHub Pages remains.
+
+## Alias-free tree for Slither, and pruned-log handling in the web scan (2026-09-18)
+
+The source diff proposed under "Static analysis (Slither) and Codex cross-check preparation (2026-09-16)" is
+applied. No file under `src/` imports a custom error under an alias any more: `LuckyDraw.sol` imports
+`BuysPaused` and `LuckyVault.sol` imports `EscrowClosed` under their own names, and the five revert sites use
+those names. `test/unit/LuckyVaultEscrow.t.sol` dropped its own local `EscrowClosed as EscrowIsClosed` in the same
+pass, so no alias survives anywhere in `contracts/`. The runtime bytecode is unchanged and was proved rather than
+asserted: `forge inspect LuckyVault deployedBytecode | cast keccak` is
+`0xb75270ba5311c3263d0c0c9076abd412792a4834a1d945472c6464e5a30e3f9b`, byte-identical to the `vault.codeHash` in
+`config/deployments/97/0x25c41f9921e51b120f971e25181c55b1dcaf1d41.json`, before and after the change.
+`LuckyDraw` hashes to `0x66ca11780ccd7db44e2b863feb96899915b3138bc5daef85760eff6af9bfe2ce` before and after, which
+differs from the manifest's `draw.codeHash` only because the artifact carries zeroed immutable placeholders where
+the deployed code carries the constructor's addresses; the before-equals-after comparison is the one that speaks to
+this change, and it holds. Contracts: 359 passed, 2 skipped; `forge fmt --check` clean.
+
+**The CI Slither run on the real tree is now the authoritative one.** The 2026-09-16 triage was taken on a scratch
+alias-free copy because the repository tree could not be parsed; that stand-in is retired. The
+`ERROR:ContractSolcParsing` guard in `.github/workflows/ci.yml` stays, now as a regression guard against
+reintroducing an alias, and `continue-on-error: true` with `fail_on: none` stays until condition (b) alone --
+every Medium finding fixed or accepted with a named owner -- is met. Note that the triage counts themselves are
+still stale under ADR 036, as the wave 7 ACCEPTANCE row records.
+
+Separately, the web entries scan learned that a provider can answer "I no longer have those blocks". Measured on
+2026-09-18: publicnode (`https://bsc-testnet-rpc.publicnode.com`) prunes logs below a rolling height and answers
+`-32701` for ranges below about block 131,577,900, while drpc's free plan refuses every `eth_getLogs` with code
+`3`. The shared classifier in `packages/client/src/reads/providerError.ts` gained a fourth kind, `pruned`, and the
+scan treats it as neither a range cap nor a rate limit: halving and retrying a window the node will never serve is
+wasted budget, so the scan records the height below which history is unavailable on this RPC, advances the cursor
+past the window and keeps reading the newest history. `usePositions` and `/entries` surface that height as a
+labelled partial-history notice from the string catalog, per SPEC 10.1, never as the provider's own words. The
+keeper treats `pruned` like `unknown` for now. SPEC 14 gains the matching mainnet gate: entry history must come
+from an archive-capable RPC or the indexer.

@@ -279,6 +279,49 @@ describe("EntriesPage scan failures", () => {
     expect((view?.detail ?? "").length).toBeLessThanOrEqual(WALLET_TEXT_MAX);
   });
 
+  // publicnode prunes logs below a rolling height (-32701, measured 2026-09-18). That is not a failure the
+  // reader can retry away, and it is not an empty history either: SPEC §10.1 requires the list to be
+  // labelled as partial rather than served as complete.
+  it("labels pruned history with its block, from the catalog and never from the node", async () => {
+    const drawAddress = testManifest().contracts.draw.address;
+    const chain = fakeChain({
+      blockNumber: 5_000,
+      rounds: {"3": roundFixture(3n, {state: State.Settled, winner: ACCOUNT})},
+      positions: {"3": positionFixture()},
+      getLogs: (filter) => {
+        // Everything below block 4,010 is gone from this node; the newest window still answers.
+        if (BigInt(filter.fromBlock) < 4_010n) {
+          throw Object.assign(new Error('could not coalesce error (payload={ "method": "eth_getLogs" })'), {
+            error: {code: -32701, message: "requested block is before the earliest available block"},
+          });
+        }
+        return [entryLog(drawAddress, 3n, ACCOUNT, 4_100)];
+      },
+    });
+    await mount(chain);
+
+    const notice = await screen.findByText(walletEn.entries.prunedTitle);
+    // The boundary is the block after the last refused window: startBlock 10 with a 2,000-block window
+    // refuses 10-2,009 and 2,010-4,009, so nothing below 4,010 can be read.
+    const body = (notice.parentElement as HTMLElement).textContent ?? "";
+    expect(body).toContain("4010");
+    // The node's own words never reach the page (SPEC §9.7).
+    expect(body).not.toContain("coalesce");
+    expect(body).not.toContain("earliest available block");
+    // The rounds that *were* readable are still listed, because they are true.
+    await waitFor(() => expect(tab("Won")).toHaveTextContent("Won (1)"));
+    // A pruned range is not the RpcUnavailable failure panel, and offers no retry: retrying is not the fix.
+    expect(screen.queryByText(walletEn.entries.errorTitle)).toBeNull();
+    expect(screen.queryByRole("button", {name: walletEn.entries.errorRetry})).toBeNull();
+  });
+
+  it("shows no pruned notice when the provider serves every window", async () => {
+    const chain = scriptedChain();
+    await mount(chain);
+    await waitFor(() => expect(tab("Active")).toHaveTextContent("Active (1)"));
+    expect(screen.queryByText(walletEn.entries.prunedTitle)).toBeNull();
+  });
+
   it("renders a catalog sentence rather than the provider's text, and keeps Scan again", async () => {
     const chain = fakeChain({
       blockNumber: 5_000,

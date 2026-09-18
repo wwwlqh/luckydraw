@@ -10,7 +10,9 @@
     "'medium' once every Medium finding is triaged as fixed or accepted with an owner and the triage is checked in.",
     "Slither 0.11.6 cannot resolve `import {Name as Alias}` for custom errors and then drops the enclosing",
     "functions from the analysis, so a run is only trustworthy when it logs no 'ERROR:ContractSolcParsing' line.",
-    "The CI job greps for that line and fails on it; do not remove that guard."
+    "No src/ file uses such an alias any more (the last two were dropped on 2026-09-18), so a run over this tree",
+    "is authoritative. The CI job greps for that line anyway and fails on it; do not remove that guard, and do not",
+    "reintroduce an alias — rename the error in src/Errors.sol instead."
   ],
   "solc_remaps": [
     "forge-std/=lib/forge-std/src/",

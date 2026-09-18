@@ -226,6 +226,118 @@ describe("scanEntryRounds", () => {
       {scannedTo: 119n, count: 1},
     ]);
   });
+
+  // publicnode prunes logs below a rolling height and answers -32701. Halving or waiting on that window is
+  // wasted budget: the blocks are gone from that node. The scan must step over it and keep reading forward,
+  // and say which block it could not read below (SPEC §10.1: partial history is labelled).
+  it("steps past a pruned window, records the boundary and keeps reading the newest history", async () => {
+    const manifest = testManifest();
+    const draw = manifest.contracts.draw.address;
+    const windows: LogFilter[] = [];
+    const provider: LogProvider = {
+      getLogs: (filter) => {
+        windows.push(filter);
+        const from = BigInt(filter.fromBlock);
+        if (from < 120n) {
+          return Promise.reject({code: -32701, message: "requested block is before the earliest available"});
+        }
+        return Promise.resolve(from === 120n ? [entryLog(draw, 9n, ME, 125, 0)] : []);
+      },
+    };
+
+    const result = await scanEntryRounds({
+      provider,
+      manifest,
+      account: ME,
+      fromBlock: 100n,
+      toBlock: 129n,
+      windowBlocks: 10n,
+    });
+
+    // Three requests, one per window: no halving retry and no repeat of a refused range.
+    expect(windows.map((entry) => [entry.fromBlock, entry.toBlock])).toEqual([
+      ["0x64", "0x6d"],
+      ["0x6e", "0x77"],
+      ["0x78", "0x81"],
+    ]);
+    // Two windows were refused, so the highest boundary wins: nothing below block 120 is readable here.
+    expect(result.historyUnavailableBelow).toBe(120n);
+    expect(result.roundIds).toEqual([9n]);
+    expect(result.scannedTo).toBe(129n);
+    expect(result.error).toBeNull();
+  });
+
+  it("never halves the window or waits on a pruned answer", async () => {
+    const manifest = testManifest();
+    const windows: LogFilter[] = [];
+    let slept = 0;
+    const provider: LogProvider = {
+      getLogs: (filter) => {
+        windows.push(filter);
+        return BigInt(filter.fromBlock) === 100n
+          ? Promise.reject(new Error("logs have been pruned for this range"))
+          : Promise.resolve([]);
+      },
+    };
+
+    const result = await scanEntryRounds({
+      provider,
+      manifest,
+      account: ME,
+      fromBlock: 100n,
+      toBlock: 119n,
+      windowBlocks: 10n,
+      sleep: () => {
+        slept += 1;
+        return Promise.resolve();
+      },
+    });
+
+    expect(slept).toBe(0);
+    // The second window is a full 10 blocks: the refusal was about the height, not about the range.
+    expect(windows.map((entry) => [entry.fromBlock, entry.toBlock])).toEqual([
+      ["0x64", "0x6d"],
+      ["0x6e", "0x77"],
+    ]);
+    expect(result.historyUnavailableBelow).toBe(110n);
+  });
+
+  it("reports the pruning boundary to onProgress, so the page can label it while the scan runs", async () => {
+    const manifest = testManifest();
+    const seen: (bigint | null)[] = [];
+    const provider: LogProvider = {
+      getLogs: (filter) =>
+        BigInt(filter.fromBlock) === 100n
+          ? Promise.reject({code: -32701, message: "pruned"})
+          : Promise.resolve([]),
+    };
+
+    await scanEntryRounds({
+      provider,
+      manifest,
+      account: ME,
+      fromBlock: 100n,
+      toBlock: 119n,
+      windowBlocks: 10n,
+      onProgress: (progress) => seen.push(progress.historyUnavailableBelow),
+    });
+
+    expect(seen).toEqual([110n, 110n]);
+  });
+
+  it("leaves the boundary null when every window is served", async () => {
+    const manifest = testManifest();
+    const result = await scanEntryRounds({
+      provider: {getLogs: () => Promise.resolve([])},
+      manifest,
+      account: ME,
+      fromBlock: 100n,
+      toBlock: 119n,
+      windowBlocks: 10n,
+    });
+    expect(result.historyUnavailableBelow).toBeNull();
+    expect(result.complete).toBe(true);
+  });
 });
 
 // SPEC §10.1 splits one rule in two: "Auto-reduce log chunk size on RPC limits, bounded retries with
@@ -270,6 +382,19 @@ describe("classifyProviderError", () => {
     ]) {
       expect(classifyProviderError({code: -32000, message})).toBe("rangeCap");
     }
+  });
+
+  it("reads publicnode's -32701 as pruned history, not as a range cap or a rate limit", () => {
+    // Measured 2026-09-18 against https://bsc-testnet-rpc.publicnode.com for ranges below ~131,577,900.
+    expect(classifyProviderError({code: -32701, message: "block range is before the pruned height"})).toBe(
+      "pruned",
+    );
+    expect(classifyProviderError(new Error("history is not available before block 131577900"))).toBe(
+      "pruned",
+    );
+    // A pruned range is a real answer about the data, not an unreachable node, so it is not the
+    // RpcUnavailable sentence.
+    expect(isRpcUnreachableScanError({code: -32701, message: "pruned"})).toBe(false);
   });
 
   it("leaves anything else unknown, so the existing halving is unchanged", () => {

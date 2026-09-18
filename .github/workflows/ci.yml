@@ -61,10 +61,10 @@ jobs:
     # builder had locally, so the authoritative run is this one.
     #
     # NON-BLOCKING FOR NOW. `continue-on-error` and `fail_on: none` in contracts/slither.config.json come off
-    # together, and this job becomes required, once BOTH hold:
-    #   (a) the two aliased error imports in src/LuckyDraw.sol and src/LuckyVault.sol are gone, so the
-    #       "no parser errors" step below passes on the real tree (see docs/REVIEW.md, 2026-09-16 section), and
-    #   (b) every Medium finding in that triage is fixed or accepted with a named owner.
+    # together, and this job becomes required, once every Medium finding in the docs/REVIEW.md triage is fixed or
+    # accepted with a named owner. The other half of that condition is already met: no src/ file imports a custom
+    # error under an alias any more (dropped 2026-09-18), so the "no parser errors" step below passes on the real
+    # tree and this run -- not the scratch copy of the 2026-09-16 section -- is the authoritative one.
     # Target: before the operator signs Deploy for BSC mainnet (SPEC section 14 gate).
     continue-on-error: true
     runs-on: ubuntu-latest
@@ -103,7 +103,8 @@ jobs:
         # Slither 0.11.6 cannot resolve `import {Name as Alias}` for custom errors: it logs ERROR:ContractSolcParsing
         # and then silently drops the enclosing functions, which turns live state variables into "never used" and
         # hides the reentrancy and complexity findings the same run reports once the alias is gone. A run with this
-        # line in it is not evidence of anything. Do not remove this guard.
+        # line in it is not evidence of anything. src/ is alias-free today, so this step is a regression guard
+        # against reintroducing one -- do not remove it.
         if: always()
         run: |
           if grep -q "ERROR:ContractSolcParsing" "$RUNNER_TEMP/slither.log"; then

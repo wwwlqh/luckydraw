@@ -6,8 +6,8 @@ import {ILuckyVault} from "../../src/interfaces/ILuckyVault.sol";
 import {ReleaseReason} from "../../src/Types.sol";
 import {MockERC20} from "../mocks/MockERC20.sol";
 import {
-    EscrowClosed as EscrowIsClosed,
     EntryWindowClosed,
+    EscrowClosed,
     InsufficientBalance,
     InvalidAmount,
     InvalidAsset,
@@ -175,10 +175,10 @@ contract LuckyVaultEscrowTest is LuckyVaultBase {
         assertTrue(vault.getEscrow(ROUND).closed, "closed flag set");
         assertLt(block.timestamp, closesAt, "the cutoff has not passed: only closeEscrow blocks this");
 
-        vm.expectRevert(EscrowIsClosed.selector);
+        vm.expectRevert(EscrowClosed.selector);
         drawMock.lock(ROUND, alice, 1 ether);
 
-        vm.expectRevert(EscrowIsClosed.selector);
+        vm.expectRevert(EscrowClosed.selector);
         drawMock.lockSeed(ROUND, seedSafe, 1 ether);
 
         assertEq(vault.getEscrow(ROUND).amount, 10 ether, "escrow unchanged");
@@ -188,7 +188,7 @@ contract LuckyVaultEscrowTest is LuckyVaultBase {
     function test_A43_DoubleCloseEscrowReverts() public {
         _register(ROUND, address(tkn));
         drawMock.closeEscrow(ROUND);
-        vm.expectRevert(EscrowIsClosed.selector);
+        vm.expectRevert(EscrowClosed.selector);
         drawMock.closeEscrow(ROUND);
 
         vm.expectRevert(InvalidId.selector);
@@ -204,10 +204,10 @@ contract LuckyVaultEscrowTest is LuckyVaultBase {
         assertTrue(vault.getEscrow(ROUND).released, "released flag set");
         assertFalse(vault.getEscrow(ROUND).closed, "the faulty Draw never called closeEscrow");
 
-        vm.expectRevert(EscrowIsClosed.selector);
+        vm.expectRevert(EscrowClosed.selector);
         drawMock.lock(ROUND, alice, 1 ether);
 
-        vm.expectRevert(EscrowIsClosed.selector);
+        vm.expectRevert(EscrowClosed.selector);
         drawMock.lockSeed(ROUND, seedSafe, 1 ether);
 
         assertEq(vault.getEscrow(ROUND).amount, 6 ether, "10 - 4 remains in escrow");

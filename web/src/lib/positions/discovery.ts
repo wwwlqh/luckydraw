@@ -14,7 +14,10 @@
 //     after an exponential, jittered wait instead, a bounded number of times. Telling the two apart is what
 //     `classifyProviderError` does. BSC's `data-seed-prebsc-*` endpoints answer every `eth_getLogs` with
 //     JSON-RPC -32005 "limit exceeded" whatever the range, which halving turned into six pointless requests
-//     and then a raw ethers string on screen;
+//     and then a raw ethers string on screen. A third refusal is neither: a node that has *pruned* the blocks
+//     will never serve them, whatever the window and however long the scan waits, so that window is recorded
+//     as unavailable, the cursor moves past it and the newest history is still read (SPEC §10.1: partial
+//     history is labelled, never served as complete);
 //   - "a response whose block range or result set was silently reduced is treated as an error and re-fetched
 //     with overlap". Several public nodes answer an over-large query with HTTP 200 and a truncated array
 //     instead of an error, so a full page is treated exactly like a thrown error: the cursor does not move,
@@ -88,17 +91,35 @@ export type ScanProgress = {
   scannedTo: bigint;
   /** Round ids found so far, ascending, without duplicates. */
   roundIds: readonly bigint[];
+  /**
+   * The lowest block this RPC still serves logs for, or null when it served every window it was asked.
+   *
+   * Non-null means the node refused one or more windows as pruned, so no entry below this block can be seen
+   * through this endpoint — not that no entry exists there. It is the height the surface labels; it is never
+   * a reason to call the list complete.
+   */
+  historyUnavailableBelow: bigint | null;
 };
 
 /**
  * What a finished scan returns.
  *
- * `complete` is the honest answer to "is this the whole history?" and is false whenever the scan stopped
- * before `toBlock`: a cancellation, a provider that keeps failing, or a range the node will not answer in
- * full. SPEC §10.1: "Never serve silently partial aggregates as complete." The round ids found before the
- * stop are still returned, because they are true; only the claim of completeness is withheld.
+ * "Is this the whole history?" is answered by `complete` *and* `historyUnavailableBelow` together, never by
+ * either alone. `complete` is false whenever the scan stopped before `toBlock`: a cancellation, a provider
+ * that keeps failing, or a range the node will not answer in full. `historyUnavailableBelow` is non-null
+ * whenever the node refused part of the span as pruned, which the scan walks past rather than stalls on.
+ * SPEC §10.1: "Never serve silently partial aggregates as complete." The round ids found are still returned
+ * in both cases, because they are true; only the claim of completeness is withheld.
  */
 export type ScanResult = ScanProgress & {
+  /**
+   * True when the scan walked its whole requested span without stopping early.
+   *
+   * It is a statement about the *cursor*, not about the data: a scan can walk every block of the span and
+   * still have been refused part of it as pruned, in which case `complete` is true and
+   * `historyUnavailableBelow` is non-null. Anything that tells a reader "this is your full history" must
+   * check both, which is what `/entries` does.
+   */
   complete: boolean;
   /** Why the scan stopped short, or null when it finished or was cancelled. */
   error: Error | null;
@@ -226,10 +247,14 @@ export async function scanEntryRounds(options: ScanOptions): Promise<ScanResult>
   if (window < 1n) window = 1n;
   let cursor = fromBlock;
   let scannedTo = fromBlock > 0n ? fromBlock - 1n : 0n;
+  // The highest "everything below here is gone" the node has told us. Monotonic: windows are read in
+  // ascending order, so a later refusal always names a higher boundary than an earlier one.
+  let historyUnavailableBelow: bigint | null = null;
 
   const stop = (error: Error | null): ScanResult => ({
     scannedTo,
     roundIds: ordered,
+    historyUnavailableBelow,
     complete: false,
     error,
   });
@@ -252,8 +277,24 @@ export async function scanEntryRounds(options: ScanOptions): Promise<ScanResult>
         });
       } catch (error) {
         // SPEC §10.1: halve on a range error, back off on a rate limit. Either way the start never moves, so
-        // the retry re-reads the same blocks and skips nothing.
-        if (classifyProviderError(error) === "rateLimit") {
+        // the retry re-reads the same blocks and skips nothing. Pruned history is the one case where the
+        // start *must* move: the node has dropped these blocks, so neither a narrower window nor a wait can
+        // produce them, and both would only spend budget that the rest of the span needs.
+        const kind = classifyProviderError(error);
+        if (kind === "pruned") {
+          // Everything up to and including `end` is unreachable through this RPC, so the first block it can
+          // still serve is `end + 1`. The window is left alone: the next one is a normal read, and it will
+          // usually succeed, because the pruning boundary is a height and not a property of this query.
+          const boundary = end + 1n;
+          if (historyUnavailableBelow === null || boundary > historyUnavailableBelow) {
+            historyUnavailableBelow = boundary;
+          }
+          // An empty page, not a failure: the loop below adds no round ids, advances the cursor past `end`
+          // and reports progress, so the newest history is still read.
+          logs = [];
+          continue;
+        }
+        if (kind === "rateLimit") {
           if (rateLimited >= rateLimitBudget) {
             return stop(new LogScanRateLimitError(cursor, end, rateLimited + 1, error));
           }
@@ -285,6 +326,7 @@ export async function scanEntryRounds(options: ScanOptions): Promise<ScanResult>
     }
 
     for (const log of logs) {
+      // A pruned window yields no logs by construction; the loop is skipped rather than special-cased.
       const decoded = decodeLog(manifest, log);
       // The emitter filter and the topic filter are both `decodeLog`'s, not ours (SPEC §10.1).
       if (decoded === null || decoded.emitter !== "draw" || decoded.name !== "EntryBought") continue;
@@ -298,8 +340,10 @@ export async function scanEntryRounds(options: ScanOptions): Promise<ScanResult>
     scannedTo = end;
     cursor = end + 1n;
     ordered.sort((left, right) => (left < right ? -1 : left > right ? 1 : 0));
-    options.onProgress?.({scannedTo, roundIds: [...ordered]});
+    options.onProgress?.({scannedTo, roundIds: [...ordered], historyUnavailableBelow});
   }
 
-  return {scannedTo, roundIds: ordered, complete: true, error: null};
+  // `complete` reports that the cursor reached `toBlock`; `historyUnavailableBelow` reports what the node
+  // would not serve on the way. The caller must read both before calling a list whole (SPEC §10.1).
+  return {scannedTo, roundIds: ordered, historyUnavailableBelow, complete: true, error: null};
 }
