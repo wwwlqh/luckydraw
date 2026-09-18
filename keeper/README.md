@@ -400,6 +400,13 @@ sudo install -m 0644 keeper/deploy/luckydraw-keeper.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now luckydraw-keeper
 journalctl -u luckydraw-keeper -f
+
+# 6. SELinux-enforcing hosts only: if the log says `AggregateError (EACCES)`, let systemd's init_t domain
+#    open outbound HTTPS (see the table below), then restart
+checkmodule -M -m -o /tmp/luckydraw-keeper-https.mod keeper/deploy/luckydraw-keeper-https.te
+semodule_package -o /tmp/luckydraw-keeper-https.pp -m /tmp/luckydraw-keeper-https.mod
+sudo semodule -i /tmp/luckydraw-keeper-https.pp
+sudo systemctl restart luckydraw-keeper
 ```
 
 ### Jitless on hardened hosts
@@ -413,6 +420,7 @@ the next operator can grep for them:
 | `# Fatal error in , line 0` / `# Check failed: 12 == (*__errno_location ()).`, a SIGTRAP inside `node::NewIsolate`, while the same binary starts fine in an interactive shell | V8 cannot get its JIT/code-range mapping inside the unit's SELinux domain, with `NoNewPrivileges` and the rest of the sandbox | `--jitless`. A keeper spends its time waiting on sockets, so it costs nothing |
 | `ERR_WEBASSEMBLY_NOT_SUPPORTED` from `src/main.ts` | jitless Node has no WebAssembly, and Node's TypeScript type stripping needs it | run the built JavaScript: `pnpm --filter @luckydraw/keeper build`, then `dist/keeper/src/main.js` |
 | `refused_to_start reason="eth_chainId could not be read: "` — an empty reason | Node's global `fetch` is undici, whose HTTP parser is a WebAssembly module, so ethers' `FetchRequest` failed with a `TypeError: fetch failed` whose real explanation (`WebAssembly is not defined`) was in `cause` and not in `message` | fixed in the keeper: `src/transport.ts` registers a `node:https` transport for every request, and the reason now falls through to the cause when the message is empty |
+| `refused_to_start reason="eth_chainId could not be read: AggregateError (EACCES)"` while `curl` to the same RPC URL works from a shell; `ausearch -m avc` shows `denied { name_connect } scontext=…:init_t tcontext=…:http_port_t` | `NoNewPrivileges=yes` forbids the SELinux domain transition, so the process stays in systemd's `init_t`, which the targeted policy does not let connect to `http_port_t` (443). Every other directive in the unit was bisected and is innocent | install `keeper/deploy/luckydraw-keeper-https.te` (step 6 above): one `allow init_t http_port_t:tcp_socket name_connect` rule, nothing about listening, files or other ports |
 | a refusal naming a manifest path with `dist` in it | — | fixed: the keeper finds the checkout root by walking up to `pnpm-workspace.yaml`, so `src/` and `dist/` resolve the same `config/` tree. Only a `dist/` deployed without the workspace file above it needs `KEEPER_DEPLOYMENTS_DIR` |
 
 `src/transport.ts` is installed unconditionally, not behind a flag: the transport the operator's host runs is

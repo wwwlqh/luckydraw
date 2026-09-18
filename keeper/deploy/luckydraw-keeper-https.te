@@ -1,0 +1,22 @@
+# One-rule SELinux module for hosts where the keeper unit cannot open its outbound HTTPS connection.
+#
+# Symptom: refused_to_start reason="eth_chainId could not be read: AggregateError (EACCES)" and
+#   avc: denied { name_connect } scontext=system_u:system_r:init_t:s0 tcontext=system_u:object_r:http_port_t:s0
+# in `ausearch -m avc`. The unit's NoNewPrivileges=yes keeps the process in systemd's own init_t domain
+# (no domain transition is allowed with NNP), and the targeted policy does not let init_t connect to
+# http_port_t (80, 443 and the HTTP alternates). Everything else the keeper needs is already allowed.
+#
+# Install (keeper/README.md, host setup step 6):
+#   checkmodule -M -m -o /tmp/luckydraw-keeper-https.mod keeper/deploy/luckydraw-keeper-https.te
+#   semodule_package -o /tmp/luckydraw-keeper-https.pp -m /tmp/luckydraw-keeper-https.mod
+#   sudo semodule -i /tmp/luckydraw-keeper-https.pp
+# Remove: sudo semodule -r luckydraw_keeper_https
+module luckydraw_keeper_https 1.0;
+
+require {
+    type init_t;
+    type http_port_t;
+    class tcp_socket name_connect;
+}
+
+allow init_t http_port_t:tcp_socket name_connect;
