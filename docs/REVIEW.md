@@ -523,3 +523,59 @@ past the window and keeps reading the newest history. `usePositions` and `/entri
 labelled partial-history notice from the string catalog, per SPEC 10.1, never as the provider's own words. The
 keeper treats `pruned` like `unknown` for now. SPEC 14 gains the matching mainnet gate: entry history must come
 from an archive-capable RPC or the indexer.
+
+## Automation upkeep review and fixes (2026-09-18)
+
+An independent review of the first `LuckyDrawUpkeep` commit found six things, and the two that mattered were the
+same mistake seen from two sides: the original page constants (`MAX_POOL_PAGE` 16, `MAX_ROUND_PAGE` 256) were
+chosen as "generous" rather than measured.
+
+**H1, the upkeep would have gone quiet about three weeks after launch.** Chainlink publishes a 10,000,000
+`checkGasLimit` for chains 56 and 97. A `getRound` over a historical identifier measures 55,559 gas against the
+production Draw with cold storage, so 256 identifiers alone is 14.2 million, and the shipped two-pool deployment
+would have crossed the limit once `roundCount` passed roughly 173. The failure mode is the bad one: a registry
+does not report a `checkUpkeep` that ran out of gas, it records nothing due. The upkeep would have looked healthy
+and done nothing, forever.
+
+**M1, an unresolved round older than 256 identifiers was starved forever.** The original comment called 256 "about
+36 periods of a 7-sequence pool", which is wrong about the data model: round ids are one dense *global* sequence
+across every pool and kind (`roundId = ++roundCount`), not a per-pool one. Sixteen pools of seven kinds mint 112
+ids a day, so the window was about five days wide and everything behind it was unreachable by construction.
+
+The fix is one design for both: pages sized to a measured budget, and a page index that rotates with the block
+number. `POOLS_PER_CHECK` 4 (28 current rounds, 1,743,623 gas), `ROUNDS_PER_CHECK` 96 (5,333,673 gas), 7,077,296
+together in the worst case against a stated 8,000,000 budget, 20% under the published limit; `ROTATE_BLOCKS` 20,
+so `(block.number / 20) % pageCount` walks every page at about a minute each. Coverage is then complete rather
+than recent: every identifier is reached within `ceil(roundCount / 96) x 20 x 3` seconds, about 11 minutes at
+1,000 rounds. The explicit `checkData` cursor survives unchanged as the fixed-page override, and the runbook now
+states the coverage time and when to register a second upkeep with one, rather than claiming an empty `checkData`
+"covers this deployment several times over".
+
+**M2, the revalidation guard was untested**, and untestable against the production Draw: deleting
+`if (_stateAction(round) != action) revert WrongState();` still reverts `WrongState`, because the Draw refuses the
+same call with the same selector, so all 35 tests and the invariant campaign passed without it. `MockUpkeepDraw`
+is a Draw that records the call and does *not* refuse, which makes the guard the only thing between
+`performUpkeep` and a Draw method; `test_PerformUpkeep_RevalidationRefusesBeforeTheDrawIsReached` fails with the
+line deleted and passes with it. The mutation was re-run to prove that before the line was restored.
+
+**L1, U2 was checking the contract against itself.** The invariant handler's reference table called
+`UPKEEP.requestReady()` for the VRF branch, so "an independently written reading of the same table" was not
+independent where it mattered. The coordinator reads are inlined in the handler now.
+
+**L2, a comment overclaimed.** `Verify._checkUpkeep` said it checks "the contract this repository builds" while
+comparing the manifest's `codeHash` with the chain's `extcodehash`. Correcting the comment was the right fix
+rather than reaching for `keccak256(type(LuckyDrawUpkeep).runtimeCode)`, which cannot match a deployed executor at
+all -- `DRAW` is an immutable, so the deployed runtime differs from `runtimeCode`'s placeholder for every
+deployment -- and because the Vault and Draw checks two lines above do exactly the same `extcodehash` comparison.
+Consistency with them is the point.
+
+**L3, rule `D28` accepted any nonzero registry.** Chain records now carry an optional `automationRegistry` with
+the address, the published check and perform gas limits, and the source URL and date; chains 56 and 97 were read
+from `docs.chain.link` Automation -> Supported Networks on 2026-09-18 as
+`0xdc21e279934ff6721cadfdd112dafb3261f09a2c` and `0x96bb60aaaec09a0fceb4527b81bbf3cc0c171393`, both 10,000,000 /
+5,000,000. `D28` compares a manifest's `contracts.upkeep.registry` with it when both exist. That is the only check
+that can catch a registry typo at all: on chain a wrong registry is indistinguishable from a healthy deployment
+with nothing due.
+
+The Draw on chain 97 is untouched; no view was added and no deployed contract changed.
+

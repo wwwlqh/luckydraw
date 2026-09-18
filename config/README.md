@@ -138,6 +138,17 @@ against the record, and prints the `networkIdentity` object to paste. It never w
 prints the RPC URL. Set `"source".url` to the page the address came from before committing, then run
 `validate:config`.
 
+## The Chainlink Automation registry in a chain record
+
+`automationRegistry` is optional and carries the registry address Chainlink publishes for that chain, its
+`checkGasLimit` and `performGasLimit`, and the page and date it was read from. Chains 56 and 97 were read from
+`https://docs.chain.link/chainlink-automation/overview/supported-networks` on 2026-09-18:
+`0xdc21e279934ff6721cadfdd112dafb3261f09a2c` and `0x96bb60aaaec09a0fceb4527b81bbf3cc0c171393`, both with a
+10,000,000 check gas limit and a 5,000,000 perform gas limit. The address is lowercase here like every other
+address in `config/`. Rule `D28` compares an operator's `contracts.upkeep.registry` with it, which is the only
+check that catches a registry typo at all: the upkeep would otherwise sit registered and silent. Re-read the page
+and update `source.date` whenever the value is re-confirmed.
+
 ## Observing a feed's update interval
 
 `observedP999IntervalSeconds` and `observationWindow` in a price record are measurements, not estimates.
@@ -185,7 +196,7 @@ in `scripts/validate_config.ts`, each with a rule tag that appears in its error 
 | `D16` | Accepted ownership leaves both contracts owned by `finalOwner` with nothing pending |
 | `D17`/`D25` | Deploy blocks are at or above `startBlock`; Vault and Draw are distinct |
 | `D22` | A mainnet deployment has a registered VRF consumer |
-| `D28` | The optional `contracts.upkeep` (Chainlink Automation executor, SPEC §10.3, ADR 039) names `contracts.draw.address` as its `draw`, is neither the Vault nor the Draw nor any of the three privileged roles, sits at or above `chain.startBlock`, and carries `registry` and `upkeepId` together or not at all. Absent is valid: the executor is a third executor, not a dependency |
+| `D28` | The optional `contracts.upkeep` (Chainlink Automation executor, SPEC §10.3, ADR 039) names `contracts.draw.address` as its `draw`, is neither the Vault nor the Draw nor any of the three privileged roles, sits at or above `chain.startBlock`, and carries `registry` and `upkeepId` together or not at all. When both the manifest's `registry` and the chain record's `automationRegistry.address` are present, they must be the same address (cross-record): a registration against the wrong registry is not an error anything on chain reports, it is an upkeep that is simply never called. Absent on either side is silence. Absent altogether is valid: the executor is a third executor, not a dependency |
 | `D26` | `release.customerLaunch` is true on mainnet only once `release.shakedown.performed` is true (SPEC §14) |
 | `D27` | A performed shakedown records its date, round ids, callback gas, request-to-fulfilment latency and cost per draw, and each is a value a real fulfilment could produce: `0 < callbackGasUsed <= vrf.callbackGasLimit`, `requestToFulfilmentSeconds >= 1`, `costPerDrawNativeWei != "0"`, and `date` at or after the manifest's `createdAtUtc` |
 | `O1`/`O2w` | Mainnet needs three distinct Safes; testnet may share one (SPEC §12.1) |

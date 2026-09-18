@@ -46,22 +46,40 @@ contract LuckyDrawUpkeep is AutomationCompatibleInterface {
     /// @notice The Draw this executor drives, fixed at construction. There is no setter.
     LuckyDraw public immutable DRAW;
 
-    /// @notice Largest number of pools one `checkUpkeep` scans (`MAX_POOL_PAGE * KIND_COUNT` `getRound` calls).
-    /// @dev Sixteen pools is 112 current rounds per call. Each `getRound` copies a fixed-size struct, so the page
-    ///      is tens of millions of gas at worst -- irrelevant to an `eth_call` simulation and bounded by a
-    ///      constant rather than by `poolCount`, which the owner can grow. Sixteen is also inside the Draw's own
-    ///      1..100 page limit (`LuckyDraw.MAX_PAGE`), so `getPools` can never revert `InvalidAmount` here. A
-    ///      deployment with more pools registers a second upkeep with `checkData` pointing at the next page.
-    uint256 public constant MAX_POOL_PAGE = 16;
+    /// @notice Pools whose current rounds one `checkUpkeep` scans (`POOLS_PER_CHECK * KIND_COUNT` `getRound`
+    ///         calls, 28 at seven kinds).
+    /// @dev Sized against a stated budget of 8,000,000 gas, 20% under the 10,000,000 `checkGasLimit` that
+    ///      Chainlink Automation publishes for BNB Chain 56 and 97 (docs.chain.link, Automation → Supported
+    ///      Networks, read 2026-09-18). Measured against the production Draw with cold storage, nothing due and
+    ///      both maxima in force (`LuckyDrawUpkeepGasTest`, `gasleft()` around the first call of each test):
+    ///      1,743,623 gas for 28 current rounds, 5,333,673 for 96 historical identifiers (55,559 each), so
+    ///      7,077,296 in the worst case where the two pages do not overlap, and 5,984,731 for the default
+    ///      rotating call on the reference fixture, where they do. Both are inside the 8,000,000 budget.
+    ///      Four is also inside the Draw's own 1..100 page limit (`LuckyDraw.MAX_PAGE`), so `getPools` can never
+    ///      revert `InvalidAmount` here.
+    uint256 public constant POOLS_PER_CHECK = 4;
 
-    /// @notice Largest number of historical round identifiers one `checkUpkeep` scans.
+    /// @notice Historical round identifiers one `checkUpkeep` scans.
     /// @dev The historical sweep exists because `closeRound` advances `current` in the same transaction, so a
     ///      round that still needs a request, an expiry or a settlement stops being any pool's current round the
     ///      moment it closes (the same gap `keeper/src/keeper.ts` covers with its in-memory `tracked` set). Round
-    ///      identifiers are a dense global sequence 1..`roundCount`, so the sweep is a window over that range and
-    ///      needs no log scan. 256 is about 36 periods of a 7-sequence pool and comfortably past the 24-hour
-    ///      request window that bounds how long an unresolved round can matter.
-    uint256 public constant MAX_ROUND_PAGE = 256;
+    ///      identifiers are a dense *global* sequence across every pool and kind (`LuckyDraw.roundId =
+    ///      ++roundCount`), so the sweep is a window over that one range and needs no log scan -- but also so
+    ///      that a fixed window is a shrinking amount of *time* as pools are added: sixteen pools of seven kinds
+    ///      mint 112 identifiers a day, and any fixed window would starve everything behind it. `ROTATE_BLOCKS`
+    ///      is the answer to that, not a bigger number here.
+    uint256 public constant ROUNDS_PER_CHECK = 96;
+
+    /// @notice Blocks each rotation page is held before `checkUpkeep` moves to the next one.
+    /// @dev The page index is derived from `block.number`, so successive blocks walk every page and every round
+    ///      is reached however long the sequence grows -- no round is starved behind a fixed newest-first window
+    ///      (the failure this constant exists to prevent). At BSC's ~3-second blocks, 20 blocks is about one
+    ///      minute per page, so *every* identifier is covered within
+    ///      `ceil(roundCount / ROUNDS_PER_CHECK) * ROTATE_BLOCKS * 3` seconds: about 1 minute at 96 rounds,
+    ///      11 minutes at 1,000 and 105 minutes at 10,000. An operator who may be offline longer than a cutoff
+    ///      can tolerate registers a second upkeep with an explicit `checkData` cursor pinned to one page
+    ///      (`docs/runbooks/testnet-launch.md` §4b).
+    uint256 public constant ROTATE_BLOCKS = 20;
 
     /// @notice Emitted once per action actually executed.
     /// @param action The action taken.
@@ -87,22 +105,34 @@ contract LuckyDrawUpkeep is AutomationCompatibleInterface {
     ///      function cannot be tricked into changing state if somebody calls it for real.
     ///
     ///      Two phases, in this order:
-    ///        1. the current round of every `Kind` of every pool in the `checkData` page, which is where a due
+    ///        1. the current round of every `Kind` of every pool in this call's pool page, which is where a due
     ///           `closeRound` almost always is;
-    ///        2. a window of historical round identifiers, which is where a round that closed but was never
+    ///        2. one page of historical round identifiers, which is where a round that closed but was never
     ///           requested, expired or settled ends up.
     ///      Both phases are bounded by the constants above and by nothing else, so a growing `poolCount` or
-    ///      `roundCount` cannot turn this into an unbounded scan.
+    ///      `roundCount` cannot turn this into an unbounded scan and the call stays inside the registry's
+    ///      `checkGasLimit`.
+    ///
+    ///      With empty `checkData` the *page index of each phase rotates with `block.number`*:
+    ///      `(block.number / ROTATE_BLOCKS) % pageCount`, computed separately for the pool list and for the
+    ///      round sequence, so successive blocks walk every page of both. Coverage is therefore complete rather
+    ///      than recent: an unresolved round is reached within
+    ///      `ceil(roundCount / ROUNDS_PER_CHECK) * ROTATE_BLOCKS` blocks whatever its identifier. Page 0 of the
+    ///      round sequence is the newest `ROUNDS_PER_CHECK` identifiers and each page walks its own ids
+    ///      downwards, so the freshest rounds -- the ones whose 24-hour request window is closest -- are still
+    ///      seen first within every rotation.
     ///
     ///      `requestDraw` additionally reproduces the two SPEC §6.2 pre-checks the Draw itself performs -- the
     ///      gas lane is still registered and the subscription's native balance covers `(pendingRequests + 1)`
     ///      requests -- and reports no action for that round when either fails, so an upkeep is not spent on a
     ///      transaction that would certainly revert. The round is not lost: it stays `AwaitingRequest` and this
     ///      contract offers `expireUnrequested` on it once its deadline passes.
-    /// @param checkData Empty, or `abi.encode(poolCursor, poolLimit, roundCursor, roundLimit)`. Empty means the
-    ///        first `MAX_POOL_PAGE` pools and the newest `MAX_ROUND_PAGE` round identifiers. `poolCursor` and
-    ///        `roundCursor` are zero-based offsets; the limits are clamped to the constants above, and a zero
-    ///        limit means the constant. The historical window is round ids `roundCursor+1 .. roundCursor+limit`.
+    /// @param checkData Empty for the rotating pages described above, or
+    ///        `abi.encode(poolCursor, poolLimit, roundCursor, roundLimit)` to pin one fixed page instead --
+    ///        the override for an operator who wants a second registration nailed to a particular slice.
+    ///        `poolCursor` and `roundCursor` are zero-based offsets; the limits are clamped to the constants
+    ///        above, and a zero limit means the constant. The historical window is round ids
+    ///        `roundCursor+1 .. roundCursor+roundLimit`, and nothing about it rotates.
     /// @return upkeepNeeded True when `performData` names an action.
     /// @return performData `abi.encode(Action, roundId)`; `(Action.None, 0)` when nothing is due.
     function checkUpkeep(bytes calldata checkData)
@@ -111,10 +141,22 @@ contract LuckyDrawUpkeep is AutomationCompatibleInterface {
         override
         returns (bool upkeepNeeded, bytes memory performData)
     {
-        (uint256 poolCursor, uint256 poolLimit, uint256 roundCursor, uint256 roundLimit) = _page(checkData);
-
-        (Action action, uint256 roundId) = _scanCurrent(poolCursor, poolLimit);
-        if (action == Action.None) (action, roundId) = _scanHistory(checkData.length == 0, roundCursor, roundLimit);
+        Action action;
+        uint256 roundId;
+        if (checkData.length == 0) {
+            (action, roundId) = _scanRotating();
+        } else {
+            (uint256 poolCursor, uint256 poolLimit, uint256 roundCursor, uint256 roundLimit) = _page(checkData);
+            (action, roundId) = _scanCurrent(poolCursor, poolLimit);
+            uint256 total = DRAW.roundCount();
+            // A cursor at or past the end is an empty window, not an error -- and checking it first keeps
+            // `roundCursor + roundLimit` away from an overflow an operator could otherwise reach with a silly
+            // cursor, which would revert the whole simulation instead of scanning nothing.
+            if (action == Action.None && roundCursor < total) {
+                uint256 end = roundCursor + roundLimit;
+                (action, roundId) = _scanHistory(roundCursor, end > total ? total : end);
+            }
+        }
 
         return (action != Action.None, abi.encode(action, roundId));
     }
@@ -203,6 +245,31 @@ contract LuckyDrawUpkeep is AutomationCompatibleInterface {
     // Bounded scans
     // ---------------------------------------------------------------------
 
+    /// @dev The default scan: one rotating pool page, then one rotating round page.
+    function _scanRotating() private view returns (Action, uint256) {
+        uint256 pools = DRAW.poolCount();
+        (Action action, uint256 roundId) =
+            _scanCurrent(_pageIndex(pools, POOLS_PER_CHECK) * POOLS_PER_CHECK, POOLS_PER_CHECK);
+        if (action != Action.None) return (action, roundId);
+
+        uint256 total = DRAW.roundCount();
+        // Page 0 is the newest `ROUNDS_PER_CHECK` identifiers, page 1 the ones before them, and so on, so an
+        // incomplete page is always the oldest one.
+        uint256 skip = _pageIndex(total, ROUNDS_PER_CHECK) * ROUNDS_PER_CHECK;
+        if (skip >= total) return (Action.None, 0);
+        uint256 end = total - skip;
+        return _scanHistory(end > ROUNDS_PER_CHECK ? end - ROUNDS_PER_CHECK : 0, end);
+    }
+
+    /// @dev Which page of `ceil(total / per)` this block belongs to. Blocks are the only clock a `view` has that
+    ///      advances on its own, and the registry re-simulates `checkUpkeep` every block, so dividing by
+    ///      `ROTATE_BLOCKS` holds each page long enough for a `performUpkeep` to be built, sent and included
+    ///      before the page moves on.
+    function _pageIndex(uint256 total, uint256 per) private view returns (uint256) {
+        if (total <= per) return 0;
+        return (block.number / ROTATE_BLOCKS) % ((total + per - 1) / per);
+    }
+
     /// @dev Phase 1: the current round of every kind of every pool in the page.
     function _scanCurrent(uint256 cursor, uint256 limit) private view returns (Action, uint256) {
         uint256 total = DRAW.poolCount();
@@ -224,19 +291,13 @@ contract LuckyDrawUpkeep is AutomationCompatibleInterface {
         return (Action.None, 0);
     }
 
-    /// @dev Phase 2: a window of historical round identifiers, newest first.
+    /// @dev Phase 2: round identifiers `start+1 .. end`, walked newest first.
     ///      Newest first because an unresolved round's request window is 24 hours wide and a freshly closed round
-    ///      is the one whose deadline is closest; walking from the oldest identifier would spend the window on
+    ///      is the one whose deadline is closest; walking from the oldest identifier would spend the page on
     ///      long-settled rounds first.
-    /// @param tail True when `checkData` was empty and the window should follow `roundCount`.
-    function _scanHistory(bool tail, uint256 cursor, uint256 limit) private view returns (Action, uint256) {
-        uint256 total = DRAW.roundCount();
-        if (total == 0) return (Action.None, 0);
-        uint256 start = tail ? (total > limit ? total - limit : 0) : cursor;
-        if (start >= total) return (Action.None, 0);
-        uint256 end = start + limit; // last id in the window, inclusive
-        if (end > total) end = total;
-
+    /// @param start Exclusive lower bound of the window.
+    /// @param end Inclusive upper bound, already clamped to `roundCount` by the caller.
+    function _scanHistory(uint256 start, uint256 end) private view returns (Action, uint256) {
         for (uint256 id = end; id > start; --id) {
             Action action = _offeredAction(DRAW.getRound(id));
             if (action != Action.None) return (action, id);
@@ -244,18 +305,15 @@ contract LuckyDrawUpkeep is AutomationCompatibleInterface {
         return (Action.None, 0);
     }
 
-    /// @dev Decodes and clamps `checkData`. Malformed data is a registration mistake, so it reverts rather than
-    ///      silently scanning something else.
+    /// @dev Decodes and clamps an explicit `checkData` page. Malformed data is a registration mistake, so it
+    ///      reverts rather than silently scanning something else.
     function _page(bytes calldata checkData)
         private
         pure
         returns (uint256 poolCursor, uint256 poolLimit, uint256 roundCursor, uint256 roundLimit)
     {
-        if (checkData.length != 0) {
-            (poolCursor, poolLimit, roundCursor, roundLimit) =
-                abi.decode(checkData, (uint256, uint256, uint256, uint256));
-        }
-        if (poolLimit == 0 || poolLimit > MAX_POOL_PAGE) poolLimit = MAX_POOL_PAGE;
-        if (roundLimit == 0 || roundLimit > MAX_ROUND_PAGE) roundLimit = MAX_ROUND_PAGE;
+        (poolCursor, poolLimit, roundCursor, roundLimit) = abi.decode(checkData, (uint256, uint256, uint256, uint256));
+        if (poolLimit == 0 || poolLimit > POOLS_PER_CHECK) poolLimit = POOLS_PER_CHECK;
+        if (roundLimit == 0 || roundLimit > ROUNDS_PER_CHECK) roundLimit = ROUNDS_PER_CHECK;
     }
 }

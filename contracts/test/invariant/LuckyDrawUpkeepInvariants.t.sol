@@ -36,7 +36,7 @@ contract UpkeepHandler is Test {
     /// @notice One line per violation; the invariant functions assert this is empty.
     string[] public violations;
 
-    /// @dev Round identifiers the idle cross-check covers. Smaller than `MAX_ROUND_PAGE` on purpose: the point is
+    /// @dev Round identifiers the idle cross-check covers. Smaller than `ROUNDS_PER_CHECK` on purpose: the point is
     ///      to compare two readings of the same window, not to re-measure the contract's page size, and a constant
     ///      window keeps a long campaign's per-call cost flat.
     uint256 internal constant SWEEP_WINDOW = 64;
@@ -190,7 +190,13 @@ contract UpkeepHandler is Test {
         }
         if (round.state == State.AwaitingRequest) {
             if (block.timestamp >= round.requestDeadline) return LuckyDrawUpkeep.Action.ExpireUnrequested;
-            return UPKEEP.requestReady() ? LuckyDrawUpkeep.Action.RequestDraw : LuckyDrawUpkeep.Action.None;
+            // The §6.2 VRF pre-checks, read from the coordinator here rather than through `UPKEEP.requestReady()`:
+            // the contract under test may not be its own reference, or U2 proves only that it agrees with itself.
+            (bool keyRegistered,) = COORDINATOR.s_provingKeys(DRAW.KEY_HASH());
+            if (!keyRegistered) return LuckyDrawUpkeep.Action.None;
+            (, uint96 nativeBalance,,,) = COORDINATOR.getSubscription(DRAW.SUBSCRIPTION_ID());
+            bool funded = uint256(nativeBalance) >= (DRAW.pendingRequests() + 1) * DRAW.MAX_REQUEST_COST_NATIVE();
+            return funded ? LuckyDrawUpkeep.Action.RequestDraw : LuckyDrawUpkeep.Action.None;
         }
         if (round.state == State.Ready) return LuckyDrawUpkeep.Action.Settle;
         return LuckyDrawUpkeep.Action.None;

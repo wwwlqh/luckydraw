@@ -12,6 +12,15 @@
     "multicall3": null,
     "source": { "url": null, "date": null }
   },
+  "automationRegistry": {
+    "address": "0x96bb60aaaec09a0fceb4527b81bbf3cc0c171393",
+    "checkGasLimit": 10000000,
+    "performGasLimit": 5000000,
+    "source": {
+      "url": "https://docs.chain.link/chainlink-automation/overview/supported-networks",
+      "date": "2026-09-18"
+    }
+  },
   "rpcEnvVars": {
     "public": "LUCKYDRAW_RPC_URL",
     "operational": "LUCKYDRAW_OPS_RPC_URL"

@@ -15,9 +15,18 @@
       "date": "2026-09-16"
     }
   },
+  "automationRegistry": {
+    "address": "0xdc21e279934ff6721cadfdd112dafb3261f09a2c",
+    "checkGasLimit": 10000000,
+    "performGasLimit": 5000000,
+    "source": {
+      "url": "https://docs.chain.link/chainlink-automation/overview/supported-networks",
+      "date": "2026-09-18"
+    }
+  },
   "rpcEnvVars": {
     "public": "LUCKYDRAW_RPC_URL",
     "operational": "LUCKYDRAW_OPS_RPC_URL"
   },
-  "notes": "Synthetic test fixture, not a chain record in use. The genesis hash and Multicall3 address are repeated-nibble placeholders that exist only so rule CH4 has something non-null to accept; the real values are verified by the operator against the live chain."
+  "notes": "Synthetic test fixture, not a chain record in use. The genesis hash and Multicall3 address are repeated-nibble placeholders that exist only so rule CH4 has something non-null to accept; the real values are verified by the operator against the live chain. automationRegistry carries the real chain 56 Chainlink Automation registry, because rule D28 compares a manifest's contracts.upkeep.registry with it."
 }

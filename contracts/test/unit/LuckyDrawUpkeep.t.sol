@@ -47,8 +47,9 @@ contract LuckyDrawUpkeepTest is LuckyDrawBase {
 
     function test_Constructor_BindsTheDrawImmutably() public view {
         assertEq(address(upkeep.DRAW()), address(draw), "DRAW");
-        assertEq(upkeep.MAX_POOL_PAGE(), 16, "MAX_POOL_PAGE");
-        assertEq(upkeep.MAX_ROUND_PAGE(), 256, "MAX_ROUND_PAGE");
+        assertEq(upkeep.POOLS_PER_CHECK(), 4, "POOLS_PER_CHECK");
+        assertEq(upkeep.ROUNDS_PER_CHECK(), 96, "ROUNDS_PER_CHECK");
+        assertEq(upkeep.ROTATE_BLOCKS(), 20, "ROTATE_BLOCKS");
     }
 
     function test_Constructor_RevertWhen_DrawIsZero() public {

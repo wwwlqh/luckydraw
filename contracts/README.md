@@ -116,12 +116,27 @@ address (SPEC §8.1) — and nothing else. `seedRound` and `claimRefund` are del
 account's balance (§5.4), the other credits a named buyer (D9). The Draw is unchanged by any of this.
 
 `checkUpkeep` is a `view` bounded by constants rather than by chain state. One call reads the current round of every
-`Kind` of at most `MAX_POOL_PAGE` (16) pools, then a window of at most `MAX_ROUND_PAGE` (256) round identifiers,
-newest first. The second phase is not redundant: `closeRound` advances `current` in the same transaction, so a round
-that still needs a request, an expiry or a settlement is named by no pool pointer — the same gap `keeper/src/keeper.ts`
-covers with its own discovery scan. `checkData` is empty (the first 16 pools and the newest 256 round ids) or
-`abi.encode(poolCursor, poolLimit, roundCursor, roundLimit)`, so a deployment larger than one page is covered by
-registering several upkeeps. `performUpkeep` re-reads the round and reverts `WrongState` if the suggested action is
+`Kind` of `POOLS_PER_CHECK` (4) pools — 28 rounds — then `ROUNDS_PER_CHECK` (96) round identifiers, newest first.
+The second phase is not redundant: `closeRound` advances `current` in the same transaction, so a round that still
+needs a request, an expiry or a settlement is named by no pool pointer — the same gap `keeper/src/keeper.ts` covers
+with its own discovery scan.
+
+Those two numbers are a gas budget, and the budget is a correctness requirement. Chainlink publishes a 10,000,000
+`checkGasLimit` for chains 56 and 97, and a `checkUpkeep` over it is not an error the registry reports — it records
+nothing due, and the upkeep goes quiet. Measured against the production Draw with cold storage
+(`LuckyDrawUpkeepGasTest`): 1,743,623 gas for the 28 current rounds, 5,333,673 for the 96 identifiers (55,559 each),
+7,077,296 together in the worst case, against a stated budget of 8,000,000 — 20% under the limit.
+
+Coverage is complete rather than recent, because with empty `checkData` both page indices rotate with the block
+number: `(block.number / ROTATE_BLOCKS) % pageCount`, `ROTATE_BLOCKS` being 20, about a minute per page at BSC's
+3-second blocks. Every pool and every round identifier is therefore reached within
+`ceil(roundCount / 96) × 20 × 3` seconds — about 11 minutes at 1,000 rounds. A fixed newest-first window would
+instead starve every older unresolved round forever, and sooner the larger the deployment: round ids are one dense
+global sequence across every pool and kind. An explicit `abi.encode(poolCursor, poolLimit, roundCursor, roundLimit)`
+pins one page and does not rotate, which is the override for a second registration nailed to a slice
+(`docs/runbooks/testnet-launch.md` §4b says when to want one).
+
+`performUpkeep` re-reads the round and reverts `WrongState` if the suggested action is
 no longer the one that state calls for; it revalidates state only, so a VRF subscription that drained between the
 simulation and inclusion surfaces as the Draw's own `SubscriptionUnderfunded`.
 

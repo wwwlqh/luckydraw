@@ -108,10 +108,24 @@ abstract contract VerifyBase is DeploymentScript, DeploymentHistory {
     }
 
     /// @dev The optional Automation executor (ADR 039). Absent is a valid manifest: the upkeep is a third
-    ///      executor, not a dependency. When it is recorded, it must be the contract this repository builds, bound
-    ///      to this manifest's Draw, and it must hold no role and no money -- the whole claim the design rests on.
+    ///      executor, not a dependency. When it is recorded, its deployed code must be the code the manifest
+    ///      recorded, it must be bound to this manifest's Draw, and it must hold no role and no money -- the whole
+    ///      claim the design rests on.
+    ///
+    ///      The code check is `extcodehash` against `contracts.upkeep.codeHash`, exactly as the Vault and Draw
+    ///      checks above are, and it is worth being exact about what that does and does not prove. It proves the
+    ///      deployment has not changed since the manifest was written from the same chain; it does not
+    ///      independently re-derive the code from this repository's sources. That would mean
+    ///      `keccak256(type(LuckyDrawUpkeep).runtimeCode)`, which cannot match a deployed executor at all: the
+    ///      runtime carries `DRAW` as an immutable, so its bytes differ from `runtimeCode`'s placeholder for every
+    ///      deployment. The repository-versus-chain comparison belongs to source verification on the explorer and
+    ///      to the toolchain pins checked above, and this script is deliberately consistent with the Vault and the
+    ///      Draw rather than special for the upkeep. `LuckyDrawUpkeep.DRAW()` is read directly below, which is the
+    ///      part of the executor's identity that actually matters here.
+    ///
     ///      Registration and LINK funding are operator facts the chain does not expose here, so `registry` and
-    ///      `upkeepId` are reported, not asserted.
+    ///      `upkeepId` are reported, not asserted; validator rule `D28` compares `registry` with the address the
+    ///      chain record publishes.
     function _checkUpkeep(DeploymentLib.Manifest memory m) private {
         if (m.upkeep.addr == address(0)) {
             console2.log("Verify: NOTICE the manifest records no Automation upkeep (SPEC 10.3 third executor)");

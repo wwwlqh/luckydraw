@@ -1139,7 +1139,17 @@ describe("the optional Automation upkeep (SPEC 10.3, ADR 039)", () => {
     assertRules(result, []);
   });
 
+  /** The chain 56 Chainlink Automation registry, as config/chains/56.json and the fixture record it. */
+  const REGISTRY_56 = "0xdc21e279934ff6721cadfdd112dafb3261f09a2c";
+
   it("a registered upkeep with both registry and id passes", () => {
+    const result = caseFor("valid-mainnet", MAINNET_MANIFEST, (doc) => {
+      doc.contracts.upkeep = {...upkeepOf(doc), registry: REGISTRY_56, upkeepId: "1234567890"};
+    });
+    assertRules(result, []);
+  });
+
+  it("D28: a registry that is not the one the chain record publishes is rejected", () => {
     const result = caseFor("valid-mainnet", MAINNET_MANIFEST, (doc) => {
       doc.contracts.upkeep = {
         ...upkeepOf(doc),
@@ -1147,7 +1157,39 @@ describe("the optional Automation upkeep (SPEC 10.3, ADR 039)", () => {
         upkeepId: "1234567890",
       };
     });
+    assertRules(result, ["D28"]);
+    assert.match(result.errors[0], /publishes the Chainlink Automation registry/);
+  });
+
+  // Absent on either side is silence, not a failure: a chain record may predate the verified address.
+  it("a registry is accepted when the chain record publishes none", () => {
+    const root = copyFixture("valid-mainnet");
+    patch(root, "chains/56.json", (doc) => {
+      delete doc.automationRegistry;
+    });
+    patch(root, MAINNET_MANIFEST, (doc) => {
+      doc.contracts.upkeep = {
+        ...upkeepOf(doc),
+        registry: "0xdddddddddddddddddddddddddddddddddddddddd",
+        upkeepId: "1234567890",
+      };
+    });
+    const result = resultFor(validateTree(root), MAINNET_MANIFEST.split("/").pop() as string);
     assertRules(result, []);
+  });
+
+  it("schema: an automationRegistry with no source is rejected", () => {
+    const result = caseFor("valid-mainnet", "chains/56.json", (doc) => {
+      delete doc.automationRegistry.source;
+    });
+    assert.ok(result.errors.length > 0, "the chain schema requires a source for a published registry");
+  });
+
+  it("schema: a checksummed automationRegistry address is rejected: addresses are compared lowercase", () => {
+    const result = caseFor("valid-mainnet", "chains/56.json", (doc) => {
+      doc.automationRegistry.address = "0xDc21E279934fF6721CaDfDD112DAfb3261f09A2C";
+    });
+    assert.ok(result.errors.length > 0, "the address pattern is lowercase hex");
   });
 
   it("D28: an upkeep bound to another Draw is rejected", () => {

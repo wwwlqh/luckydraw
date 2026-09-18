@@ -1443,6 +1443,34 @@ function checkCrossRecords(loaded: Loaded[]): void {
     }
   }
 
+  // D28 (cross-record half): a registered upkeep must name the registry its chain's record publishes. On its own
+  // the per-document half only sees "some nonzero address", and a wrong registry is invisible on chain -- the
+  // upkeep is simply never called, which looks exactly like a healthy deployment nothing happens to be due on.
+  for (const manifest of deployments) {
+    const contracts = isObject(manifest.doc.contracts) ? (manifest.doc.contracts as Doc) : null;
+    const upkeep = contracts !== null && isObject(contracts.upkeep) ? (contracts.upkeep as Doc) : null;
+    if (upkeep === null) continue;
+    const registry = upkeep.registry;
+    if (typeof registry !== "string" || registry === ZERO_ADDRESS) continue;
+    const chain = isObject(manifest.doc.chain) ? (manifest.doc.chain as Doc) : null;
+    const chainId = chain === null ? undefined : chain.chainId;
+    if (typeof chainId !== "number") continue;
+    const record = chainRecords.find((e) => e.doc.chainId === chainId);
+    const automation =
+      record !== undefined && isObject(record.doc.automationRegistry)
+        ? (record.doc.automationRegistry as Doc)
+        : null;
+    const published = automation === null ? undefined : automation.address;
+    // Absent on either side is silence, not a failure: a chain record may predate the verified address, and a
+    // manifest may record no registration at all.
+    if (typeof published !== "string" || registry === published) continue;
+    fail(
+      manifest.sink,
+      "D28",
+      `contracts.upkeep.registry is ${registry} but config/chains/${chainId}.json publishes the Chainlink Automation registry ${published}; a registration against the wrong registry never runs (SPEC 10.3, ADR 039)`,
+    );
+  }
+
   // RA2: a release-authority record's recovery drill names the Safes the manifest gives the roles to.
   const byDeploymentId = new Map<string, Doc>();
   for (const entry of deployments) {

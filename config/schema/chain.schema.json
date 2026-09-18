@@ -58,6 +58,31 @@
           "required": ["genesisHash", "multicall3", "source"],
           "additionalProperties": false
         },
+        "automationRegistry": {
+          "anyOf": [
+            {
+              "type": "object",
+              "description": "The Chainlink Automation registry this chain publishes (SPEC section 10.3, ADR 039). Optional: a chain with no Automation deployment, or one nobody has verified yet, simply omits it. When a manifest records contracts.upkeep.registry, validator rule D28 requires it to be this address, so a wrong registry in a registration is caught here rather than by an upkeep that silently never runs.",
+              "properties": {
+                "address": { "$ref": "common.schema.json#/$defs/address" },
+                "checkGasLimit": {
+                  "type": "integer",
+                  "description": "Published checkGasLimit for this chain. checkUpkeep must complete under it or the registry records nothing due.",
+                  "minimum": 1
+                },
+                "performGasLimit": {
+                  "type": "integer",
+                  "description": "Published performGasLimit for this chain; the ceiling for the gas limit chosen at registration.",
+                  "minimum": 1
+                },
+                "source": { "$ref": "common.schema.json#/$defs/sourceRef" }
+              },
+              "required": ["address", "checkGasLimit", "performGasLimit", "source"],
+              "additionalProperties": false
+            },
+            { "type": "null" }
+          ]
+        },
         "rpcEnvVars": {
           "type": "object",
           "description": "Names only. The public endpoint serves the app; the operational endpoint serves keeper and indexer and requires full log history (SPEC section 10.3).",

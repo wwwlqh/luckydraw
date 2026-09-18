@@ -385,8 +385,13 @@ the Safe handover of section 4.
 
 3. **Look up the registry address for chain 97.** Chainlink publishes the Automation registry and registrar
    addresses per chain in its own documentation (`docs.chain.link`, Automation → Supported Networks). **Read it
-   from there and copy it.** Nothing in this repository knows the address and no value here should be taken on
-   trust; a wrong registry address is an upkeep that never runs.
+   from there and check it yourself**; a wrong registry address is an upkeep that never runs. As of 2026-09-18
+   that page gives chain 97 the registry `0x96bb60aAAec09A0FceB4527b81bbF3Cc0c171393` and chain 56
+   `0xDc21E279934fF6721CaDfDD112DAfb3261f09A2C`, and both are recorded lowercase in
+   `config/chains/97.json` and `config/chains/56.json` with that source URL and date. Validator rule `D28`
+   compares what you enter in step 5 against that record, so a typo fails section 5 rather than going quiet on
+   chain. If the documentation now disagrees with the record, the documentation wins: update the chain record and
+   its `source.date` in the same change.
 
 4. **Register a custom-logic upkeep.** Go to `automation.chain.link`, connect the wallet that will own the
    upkeep, choose **Register new upkeep → Custom logic**, and give it:
@@ -394,16 +399,37 @@ the Safe handover of section 4.
    - **Target contract address**: the `contracts.upkeep.address` from step 1.
    - **Gas limit**: 500,000 is comfortable. The most expensive single action is `closeRound` on a round that has
      to open its successor; `performUpkeep` performs exactly one action, so this is not a batch budget.
-   - **Check data**: leave it empty. Empty means "the first 16 pools and the newest 256 round ids", which covers
-     this deployment several times over. A deployment with more than 16 pools registers a second upkeep with
-     `checkData` set to `abi.encode(poolCursor, poolLimit, roundCursor, roundLimit)` for the next page.
+   - **Check data**: leave it empty. Empty does *not* mean "a fixed window that covers everything". It means
+     one rotating page per call: the current rounds of 4 pools and 96 round identifiers, with both page indices
+     derived from the block number (`(block.number / 20) % pageCount`), so successive blocks walk every page.
+     The pages are sized to stay under 8,000,000 gas, 20% below the 10,000,000 `checkGasLimit` this chain
+     publishes; a `checkUpkeep` above that limit is not an error you would see, it is an upkeep that quietly
+     reports nothing due.
+
+     **The number to know is the coverage time**: every round identifier is looked at once per
+     `ceil(roundCount / 96) × 20` blocks, which at BSC's ~3-second blocks is
+     `ceil(roundCount / 96) × 60` seconds — about 1 minute while the deployment has under 96 rounds, about
+     11 minutes at 1,000 rounds, about 105 minutes at 10,000. Pools rotate the same way, at
+     `ceil(poolCount / 4) × 60` seconds, which is one page and no rotation at all for a two-pool deployment.
+     Round ids are one global sequence across every pool, so this number grows with the *whole* deployment, not
+     with one pool: check it against `roundCount()` from time to time.
+
+     **Register a second upkeep with a cursor** when that coverage time is longer than you are willing to leave
+     a closed round unrequested — in practice, when your keeper may be down for longer than it, or when
+     `roundCount` has grown past a few thousand. Set that one's **Check data** to
+     `abi.encode(poolCursor, poolLimit, roundCursor, roundLimit)`: an explicit cursor pins one fixed page and
+     never rotates, so it is the way to keep a particular slice (the newest 96 ids, say:
+     `abi.encode(0, 0, roundCount - 96, 96)`, re-set as the sequence grows) under continuous watch while the
+     empty-`checkData` upkeep keeps sweeping everything else. The same override covers a deployment with more
+     than 4 pools that wants one pool page watched continuously.
    - **Starting balance**: LINK. You need testnet LINK on chain 97 from `faucets.chain.link`, and the upkeep is
      funded in LINK even though the Draw's VRF subscription is billed in native BNB. These are two separate
      balances: draining one does not touch the other.
 
-5. **Record what registration produced.** Put the registry address in `contracts.upkeep.registry` and the
-   registry's upkeep id in `contracts.upkeep.upkeepId` (a decimal string). The validator's rule `D28` requires
-   both or neither, so a half-filled record fails section 5.
+5. **Record what registration produced.** Put the registry address in `contracts.upkeep.registry`, **lowercase**
+   like every other address in `config/`, and the registry's upkeep id in `contracts.upkeep.upkeepId` (a decimal
+   string). Rule `D28` requires both or neither, so a half-filled record fails section 5, and it compares the
+   registry with `config/chains/97.json`'s `automationRegistry.address`, so a wrong one fails there too.
 
 6. **Check it.** Re-run `Verify` (section 3) and watch the upkeep's history in the Automation app. With the
    keeper also running, most actions will be the keeper's: the two race and the loser reverts with a named error,
