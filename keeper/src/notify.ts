@@ -21,6 +21,7 @@
 // difference between an alert and a denial of service against the operator's phone.
 
 import {type LogFields, type Logger, redactUrls} from "./log.ts";
+import {fetchOverNodeHttp} from "./transport.ts";
 
 /** One alert per cause per hour (SPEC §10.3 "repeat interval"). */
 export const ALERT_REPEAT_MS = 3_600_000;
@@ -106,7 +107,10 @@ function summarise(cause: AlertCause, fields: Record<string, string | number | b
  */
 export function createNotifier(options: NotifierOptions): Notifier {
   const {logger} = options;
-  const doFetch = options.fetch ?? (globalThis.fetch as unknown as FetchLike);
+  // `fetchOverNodeHttp`, not `globalThis.fetch`: Node's global fetch is undici, whose HTTP parser is a
+  // WebAssembly module, and the hardened unit runs Node with `--jitless` (transport.ts). Under the global
+  // one the heartbeat would fail every cycle - a dead man's switch that is itself dead.
+  const doFetch = options.fetch ?? (fetchOverNodeHttp as FetchLike);
   const now = options.now ?? ((): number => Date.now());
   const timeoutMs = options.timeoutMs ?? NOTIFY_TIMEOUT_MS;
   const lastAlertAt = new Map<AlertCause, number>();

@@ -2,6 +2,8 @@
 // into sending.
 
 import assert from "node:assert/strict";
+import {existsSync} from "node:fs";
+import {tmpdir} from "node:os";
 import {join} from "node:path";
 import test from "node:test";
 import {
@@ -10,6 +12,7 @@ import {
   DEFAULT_INTERVAL_MS,
   DEFAULT_LOG_WINDOW,
   type Environment,
+  findRepoRoot,
   loadConfig,
   manifestPathOf,
   REPO_ROOT,
@@ -44,6 +47,19 @@ test("the manifest path is <deployments>/<chainId>/<lowercase draw address>.json
     manifestPathOf(config),
     join(REPO_ROOT, "config", "deployments", "31337", `${DRAW}.json`),
   );
+});
+
+test("the repository root is found by the workspace marker, from src and from dist alike", () => {
+  // `keeper/src` and the built `keeper/dist/keeper/src` are different distances from the root, which is why
+  // this walks up to `pnpm-workspace.yaml` instead of counting levels. The hardened unit runs the built file.
+  assert.strictEqual(REPO_ROOT, findRepoRoot(import.meta.dirname));
+  assert.ok(existsSync(join(REPO_ROOT, "pnpm-workspace.yaml")));
+  assert.strictEqual(findRepoRoot(join(REPO_ROOT, "keeper", "dist", "keeper", "src")), REPO_ROOT);
+  assert.strictEqual(findRepoRoot(REPO_ROOT), REPO_ROOT);
+  // No marker anywhere above: the old two-levels-up behaviour, so a lone `dist/` tree still resolves to
+  // *something* and the operator overrides it with KEEPER_DEPLOYMENTS_DIR.
+  const orphan = join(tmpdir(), "luckydraw-no-workspace", "a", "b");
+  assert.strictEqual(findRepoRoot(orphan), join(tmpdir(), "luckydraw-no-workspace"));
 });
 
 test("both signing modes at once is refused", () => {

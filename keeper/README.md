@@ -392,12 +392,35 @@ sudo sh -c 'read -rs KEY && printf "%s" "$KEY" > /etc/luckydraw/keeper-private-k
 sudo install -m 0600 -o root -g root keeper/deploy/luckydraw-keeper.env.example /etc/luckydraw/keeper.env
 sudo "$EDITOR" /etc/luckydraw/keeper.env        # replace every <...> placeholder
 
-# 4. the unit; edit WorkingDirectory, ExecStart and User if your paths differ
+# 4. the built JavaScript: the unit runs `node --jitless dist/keeper/src/main.js`, not src/main.ts
+npx pnpm@12.3.4 --filter @luckydraw/keeper build      # repeat after every git pull
+
+# 5. the unit; edit WorkingDirectory, ExecStart and User if your paths differ
 sudo install -m 0644 keeper/deploy/luckydraw-keeper.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now luckydraw-keeper
 journalctl -u luckydraw-keeper -f
 ```
+
+### Jitless on hardened hosts
+
+The unit runs `node --jitless dist/keeper/src/main.js`. Both halves of that are load-bearing on an
+SELinux-enforcing host (found on Oracle Linux 9.7 aarch64, Node v24.21.0, 2026-09-18). The exact strings, so
+the next operator can grep for them:
+
+| What you see | Why | What fixes it |
+| --- | --- | --- |
+| `# Fatal error in , line 0` / `# Check failed: 12 == (*__errno_location ()).`, a SIGTRAP inside `node::NewIsolate`, while the same binary starts fine in an interactive shell | V8 cannot get its JIT/code-range mapping inside the unit's SELinux domain, with `NoNewPrivileges` and the rest of the sandbox | `--jitless`. A keeper spends its time waiting on sockets, so it costs nothing |
+| `ERR_WEBASSEMBLY_NOT_SUPPORTED` from `src/main.ts` | jitless Node has no WebAssembly, and Node's TypeScript type stripping needs it | run the built JavaScript: `pnpm --filter @luckydraw/keeper build`, then `dist/keeper/src/main.js` |
+| `refused_to_start reason="eth_chainId could not be read: "` — an empty reason | Node's global `fetch` is undici, whose HTTP parser is a WebAssembly module, so ethers' `FetchRequest` failed with a `TypeError: fetch failed` whose real explanation (`WebAssembly is not defined`) was in `cause` and not in `message` | fixed in the keeper: `src/transport.ts` registers a `node:https` transport for every request, and the reason now falls through to the cause when the message is empty |
+| a refusal naming a manifest path with `dist` in it | — | fixed: the keeper finds the checkout root by walking up to `pnpm-workspace.yaml`, so `src/` and `dist/` resolve the same `config/` tree. Only a `dist/` deployed without the workspace file above it needs `KEEPER_DEPLOYMENTS_DIR` |
+
+`src/transport.ts` is installed unconditionally, not behind a flag: the transport the operator's host runs is
+then the one the tests and the local dry-run exercise, and undici's behavioural differences leave the picture
+entirely. It is also what the heartbeat and the alert webhook go through, for the same reason — under the
+global `fetch` a jitless host would log `heartbeat_failed` every cycle, which is a dead man's switch that is
+itself dead. It never puts the request URL into an error message; the worst it can surface is what `node:net`
+says, a host and a port.
 
 `LoadCredential=keeper-private-key:/etc/luckydraw/keeper-private-key` makes systemd copy the file into a
 per-invocation tmpfs readable only by the service user and export that directory as `$CREDENTIALS_DIRECTORY`;

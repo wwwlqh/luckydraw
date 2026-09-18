@@ -35,6 +35,7 @@ import {
   verifyDeployment,
 } from "./client.ts";
 import {ConfigError, chainRecordPathOf, type KeeperConfig, manifestPathOf} from "./config.ts";
+import {describeError} from "./transport.ts";
 
 /** A refusal to start. The keeper exits non-zero; it never continues with a partial check. */
 export class StartupError extends Error {
@@ -178,8 +179,11 @@ export async function nodeChainId(provider: RawRpcProvider): Promise<bigint> {
   try {
     raw = await provider.send("eth_chainId", []);
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new StartupError(`eth_chainId could not be read: ${message}`);
+    // `describeError`, not `error.message`: the first gate to touch the network is the one an operator reads
+    // when nothing works, and a `TypeError` whose explanation lives in `cause` (`fetch failed` ->
+    // `WebAssembly is not defined`, under `node --jitless`) printed this as
+    // `refused_to_start reason="eth_chainId could not be read: "` - a blank reason, with nothing to grep.
+    throw new StartupError(`eth_chainId could not be read: ${describeError(error)}`);
   }
   if (typeof raw !== "string" || !HEX_QUANTITY.test(raw)) {
     throw new StartupError(`eth_chainId returned ${JSON.stringify(raw)}, which is not a hex quantity`);

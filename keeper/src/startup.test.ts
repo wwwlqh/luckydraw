@@ -184,6 +184,36 @@ test("an unreachable node is a refusal with the node's own message", async () =>
   );
 });
 
+test("a transport error with no message still names itself: the reason is never blank", async () => {
+  const config = loadConfig(env());
+  const manifest = loadManifest(config, readFixture);
+  // The exact failure an operator hit under `node --jitless`: undici's WebAssembly parser is absent, so the
+  // global `fetch` throws a `TypeError` whose `message` is "fetch failed" and whose real explanation is in
+  // `cause`. The blank variant below is the same shape with an empty message, which printed
+  // `refused_to_start reason="eth_chainId could not be read: "` - nothing to grep, nothing to search for.
+  const blank: StartupProvider = {
+    ...noSnapshot("the reason is decided before any block is read"),
+    async getNetwork(): Promise<{chainId: bigint}> {
+      return {chainId: 31337n};
+    },
+    async send(): Promise<unknown> {
+      throw new TypeError("", {cause: new ReferenceError("WebAssembly is not defined")});
+    },
+    async getCode() {
+      return "0x";
+    },
+    async call() {
+      return "0x";
+    },
+  };
+  await assert.rejects(
+    () => assertChainId(config, blank, manifest),
+    (error: unknown) =>
+      error instanceof StartupError &&
+      error.message === "eth_chainId could not be read: TypeError: WebAssembly is not defined",
+  );
+});
+
 test("the chain-id gate asks the node, not the static network it was configured with (F1)", async () => {
   const config = loadConfig(env());
   const manifest = loadManifest(config, readFixture);

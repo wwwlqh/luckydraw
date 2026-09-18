@@ -19,11 +19,28 @@ StartLimitIntervalSec=0
 
 [Service]
 Type=simple
-; EDIT: the checkout. It must contain config/deployments/<chainId>/<draw>.json, because that is where the
-; keeper looks for the manifest unless KEEPER_DEPLOYMENTS_DIR says otherwise.
+; EDIT: the checkout. Its *root* (the directory holding pnpm-workspace.yaml, one level up from here) must
+; contain config/deployments/<chainId>/<draw>.json: the keeper finds the repository root by walking up from
+; its own file to that marker, which lands in the same place whether it runs from src/ or from dist/.
+; KEEPER_DEPLOYMENTS_DIR overrides it for a manifest tree kept outside the checkout.
 WorkingDirectory=/opt/luckydraw/keeper
-; EDIT: node 24 or newer. The keeper runs its TypeScript sources directly under Node's type stripping.
-ExecStart=/usr/bin/node src/main.ts
+; EDIT: node 24 or newer, and the path to it (/usr/local/bin/node on a tarball install).
+;
+; --jitless, and the *built* JavaScript rather than src/main.ts. On an SELinux-enforcing host the sandbox
+; below refuses V8 the JIT/code-range mapping it wants, and Node dies before it runs a line of the keeper:
+;   # Fatal error in , line 0
+;   # Check failed: 12 == (*__errno_location ()).
+; (SIGTRAP inside node::NewIsolate; the same binary starts fine in an interactive shell). --jitless removes
+; that mapping and the process starts. It costs a keeper nothing - it sends a few dozen JSON-RPC requests a
+; minute and spends its time waiting on sockets - and it is why the built file is named here: jitless Node
+; has no WebAssembly, and Node's TypeScript type stripping needs it (ERR_WEBASSEMBLY_NOT_SUPPORTED), so
+; src/main.ts cannot be the entry point. Run `pnpm --filter @luckydraw/keeper build` before starting the
+; unit, and after every `git pull` (keeper/README.md, "Jitless on hardened hosts").
+;
+; The same missing WebAssembly breaks Node's global fetch (undici's parser is a WebAssembly module); the
+; keeper therefore sends every HTTPS request over node:https itself (keeper/src/transport.ts), which needs
+; no build flag and no environment variable.
+ExecStart=/usr/local/bin/node --jitless dist/keeper/src/main.js
 
 ; --- identity -------------------------------------------------------------------------------------------
 ; EDIT if you named the account differently. Create it with:

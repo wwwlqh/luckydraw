@@ -12,7 +12,8 @@
 // constructs the wallet. Nothing that a log line, an error message or a test snapshot can reach ever holds
 // the value.
 
-import {join} from "node:path";
+import {existsSync} from "node:fs";
+import {dirname, join, resolve} from "node:path";
 import {type Address, isAddress} from "./client.ts";
 import {type KeySource, privateKeySource} from "./credentials.ts";
 
@@ -53,8 +54,32 @@ export type KeeperConfig = {
 
 export type Environment = Readonly<Record<string, string | undefined>>;
 
-/** Repository root, two levels above `keeper/src`. */
-export const REPO_ROOT = join(import.meta.dirname, "..", "..");
+/**
+ * The repository root: the nearest ancestor directory holding `pnpm-workspace.yaml`.
+ *
+ * Not `join(import.meta.dirname, "..", "..")`. That is right for `keeper/src/config.ts` and wrong for the
+ * built copy: `tsconfig.build.json` has `rootDir: ".."`, so the compiled file is at
+ * `keeper/dist/keeper/src/config.js` and two levels up is `keeper/dist`. The operator's host runs the built
+ * file (the hardened unit needs `node --jitless`, which cannot type-strip TypeScript), and the symptom was a
+ * manifest that "could not be read" from a path with `dist` in it. Walking up to the workspace marker is
+ * correct in both modes and needs no environment variable in either.
+ *
+ * `KEEPER_DEPLOYMENTS_DIR`/`KEEPER_CHAINS_DIR` still override it, for a manifest tree kept outside the
+ * checkout. The fallback - two levels up, the old behaviour - covers a copy of `dist/` deployed on its own,
+ * with no workspace file anywhere above it; the paths it produces are then wrong in the same way they were
+ * before, and the operator sets the variable, which is what the template says.
+ */
+export function findRepoRoot(start: string = import.meta.dirname): string {
+  let dir = resolve(start);
+  for (;;) {
+    if (existsSync(join(dir, "pnpm-workspace.yaml"))) return dir;
+    const parent = dirname(dir);
+    if (parent === dir) return resolve(start, "..", "..");
+    dir = parent;
+  }
+}
+
+export const REPO_ROOT = findRepoRoot();
 
 export const DEFAULT_INTERVAL_MS = 15_000;
 export const DEFAULT_LOG_WINDOW = 2_000n;

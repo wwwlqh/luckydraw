@@ -19,9 +19,14 @@ import {createNotifier} from "./notify.ts";
 import type {LogQuery} from "./refunds.ts";
 import {createDispatcher, createSender} from "./sender.ts";
 import {prepare} from "./startup.ts";
+import {installNodeHttpTransport} from "./transport.ts";
 
 export async function main(): Promise<number> {
   const logger = createLogger();
+  // Before anything can send a request. Every `FetchRequest` in the process - the provider's, the
+  // heartbeat's - then goes over `node:https` instead of whichever of ethers' two implementations this
+  // install resolved, which is what makes the keeper work under `node --jitless` (transport.ts).
+  installNodeHttpTransport();
   // Inside the `try`, not before it. `loadConfig` throws `ConfigError` for the commonest operator mistake
   // there is - a variable that is missing, misspelled or holds the wrong thing - and outside the `try` that
   // arrived as an uncaught stack trace on stderr instead of the one `refused_to_start` line the runbook and

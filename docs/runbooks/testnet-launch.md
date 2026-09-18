@@ -499,6 +499,19 @@ Prefix the last command with `KEEPER_DRY_RUN=1` for a rehearsal first: everythin
 nothing is sent. The key never goes into a file, a shell rc file or a process argument, and the keeper never
 logs it or the RPC URL.
 
+For the long-running install, use the systemd unit in `keeper/deploy/` (`keeper/README.md`, "Running it under
+systemd"). Build it first — the unit runs the compiled JavaScript under `--jitless`, because on an
+SELinux-enforcing host V8 cannot get its JIT mapping inside the sandbox and Node dies at start-up, and jitless
+Node cannot type-strip TypeScript:
+
+```bash
+npx pnpm@12.3.4 --filter @luckydraw/keeper build      # repeat after every git pull
+# the unit's line, for reference:
+#   ExecStart=/usr/local/bin/node --jitless dist/keeper/src/main.js
+```
+
+The symptom strings for each part of that are in `keeper/README.md`, "Jitless on hardened hosts".
+
 Watch the first few cycles. `event=action_sent … action=seedRound` means section 4 worked. Repeated
 `skip=SeedNotAuthorized`, `skip=InsufficientSeedBalance` or `event=request_precheck_failed` means the seed
 authorization, the Safe's Vault balance or the VRF subscription needs attention. Ten consecutive failed cycles
