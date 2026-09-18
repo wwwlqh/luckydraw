@@ -595,6 +595,70 @@ describe("plans", () => {
     });
     assertRules(result, ["M1"]);
   });
+
+  // PL9w: a plan is a draft, so the fields only the operator can supply are allowed to hold the documented
+  // placeholder - but never silently. The warning names every one of them, so nothing has to be remembered.
+  it("PL9w: placeholders in a plan warn, naming each field, and do not fail the run", () => {
+    const result = caseFor("valid-plan", TESTNET_PLAN, (doc) => {
+      doc.ownership.finalOwner = "0x504c414345484f4c444552000000000000000001";
+      doc.ownership.feeAccount = "0x504c414345484f4c444552000000000000000002";
+      doc.ownership.seedAccount = "0x504c414345484f4c444552000000000000000003";
+      doc.vrf.subscriptionId = "0";
+    });
+    assertRules(result, []);
+    const placeholder = result.warnings.filter((w) => w.startsWith("[PL9w]"));
+    assert.equal(placeholder.length, 1);
+    for (const field of [
+      "ownership.finalOwner",
+      "ownership.feeAccount",
+      "ownership.seedAccount",
+      "vrf.subscriptionId",
+    ]) {
+      assert.ok(placeholder[0].includes(field), `PL9w did not name ${field}: ${placeholder[0]}`);
+    }
+  });
+
+  it('PL9w: a subscription id of "0" is a placeholder on its own', () => {
+    const result = caseFor("valid-plan", TESTNET_PLAN, (doc) => {
+      doc.vrf.subscriptionId = "0";
+    });
+    assertRules(result, []);
+    const placeholder = result.warnings.filter((w) => w.startsWith("[PL9w]"));
+    assert.equal(placeholder.length, 1);
+    assert.match(placeholder[0], /vrf\.subscriptionId still holds an operator placeholder/);
+  });
+
+  it("a plan with no placeholder reports no PL9w", () => {
+    const run = validateTree(join(FIXTURES, "valid-plan"));
+    const result = resultFor(run, "first-testnet.plan.json");
+    assert.equal(result.warnings.filter((w) => w.startsWith("[PL9w]")).length, 0);
+  });
+});
+
+describe("operator placeholders in a manifest", () => {
+  // PL9: the same value in a deployment manifest is a failure, not a warning. A manifest describes contracts
+  // that already exist, and this one is the case nothing else catches: Deploy refuses a privileged role whose
+  // address has no code, but an unreplaced subscription id is frozen into the Draw's constructor and is only
+  // noticed by the coordinator at the first requestDraw.
+  it("PL9: a placeholder subscription id in a mainnet manifest is rejected", () => {
+    const result = caseFor("valid-mainnet", MAINNET_MANIFEST, (doc) => {
+      doc.vrf.subscriptionId = "0";
+      doc.contracts.draw.constructorArgs.subscriptionId = "0";
+    });
+    assertRules(result, ["PL9"]);
+    assert.match(result.errors[0], /vrf\.subscriptionId still holds an operator placeholder/);
+  });
+
+  it("PL9: a placeholder Safe address in a mainnet manifest is reported by name", () => {
+    const result = caseFor("valid-mainnet", MAINNET_MANIFEST, (doc) => {
+      doc.ownership.seedAccount = "0x504c414345484f4c444552000000000000000003";
+    });
+    assert.ok(tagsOf(result).includes("PL9"), `expected PL9, got ${tagsOf(result).join(", ")}`);
+    assert.ok(
+      result.errors.some((e) => e.startsWith("[PL9]") && e.includes("ownership.seedAccount")),
+      result.errors.join("\n"),
+    );
+  });
 });
 
 describe("uint256 handling", () => {

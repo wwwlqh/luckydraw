@@ -94,6 +94,34 @@ two agree, so nothing is lost by the shorter file name.
   launch day: by the time a manifest exists, the mainnet Safes already hold the owner, treasury and seed roles.
   Write the release-authority record first.
 
+## Placeholders for values only the operator can supply
+
+A deployment plan can be prepared before the operator has created a Safe or a VRF subscription: every chain
+fact in it is read-only work, and the three Safe addresses and the subscription id are the only fields that
+need a key to exist. A plan in that state carries **placeholders**, written so that they are valid documents
+the validator can still check end to end, and so that nobody can mistake one for a real value.
+
+| Field | Placeholder | Why not something else |
+|---|---|---|
+| `ownership.finalOwner` | `0x504c414345484f4c444552000000000000000001` | The zero address is refused by rule `O3`, and three zeros would also fail `O1`, which needs the three mainnet roles to be three distinct addresses — so a zero placeholder would fail twice over for reasons that say nothing about the missing Safe |
+| `ownership.feeAccount` | `0x504c414345484f4c444552000000000000000002` | same |
+| `ownership.seedAccount` | `0x504c414345484f4c444552000000000000000003` | same |
+| `vrf.subscriptionId` | `"0"` | The id has no address shape to carry the sentinel. VRF numbers subscriptions from 1 upwards, and a coordinator answers `getSubscription(0)` with `InvalidSubscription`, so `"0"` is a value no deployment can be built on |
+
+The address form is the ASCII of `PLACEHOLDER` (`0x504c414345484f4c444552`) followed by a one-byte index: a
+syntactically valid lowercase address that no key can control and that reads as a placeholder in a diff, an
+explorer or an error message.
+
+Rule `PL9w` reports every placeholder still in a plan as a **warning**, naming each field, because a plan is a
+draft the operator finishes. Rule `PL9` reports the same thing in a deployment **manifest** as a failure: a
+manifest describes contracts that exist. Only some of these are caught elsewhere — `Deploy` refuses a
+privileged role whose address has no code, so an unreplaced Safe does stop there, but an unreplaced
+subscription id is frozen into the Draw's constructor and is only noticed by the coordinator at the first
+`requestDraw`, long after it can be changed.
+
+The keeper signer address is an operator value too and is deliberately **not** a field of any document here:
+it lives in the keeper host's environment, and SPEC §15 keeps signer identities out of the public record.
+
 ## Mocks
 
 A mock exists only in the `local` environment. The validator rejects any `testnet` or `mainnet`
@@ -199,6 +227,7 @@ in `scripts/validate_config.ts`, each with a rule tag that appears in its error 
 | `D28` | The optional `contracts.upkeep` (Chainlink Automation executor, SPEC §10.3, ADR 039) names `contracts.draw.address` as its `draw`, is neither the Vault nor the Draw nor any of the three privileged roles, sits at or above `chain.startBlock`, and carries `registry` and `upkeepId` together or not at all. When both the manifest's `registry` and the chain record's `automationRegistry.address` are present, they must be the same address (cross-record): a registration against the wrong registry is not an error anything on chain reports, it is an upkeep that is simply never called. Absent on either side is silence. Absent altogether is valid: the executor is a third executor, not a dependency |
 | `D26` | `release.customerLaunch` is true on mainnet only once `release.shakedown.performed` is true (SPEC §14) |
 | `D27` | A performed shakedown records its date, round ids, callback gas, request-to-fulfilment latency and cost per draw, and each is a value a real fulfilment could produce: `0 < callbackGasUsed <= vrf.callbackGasLimit`, `requestToFulfilmentSeconds >= 1`, `costPerDrawNativeWei != "0"`, and `date` at or after the manifest's `createdAtUtc` |
+| `PL9`/`PL9w` | An operator placeholder (see "Placeholders for values only the operator can supply") is a warning in a plan, which is a draft, and a failure in a deployment manifest, which describes contracts that exist. The message names every field still holding one |
 | `O1`/`O2w` | Mainnet needs three distinct Safes; testnet may share one (SPEC §12.1) |
 | `O4` | Mainnet needs a nonzero `makeWholeReserve` and `makeWholeCap`; `local` and `testnet` may leave them null or `"0"` |
 | `T1` | `toolchain` matches the pins in `contracts/foundry.toml` |

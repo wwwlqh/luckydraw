@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "name": "mainnet",
+  "environment": "mainnet",
+  "notes": "Chain 56 deployment plan, prepared 2026-09-18 as the read-only half of docs/runbooks/mainnet-launch.md. Nothing here was signed, sent or funded: every chain fact below was read with eth_call against BOTH public endpoints https://bsc-dataseed.bnbchain.org and https://bsc-rpc.publicnode.com and agreed on the two, the way ADR 037 verified the USDT candidate. The five values only the operator can supply are marked, and the validator names them again (rule PL9w). ONE POOL, NATIVE BNB ONLY: ADR 040 defers the ADR 037 Binance-Peg USDT admission, so config/assets/56/usdt.json stays a candidate and gets no pool here; adding it later is an operator process, not an edit to this file. PLACEHOLDERS STILL TO REPLACE, each with a value verified against the live chain on the day (config/README.md, \"Placeholders for values only the operator can supply\"): (1) ownership.finalOwner - the owner Safe, currently 0x504c414345484f4c444552000000000000000001; (2) ownership.feeAccount - the treasury Safe, currently ...0002; (3) ownership.seedAccount - the seed Safe, currently ...0003; (4) vrf.subscriptionId - currently \"0\", which is not a subscription any coordinator will answer for; (5) the keeper signer address, which is not a field of this document at all - it goes in KEEPER_DRAW_ADDRESS's neighbour on the keeper host and nowhere in config/, and it must be a dedicated key that is none of the three Safes and not the subscription owner (runbook section 1.8). Each placeholder address is the ASCII of \"PLACEHOLDER\" followed by an index, so it is a syntactically valid address no key can control and it reads as a placeholder in any diff or explorer. The three Safes must be three DISTINCT addresses with deployed code (rules O1 and O3, and Deploy refuses a privileged role with no code), and ownership.safes[] should be filled with the sanitised configurations read off the chain in runbook section 1.2. VRF, verified on chain 2026-09-18: coordinator 0xd691f04bc0c9a24edb78af9e005cf85768f694c9 from the Chainlink supported-networks page, 48,191 bytes of code on both endpoints; the key hash is the LOWEST gas lane of the three that page lists for BNB Chain mainnet (200 gwei 0x130dba50..., 500 gwei 0xeb0f7253..., 1000 gwei 0xb94a4fdb...), and s_provingKeys reported it registered with maxGas exactly 200000000000 wei on both endpoints (the 500 and 1000 lanes were also probed and report 5e11 and 1e12, which is what makes 200 gwei the lowest rather than an assumption). getSubscription(uint256) exists: it reverts InvalidSubscription for id 0 rather than being absent, which is the getter Deploy asserts. The premium and flat fee in maxRequestCostDerivation were read from the coordinator's own s_config, not from the documentation: nativePremiumPercentage 60 and fulfillmentFlatFeeNativePPM 0, alongside minimumRequestConfirmations 3, maxGasLimit 2,500,000 and gasAfterPaymentCalculation 48,500 - identical on both endpoints. maxRequestCostNative is therefore 200 gwei x (300,000 callback + 200,000 verification overhead) x 1.60 = 0.16 BNB, a ceiling frozen into the Draw at construction with no setter; the real cost of a fulfilment is far below it (chain 97's live round paid 273,060,800,000,000 wei, about 0.00027 BNB), and the ceiling exists so an accepted request can never cost more than the subscription was checked for. lowFundingThresholdNative equals one maxRequestCostNative, the same relationship config/deployments/97/testnet.plan.json uses; runbook section 1.4 asks for the subscription to be funded above that PLUS at least 30 draws of headroom, and a round that is accepted and never fulfilled raises the requestDraw floor by one maxRequestCostNative permanently. measuredCallbackGasUsed 67,184 is the FOUNDRY measurement, not a mainnet observation: `FOUNDRY_OUT=out/mainnet-gas FOUNDRY_CACHE_PATH=cache/mainnet-gas forge test --match-test test_Gas_CloseRequestSettleAndCallback -vv` reported `callback (two nonzero words, cold) 67184 150000` on forge 1.8.1 with the pinned toolchain below, which is 45% of the section 11.2 ceiling of 150,000 and 22% of the configured 300,000 callbackGasLimit. The MAINNET number is a different field on purpose and is measured during the shakedown into release.shakedown.callbackGasUsed; a large gap between the two is a finding, not a rounding error. FEED: the BNB/USD proxy, its aggregator bounds and the measured p99.9 update interval are copied from config/assets/56/bnb.json, which records the full evidence, why the 8-decimal proxy was chosen over the 18-decimal SVR variant, and why the observation window is one day rather than the thirty runbook section 1.6 suggests (neither public endpoint is archive-capable). SIZING THE SEED, per runbook section 2: a pool has seven kinds under ADR 036, so a quiet month is 3 daily tiers x 30 days = 90 rounds, plus 3 weekly tiers x 4.35 weeks = 13, plus 1 monthly = 104 funded rounds, each spending one seedAmount out of the Vault balance the seed Safe deposited and returning nothing when the round settles. seedAmount 0.003 BNB was chosen from the floor, not from the chain 97 figure: SPEC section 5.4 wants a seed well above the USD 1 reference minimum, and at the USD 754.97 the feed answered on 2026-09-18 this is USD 2.27 and stays above USD 1 until BNB falls below USD 334, a 56% drop. Copying chain 97's 0.001 BNB would have been USD 0.76, below the minimum entry the contract will accept, so a lone player would get a refund instead of the draw the seed exists to guarantee - harmless with faucet money, not with this. The month then costs 104 x 0.003 = 0.312 BNB of seeds plus roughly 104 x 0.0003 = 0.032 BNB of VRF and keeper gas (chain 97 measured 273,060,800,000,000 wei of VRF payment and 33,446,400,000,000 wei of keeper gas on its settled round), about 0.35 BNB or USD 260 a month at that price, and it must be an amount the operator is willing to lose: a seed is a real entry that can win, and when it loses the money goes to the winner. seedAuthorizedMaxPerRound is 2x seedAmount, the same ratio as both chain 97 pools, so setSeedAmount can be raised once from the owner Safe without a second Safe transaction from the seed account. Deposit at least a month of seeds (0.35 BNB, rounded up) in runbook section 4 step 3 and top it up on a schedule rather than on an alert. MAKE-WHOLE: makeWholeReserve 0.5 BNB and makeWholeCap 0.25 BNB are proposals the operator must confirm and, unlike every other number here, must actually HOLD - section 7.3 commits the operator to reimbursing an affected buyer's gross entry from the treasury Safe within 3 business days if a round sits in Drawing for more than 7 days, up to the published cap, and the app publishes the reserve, the cap and the current sum of gross in Drawing and Ready on /verify. At launch scale a stuck round holds a handful of small entries, so the cap covers one incident with room and the reserve covers two; raise both before the pools carry more. Rule O4 rejects a null or zero, so these cannot be left blank, which is why they are numbers rather than placeholders - they are still the operator's decision. WHAT REMAINS BEFORE Deploy IS SIGNED is docs/runbooks/mainnet-operator-checklist.md in order; nothing in this file is evidence that any of it has happened.",
+  "chain": {
+    "chainId": 56,
+    "name": "bsc-mainnet",
+    "nativeSymbol": "BNB",
+    "explorerUrl": "https://bscscan.com",
+    "confirmationDepth": 200,
+    "rpcEnvVars": {
+      "public": "LUCKYDRAW_RPC_URL",
+      "operational": "LUCKYDRAW_OPS_RPC_URL"
+    }
+  },
+  "toolchain": {
+    "foundry": "1.8.1",
+    "solc": "0.8.28",
+    "evmVersion": "paris",
+    "optimizer": true,
+    "optimizerRuns": 600,
+    "viaIr": true,
+    "bytecodeHash": "none"
+  },
+  "vrf": {
+    "coordinator": "0xd691f04bc0c9a24edb78af9e005cf85768f694c9",
+    "coordinatorIsMock": false,
+    "subscriptionId": "0",
+    "keyHash": "0x130dba50ad435d4ecc214aad0d5820474137bd68e7e77724144f27c3c377d3d4",
+    "nativeBilling": true,
+    "requestConfirmations": 200,
+    "numWords": 2,
+    "callbackGasLimit": 300000,
+    "maxRequestCostNative": "160000000000000000",
+    "maxRequestCostDerivation": {
+      "maxGasPriceWei": "200000000000",
+      "verificationGasOverhead": 200000,
+      "premiumPercentage": 60,
+      "flatFeeNativeWei": "0",
+      "note": "200 gwei lane, the lowest of the three the Chainlink supported-networks page lists for BNB Chain mainnet (s_provingKeys maxGas = 200000000000 for this key hash, read from the deployed coordinator on both public endpoints 2026-09-18) x (300000 callback + 200000 max verification gas from docs.chain.link/vrf/v2-5/billing) x 1.60 (s_config nativePremiumPercentage = 60 and fulfillmentFlatFeeNativePPM = 0, read from the same coordinator on both endpoints 2026-09-18) = 0.16 BNB."
+    },
+    "keyHashGetter": "s_provingKeys(bytes32)",
+    "lowFundingThresholdNative": "160000000000000000",
+    "measuredCallbackGasUsed": 67184,
+    "source": {
+      "url": "https://docs.chain.link/vrf/v2-5/supported-networks",
+      "date": "2026-09-18"
+    }
+  },
+  "ownership": {
+    "finalOwner": "0x504c414345484f4c444552000000000000000001",
+    "feeAccount": "0x504c414345484f4c444552000000000000000002",
+    "seedAccount": "0x504c414345484f4c444552000000000000000003",
+    "makeWholeReserve": "500000000000000000",
+    "makeWholeCap": "250000000000000000",
+    "note": "PLACEHOLDERS: all three addresses are the documented operator placeholder and must be replaced with the three real chain 56 Safes before Deploy is signed. SPEC section 10.5: three SEPARATE Safes (owner, treasury/fee account, seed account), each 2-of-3 with independently generated hardware keys, held by distinct people where possible, no enabled modules and no custom guard, each configuration read off the chain rather than off the screen they were created on and recorded sanitised in ownership.safes[]. The recovery drill is performed on these Safes BEFORE Deploy and recorded under custody.recoveryDrill in a release-authority record whose deploymentId matches the manifest (rules RA2 and RA3). The fee account is frozen into every round at creation and can never be changed for rounds that already exist. The final owner must accept both Ownable2Step transfers, and the seed account must call Vault.authorizeSeed itself before any seed entry: nobody, including the owner, can consent to spending the seed Safe's balance on its behalf."
+  },
+  "assets": [
+    {
+      "asset": "0x0000000000000000000000000000000000000000",
+      "native": true,
+      "symbol": "BNB",
+      "name": "BNB",
+      "decimals": 18,
+      "isMock": false,
+      "depositsEnabled": true,
+      "exactTransferEvidence": "Native path: the Vault credits exactly msg.value and checks the exact debit on withdrawal, so no token transfer hook can change the amount (SPEC section 3.1). There is no token contract and no issuer in the path at all.",
+      "status": "approved",
+      "source": {
+        "url": "https://docs.bnbchain.org/bnb-smart-chain/",
+        "date": "2026-09-18"
+      },
+      "price": {
+        "feed": "0x0567f2323251f0aab15c8dfb1967e4e8a7d42aee",
+        "feedIsMock": false,
+        "feedDecimals": 8,
+        "baseQuote": "BNB/USD",
+        "heartbeatSeconds": 27,
+        "observedP999IntervalSeconds": 44,
+        "observationWindow": {
+          "fromBlock": 122376299,
+          "toBlock": 122568202,
+          "samples": 2628
+        },
+        "maxPriceAge": 3600,
+        "minAnswer": "1",
+        "maxAnswer": "95780971304118053647396689196894323976171195136475135",
+        "answerBoundsConfirmedAbsent": false,
+        "referenceKind": "ExactToken",
+        "displayLabel": "BNB/USD",
+        "pegAssumption": null,
+        "verifiedOn": "2026-09-18",
+        "source": {
+          "url": "https://reference-data-directory.vercel.app/feeds-bsc-mainnet.json",
+          "date": "2026-09-18"
+        }
+      },
+      "pool": {
+        "enabled": true,
+        "seedAmount": "3000000000000000",
+        "seedAuthorizedMaxPerRound": "6000000000000000",
+        "targetsUsd": {
+          "Day100": 100,
+          "Day1k": 1000,
+          "Day10k": 10000,
+          "Week1k": 1000,
+          "Week10k": 10000,
+          "Week100k": 100000,
+          "Month100k": 100000
+        },
+        "notes": "The seven ADR 036 defaults, unchanged (SPEC section 6.1): a round draws as soon as its whole-USD target is reached, and at its fixed UTC daily, weekly or monthly cutoff at the latest. seedAmount 0.003 BNB = USD 2.27 at the USD 754.97 the feed answered on 2026-09-18, chosen from SPEC section 5.4's floor rather than copied from chain 97's 0.001 BNB, which would be USD 0.76 here and below the USD 1 reference minimum an entry must meet. seedAuthorizedMaxPerRound is 2x that, so seedAmount can be raised once from the owner Safe without a second transaction from the seed Safe. The seed account must call Vault.authorizeSeed(0x0000000000000000000000000000000000000000, 6000000000000000) itself and the Vault must hold a seed balance for this asset: pointing is not consent, and consent does not cross assets."
+      }
+    }
+  ]
+}

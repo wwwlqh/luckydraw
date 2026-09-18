@@ -33,6 +33,16 @@ const SCHEMA_BASE = "https://luckydraw.invalid/schema/";
 const MAX_UINT256: bigint = (1n << 256n) - 1n;
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
+// PL9: the placeholder convention of config/README.md. A value only the operator can supply is written as
+// "PLACEHOLDER" in ASCII hex followed by an index, so it is a syntactically valid lowercase address that no
+// key can ever control and that reads as what it is in any diff, explorer or error message. The zero address
+// cannot serve: rule O3 rejects it outright and rule O1 needs the three mainnet roles to be three distinct
+// addresses, so three zeros would fail twice over and hide the placeholder behind an unrelated error.
+const PLACEHOLDER_ADDRESS_PREFIX = "0x504c414345484f4c444552";
+// The subscription id has no address shape to carry the sentinel, so its placeholder is "0": VRF numbers
+// subscriptions from 1 upwards and a coordinator answers getSubscription(0) with InvalidSubscription.
+const PLACEHOLDER_SUBSCRIPTION_ID = "0";
+
 /** Chains whose public identity is fixed. A record for one of these must agree with it. */
 const KNOWN_CHAINS: Record<
   string,
@@ -538,6 +548,40 @@ function checkAssetShape(asset: unknown, where: string, environment: string | nu
   checkPrice(a.price, `${where}.price`, environment, sink);
 }
 
+/**
+ * PL9/PL9w: operator placeholders (config/README.md, "Placeholders for values only the operator can
+ * supply"). A plan is a draft the operator finishes, so a placeholder there is a warning naming every field
+ * still to be filled; a deployment manifest describes contracts that exist, so a placeholder in one is a
+ * failure. Nothing on chain reports this: a Safe address nobody replaced is an address with no code, which
+ * Deploy does refuse, but a subscription id of 0 is caught only by the coordinator at request time, long
+ * after the value was frozen into the Draw's constructor.
+ */
+function checkPlaceholders(doc: Doc, isManifest: boolean, sink: Sink): void {
+  const hits: string[] = [];
+  const isPlaceholderAddress = (value: unknown): boolean =>
+    typeof value === "string" && value.toLowerCase().startsWith(PLACEHOLDER_ADDRESS_PREFIX);
+
+  if (isObject(doc.ownership)) {
+    const o = doc.ownership as Doc;
+    for (const field of ["finalOwner", "feeAccount", "seedAccount"] as const) {
+      if (isPlaceholderAddress(o[field])) hits.push(`ownership.${field}`);
+    }
+  }
+  if (isObject(doc.vrf)) {
+    const v = doc.vrf as Doc;
+    if (isPlaceholderAddress(v.coordinator)) hits.push("vrf.coordinator");
+    if (v.subscriptionId === PLACEHOLDER_SUBSCRIPTION_ID) hits.push("vrf.subscriptionId");
+  }
+  if (hits.length === 0) return;
+
+  const message =
+    `${hits.join(", ")} still ${hits.length === 1 ? "holds" : "hold"} an operator placeholder ` +
+    `(config/README.md, "Placeholders for values only the operator can supply"); replace ` +
+    `${hits.length === 1 ? "it" : "each of them"} with a value verified against the live chain before Deploy is signed`;
+  if (isManifest) fail(sink, "PL9", message);
+  else warn(sink, "PL9w", message);
+}
+
 /** V1: the recorded maxRequestCostNative must cover the recorded derivation (SPEC 7.1). */
 function checkVrfCost(vrf: unknown, sink: Sink): void {
   if (!isObject(vrf)) return;
@@ -929,6 +973,7 @@ function checkDeployment(doc: Doc, cls: Classification, sink: Sink): void {
   checkToolchain(doc.toolchain, sink);
   checkVrfCost(vrf, sink);
   checkCustody(environment, doc.ownership, sink);
+  checkPlaceholders(doc, true, sink);
 
   // D26/D27: the private mainnet shakedown (SPEC 14) is the only thing that opens a mainnet deployment
   // to customers. `release` is optional and an absent object means customerLaunch false.
@@ -1132,6 +1177,7 @@ function checkPlan(doc: Doc, cls: Classification, sink: Sink): void {
   checkToolchain(doc.toolchain, sink);
   checkVrfCost(doc.vrf, sink);
   checkCustody(environment, doc.ownership, sink);
+  checkPlaceholders(doc, false, sink);
 
   if (
     environment !== null &&
