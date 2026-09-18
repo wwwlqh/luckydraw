@@ -685,3 +685,68 @@ What this run still does not cover, unchanged from the 2026-09-16 statement: onl
 `script/` and `test/` are out of scope, and a static analyser finds none of the classes this product's risk lives
 in — money conservation, schedule arithmetic, selection fairness, VRF lifecycle races — which are the unit,
 vector, integration, D7 progress, scale and stateful invariant suites' job. It is not an audit.
+
+## Wave 8 review: mainnet closeout (2026-09-18)
+
+Independent review of the four closeout commits (2f34ca9, 306e2c8, f33d9d2, 71baac4) by a reviewer that was
+not the builder, with the evidence re-run rather than re-read. Nothing under `contracts/` changed in the four
+commits and nothing was changed by this review.
+
+**Evidence integrity.** The 55 per-seed campaign logs re-summed to exactly the recorded aggregates; three seeds
+and one repeat were re-run from the README command and passed with 0 violations and 0 P_LIVE; the scale run
+reproduced every gas figure to the unit; `forge test` reports 416 tests (414 passing, 2 skipped by design).
+Two findings, both fixed in ACCEPTANCE (601e541): **medium**, the contract-suite row opened with 361 tests
+while its own last sentence and `forge test` say 416; **medium**, a `FOUNDRY_FUZZ_SEED` fixes the per-action
+call counts of a campaign sequence but not its arguments, so the same seed gave 1,982, 1,919 and 1,949 applied
+actions in three runs and the per-seed totals are not bit-reproducible. The row now says what is reproducible
+(the pass and the distribution) and what is not (the exact totals).
+
+**Slither triage.** All six Medium classifications confirmed against the source: every external call the four
+`reentrancy-no-eth` findings cite goes to the immutable `VAULT`; `registerRound`, `lock`, `lockSeed`,
+`closeEscrow` and `release`, with their private helpers `_moveToEscrow` and `_credit`, make no external call
+(the Vault's only outbound calls are in `deposit` and `withdraw`, not on these paths); every state-mutating
+Draw entry point and `_fulfillRandomWords` carry `nonReentrant`, `rawFulfillRandomWords` only authenticates the
+coordinator and delegates, and `_byRequest` is written after `_requestRandomWords` returns; `refunding` and
+`refundReason` are set together and read only under `if (refunding)`. Every cited line number matched. No
+change.
+
+**Spec consistency.** ADR 040 records the decision as briefed; §12.1, the §14 rows and the two closing §14
+paragraphs agree with it; `trace_check` passes; `render_spec.py` regenerates `SPEC.html` byte for byte, so it
+was not hand-edited. **Low, left open:** §10.3 still says "Redundancy, before mainnet: a second keeper ... on
+an independent host", while §12.1 has had the backup keeper in the after-MVP column since ADR 034 and ADR 039
+calls it deferred; one sentence to reconcile when §10.3 is next edited.
+
+**Runbook operability.** Two findings, fixed in the runbook and the ACCEPTANCE shakedown row:
+
+- **High.** Section 7's "prove one alert arrives" pointed `KEEPER_RPC_URL` at a closed port and restarted the
+  unit, expecting ten `cycle_failed` lines and a `consecutive_cycle_failures` alert. It cannot produce one:
+  `keeper/src/startup.ts` reads `eth_chainId`, the deployed code and Multicall3 from the node *before* the
+  first cycle, so with no node `main.ts` logs `refused_to_start`, exits 1, and `Restart=on-failure` with
+  `StartLimitIntervalSec=0` repeats that every 30 seconds without a cycle, a counter or a post. The operator
+  following it would either conclude the webhook was broken or record a gate as met with no alert behind it.
+  The procedure now uses the one fault the sequence produces on its own: a keeper started after `Finalize`
+  and before the seed Safe's `authorizeSeed` posts one `SeedNotAuthorized` alert in its first cycle
+  (`keeper.ts`, `round_idle` branch; covered by `keeper.test.ts` "an unauthorized or unfunded seed account
+  raises its own alert"), sends nothing to the chain, and clears itself when step 4 of section 4 is sent.
+  The runbook now also states the operational fact behind the finding: a keeper that cannot start pages
+  nothing, and only the heartbeat monitor sees it.
+- **Medium.** Section 5c said the chain 56 MetaMask journey could not be taken before the flip because
+  `releaseGate.ts` refuses every chain 56 build, and section 5a step 2 told the operator to enter the
+  shakedown round "from MetaMask on the site" — a site that could not exist yet. The gate is a Vite plugin
+  with `apply: "build"`: `vite dev` is not gated and serves the same app pinned to the chain 56 manifest on
+  localhost, and the running app has no `customerLaunch` check of its own. So no preview bypass is warranted
+  — a bypass would add a way to build a publishable chain 56 bundle before the flip, which is the one thing
+  the gate exists to prevent, to solve a problem the dev server already solves without producing a bundle.
+  The shakedown entry and the first chain 56 journey now happen on the dev server, the second on the published
+  site straight after the flip, and the chain 97 site is an optional stand-in for the phone half only.
+
+Also fixed while there: section 1.8 presented the adviser determination as a prerequisite, which ADR 040
+defers (low); section 1.2 claimed "no custom guard" without reading it, and Safe 1.4.x has no public getter
+for the guard, so the guard storage slot is now read with `cast storage` (low). The Safe drill steps
+themselves (zero-value self-call, `swapOwner` twice, `getModulesPaginated`, `VERSION`) are correct for Safe
+1.4.x on chain 56.
+
+**Security and operations.** Nothing in the four commits leaks a hostname, a webhook, an RPC key or a signer
+beyond what earlier rows already print; the only identifiers added are a public GitHub Actions run id, the
+chain 97 Draw address and the systemd unit name. No check was weakened. The one false sense of coverage was
+the alert procedure above.

@@ -22,8 +22,8 @@ and this runbook is that list in order:
 | 1 | Safe configuration verified and the §10.5 recovery drill performed **on the real mainnet Safes, before `Deploy` is signed** | 1.2, 1.3 |
 | 2 | deploy → configure → finalize → verify → `validate:config`, with `Verify` exiting zero | 3, 4 |
 | 3 | The private shakedown: one settled round and one refund, with measured callback gas, request-to-fulfilment latency and cost per draw in `release.shakedown` | 5 |
-| 4 | The keeper on its host with `KEEPER_HEARTBEAT_URL` and `KEEPER_ALERT_WEBHOOK` set and **one alert actually received** | 7 |
-| 5 | One manual real-wallet MetaMask entry on the live web app (chain 97 before the flip, chain 56 straight after it) | 5c |
+| 4 | The keeper on its host with `KEEPER_HEARTBEAT_URL` and `KEEPER_ALERT_WEBHOOK` set and **one alert actually received** — proven in section 4, before the seed is authorized | 4, 7 |
+| 5 | One manual real-wallet MetaMask entry on the live web app: on chain 56 through the local dev server during the shakedown, and again on the published site straight after the flip | 5c |
 | 6 | The flip itself, and nothing after it | 6 |
 
 Four rules that override anything below:
@@ -89,10 +89,14 @@ cast call <safe address> "getOwners()(address[])"       --rpc-url "$LUCKYDRAW_OP
 cast call <safe address> "getThreshold()(uint256)"      --rpc-url "$LUCKYDRAW_OPS_RPC_URL"
 cast call <safe address> "getModulesPaginated(address,uint256)(address[],address)" \
   0x0000000000000000000000000000000000000001 10        --rpc-url "$LUCKYDRAW_OPS_RPC_URL"
+# The guard slot (keccak256("guard_manager.guard.address") in Safe 1.3.x and 1.4.x): must read as all zeros.
+cast storage <safe address> 0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8 \
+  --rpc-url "$LUCKYDRAW_OPS_RPC_URL"
 ```
 
-`getOwners()` must list three addresses, `getThreshold()` must be 2 and `getModulesPaginated` must come back
-empty. Record the sanitised result — role, threshold, signer count, hardware keys, distinct key holders,
+`getOwners()` must list three addresses, `getThreshold()` must be 2, `getModulesPaginated` must come back
+empty and the guard slot must be zero — Safe 1.4.x exposes no public getter for the guard, so the storage
+read is the only way to confirm "no custom guard" rather than assume it. Record the sanitised result — role, threshold, signer count, hardware keys, distinct key holders,
 implementation address, fallback-handler code hash, `modulesEnabled: false` — in the plan's optional
 `ownership.safes` array (`config/schema/ownership.schema.json`). Signer addresses, seeds and backup locations
 are never written into `config/`; §15 says the public record holds the sanitised configuration only.
@@ -286,10 +290,12 @@ roughly 42 RPC requests per block epoch, which a public BSC endpoint will thrott
 - **A public RPC origin** for the web build, with no API key and no query string. It is compiled into the
   bundle and handed to every visitor's wallet by `wallet_addEthereumChain`; the build refuses a value carrying
   credentials or a query string.
-- **The jurisdiction determination** from qualified advisers (SPEC §14) and the one-sentence notice you will
-  publish as its outcome. The build requires that sentence on chain 56 and fails without it. This spec defines
-  an unrestricted on-chain baseline; it is not a claim of legal permission, and a frontend-only restriction is
-  not enforcement if mandatory controls require contract enforcement.
+- **The jurisdiction sentence** you will publish (SPEC §14). The build requires that sentence on chain 56 and
+  fails without it. The adviser determination behind it is **deferred per ADR 040**, so until it exists the
+  sentence is your own statement of who may use this and where it is not offered, and deferring the
+  determination does not create permission. This spec defines an unrestricted on-chain baseline; it is not a
+  claim of legal permission, and a frontend-only restriction is not enforcement if mandatory controls require
+  contract enforcement.
 
 ### 1.9 Tooling and review gates
 
@@ -512,6 +518,13 @@ with independent verification of the decoded calldata.
 3. **Deposit the seed balance** — `depositNative()` on the Vault, from the **seed** Safe, with a BNB value of
    at least a month of seeds (section 2). Every seeded round spends `seedAmount` from this balance and rounds
    that settle return nothing to it.
+
+   **Between step 3 and step 4, prove the alert channel** (ADR 040 item 4; the procedure is "Prove one alert
+   actually arrives" in section 7). Start the keeper now, with `KEEPER_HEARTBEAT_URL` and
+   `KEEPER_ALERT_WEBHOOK` set: with the seed unauthorized it posts one `SeedNotAuthorized` alert in its first
+   cycle and sends nothing to the chain. This is the only point in the sequence where that alert can be
+   produced without breaking anything, so do not skip past it.
+
 4. **Authorize the seed, per asset** — `authorizeSeed(asset, maxPerRound)` on the Vault, from the **seed**
    Safe, once for each asset in the plan, with `maxPerRound` equal to the plan's `seedAuthorizedMaxPerRound`.
    Use `0x0000000000000000000000000000000000000000` as `asset` for native BNB. The seed account has to call
@@ -542,15 +555,17 @@ You play alone, with your own money, against the real coordinator and the real f
 At this point the manifest has no `release` object, which means `customerLaunch` is false, which means the
 mainnet web build refuses to publish. That is what keeps section 6 from happening early. Leave it that way.
 
-Start the keeper first (section 7 sets up the service; for the shakedown a foreground run in your own shell is
-fine), and watch its log lines.
+The keeper is already running from section 4 (section 7 sets up the service; a foreground run from the same
+host with the same environment file is fine for the shakedown). Watch its log lines. The web app you play on
+is the **local dev server of section 5c**, not a published site: there is none yet.
 
 ### 5a. One daily round, end to end
 
 1. **Seed.** The keeper seeds the open daily round: `event=action_sent … action=seedRound`. If it does not,
    fix section 4 before going further.
-2. **Your own entry.** Buy into that round from MetaMask on the site, or from the Safe-free account you use for
-   ordinary play. A whole-USD target of 100 will not be reached by one small entry, which is what you want: the
+2. **Your own entry.** Buy into that round from MetaMask on the local dev server (section 5c), with the
+   Safe-free account you use for ordinary play. This entry is also the chain 56 half of the manual MetaMask
+   journey, so take 5c's screenshots while you make it. A whole-USD target of 100 will not be reached by one small entry, which is what you want: the
    round should close at its **UTC cutoff**, not on target.
 3. **Cutoff and close.** At the cutoff the keeper sends `closeRound`. Record the block timestamp.
 4. **Request.** The keeper sends `requestDraw`. Record the transaction hash and the timestamp.
@@ -602,17 +617,29 @@ ADR 040 makes **one entry made by hand, from a real wallet, on the published web
 test in this repository drives a fake EIP-1193 provider; none of them has ever seen MetaMask's own confirmation
 dialog, its chain-switch prompt, or what the page does while a real wallet is thinking.
 
-There is an ordering problem, and it is real rather than a documentation slip: `web/src/lib/build/releaseGate.ts`
-refuses **any** chain 56 build — including a local `pnpm build` and `preview` — while `release.customerLaunch`
-is false. So on chain 56 this journey cannot be taken before the flip. Take it in both places:
+Where to take it before the flip: `web/src/lib/build/releaseGate.ts` refuses every chain 56 **build** — `pnpm
+build`, and therefore `preview`, which serves a build — while `release.customerLaunch` is false. It is a
+build-time plugin (`apply: "build"`), so the **dev server** is not gated: `vite dev` serves the same app, from
+the same sources, pinned to the same chain 56 manifest, on your own machine only. That is where the shakedown
+is played and where this journey is taken first:
 
-- **Before the flip, on chain 97**, against the live testnet site. Same code, same wallet layer, same flows,
-  faucet money.
-- **Immediately after the flip, on chain 56**, before the link is given to anybody. If anything here is wrong,
-  you have a published page nobody has been sent yet, which is a recoverable position.
+```bash
+cp web/.env.mainnet.example web/.env    # fill in the draw address, the public RPC and the sentence
+npx pnpm@12.3.4 --filter @luckydraw/web dev
+# http://localhost:5173/luckydraw/  (the path is VITE_LUCKYDRAW_BASE; leave --host off: localhost only)
+```
+
+Nothing is published by this and nothing can be: the dev server binds to localhost and the gate still refuses
+the build. The app checks the deployed code hashes against the manifest at start-up exactly as the published
+one does, so a wrong address fails here the same way.
+
+Take the journey twice on chain 56: **on the dev server during the shakedown** (your 5a entry is step 4
+below), and **on the published site immediately after the flip**, before the link is given to anybody — what
+is new then is the published bundle and its origin, not the app. If the phone half is wanted before the flip,
+the live chain 97 site is the same code with faucet money and stands in for it.
 
 The journey, in one sitting, on a desktop browser and then repeated on a phone in the MetaMask app's own
-browser:
+browser (the phone half on the published site, after the flip):
 
 1. Open the site with the wallet **locked**. Browse the home page and a round page. Nothing should demand a
    wallet to read.
@@ -634,8 +661,9 @@ rejected-transaction state; (h) the phone browser's version of (d) and (f). Reda
 if you would rather not publish it — these are evidence for you, not for the repository, and **no screenshot of
 a seed phrase, a private key or a keyed RPC URL ever goes anywhere**.
 
-Note the chain id and the date next to each set. Record in ACCEPTANCE which chain each journey was taken on;
-the chain 97 set is the evidence that exists before the flip, and the chain 56 set is taken straight after it.
+Note the date and the origin (`localhost:5173` or the Pages URL) next to each set. Record in ACCEPTANCE where
+each journey was taken: the dev-server set on chain 56 is the evidence that exists before the flip, and the
+published-site set is taken straight after it.
 
 ### 5d. Record it
 
@@ -682,12 +710,13 @@ this section does not start. Read the list back before you touch the manifest:
 - [ ] The shakedown of section 5: one settled round, one refund, and `release.shakedown` carrying the measured
       `callbackGasUsed`, `requestToFulfilmentSeconds` and `costPerDrawNativeWei`.
 - [ ] The keeper under systemd with `KEEPER_HEARTBEAT_URL` and `KEEPER_ALERT_WEBHOOK` set, and **one alert seen
-      at its destination** (section 7), with the date recorded.
-- [ ] The manual MetaMask journey of section 5c taken on the live chain 97 site, screenshots kept.
+      at its destination** (section 4, procedure in section 7), with the date recorded.
+- [ ] The manual MetaMask journey of section 5c taken on chain 56 through the local dev server, screenshots
+      kept.
 
 Because the chain 56 build refuses while `release.customerLaunch` is false, the flip and the publish are one
-motion: nothing below can be rehearsed against chain 56 beforehand, and the first thing after publishing is the
-same MetaMask journey again, on 56, before any link is shared.
+motion: the published bundle cannot be rehearsed beforehand, only the app behind it (section 5c), so the first
+thing after publishing is the same MetaMask journey again, on the published site, before any link is shared.
 
 1. **Flip the switch.** Set `release.customerLaunch` to `true` in the manifest, re-run `npx pnpm@12.3.4
    validate:config`, and commit. Remember the warning in section 3: do not re-run `Configure` after this
@@ -755,9 +784,9 @@ same MetaMask journey again, on 56, before any link is shared.
    scrolled out of the readable window must be told why, and every round's own state is read from contract
    storage and stays correct regardless.
 
-8. **Repeat the MetaMask journey of section 5c, now on chain 56**, against the published site, with the
-   screenshots. This is the first use of the real thing, and it is still private: the link exists but nobody
-   has it. Only then, section 8.
+8. **Repeat the MetaMask journey of section 5c, now against the published site**, desktop and phone, with the
+   screenshots. This is the first use of the published bundle, and it is still private: the link exists but
+   nobody has it. Only then, section 8.
 
 A local rehearsal of exactly the same build, before pushing:
 
@@ -827,23 +856,44 @@ signal. One alert channel you actually receive is a §12.1 MVP gate item; two ch
 
 **Prove one alert actually arrives.** Configured is not received: a webhook with a typo, a monitor that silently
 drops unauthenticated POSTs and a chat app that never showed you the message all look identical from this side.
-Do this once, deliberately, on the running service, and keep the timestamps:
+The proof is the keeper on this host posting a real alert from a real cycle to the configured webhook, and the
+moment for it is fixed by the sequence: **section 4, after `Finalize` and `Verify` and before the seed Safe
+sends `authorizeSeed`.** A keeper started then finds every Open round unseedable because the seed account has
+not consented for the asset, logs `round_idle … skip=SeedNotAuthorized` for each, and posts exactly one
+`SeedNotAuthorized` alert in its first cycle. The decision is a skip, so nothing is sent to the chain, and
+nothing has to be broken or restored afterwards. Keep the timestamps:
 
-1. Note the time, and watch with `journalctl -u luckydraw-keeper -f`.
-2. Break the node the keeper talks to, for one fault only: edit `/etc/luckydraw/keeper.env` and point
-   `KEEPER_RPC_URL` at a host that does not answer (a closed port on localhost, `http://127.0.0.1:1`, is the
-   cleanest — it fails instantly and reaches nobody else's server), then `systemctl restart luckydraw-keeper`.
-3. Every cycle now fails. After ten of them — about 2.5 minutes at the 15-second interval — the log shows
-   `cycle_failed` ten times, then `event=alert_sent cause=consecutive_cycle_failures`, then `fatal`, and the
-   unit exits non-zero. systemd restarts it 30 seconds later and it pages again, which is exactly the behaviour
-   `keeper/README.md` warns about; that is your cue to stop, not a second incident.
-4. **Look at the destination.** The alert must be visible where you would see it at 03:00 — the chat channel on
+1. Install the unit as described above with `KEEPER_HEARTBEAT_URL` and `KEEPER_ALERT_WEBHOOK` filled in — or,
+   for the shakedown, run the keeper in the foreground on this host from the same environment file. Either
+   way it is this host and this webhook that are being proven.
+2. Note the time, start it, and watch `journalctl -u luckydraw-keeper -f`. The `started` line must show
+   `alerts=on` and `heartbeat=GET` or `POST`; then the first cycle logs `round_idle … skip=SeedNotAuthorized`
+   for every Open round (seven per pool) and one `event=alert_sent cause=SeedNotAuthorized`, followed by the
+   `cycle` line.
+3. **Look at the destination.** The alert must be visible where you would see it at 03:00 — the chat channel on
    your phone, not a webhook log you would have to go looking for. If nothing arrived, the gate is not met; fix
-   the URL and repeat.
-5. Restore the real `KEEPER_RPC_URL`, restart, and confirm healthy cycles and a heartbeat ping.
-6. Record it: the date, the cause (`consecutive_cycle_failures`), the delay between the first `cycle_failed` and
-   the alert appearing at the destination, and where it appeared. That line is the §14 "alerts received"
-   evidence and belongs in ACCEPTANCE.
+   the URL, restart the unit (the once-per-cause-per-hour limiter is per process, so a restart pages again at
+   once) and look again.
+4. Leave the keeper running and continue section 4 with `authorizeSeed`. On the next cycle the condition is
+   gone, no second alert is posted, and the rounds are seeded — which is also the proof that the same keeper
+   acts once the fault is cleared.
+5. Record it: the date, the cause (`SeedNotAuthorized`), the delay between `alert_sent` in the log and the
+   alert appearing at the destination, and where it appeared. That line is the §14 "alerts received" evidence
+   and belongs in ACCEPTANCE.
+
+To prove it again later — after changing the webhook, say — the same fault is the only safe one: from the seed
+Safe, `authorizeSeed(asset, 0)` revokes the consent for that asset, restart the unit, take the alert, then
+`authorizeSeed(asset, <the plan's seedAuthorizedMaxPerRound>)` restores it. Rounds are left unseeded for the
+minutes in between, which on a quiet deployment costs nothing; do not do it with a cutoff minutes away.
+
+**What does not work, and why it matters beyond the drill:** pointing `KEEPER_RPC_URL` at a dead endpoint and
+restarting proves nothing. The start-up gates read `eth_chainId`, the deployed code and Multicall3 from the node
+*before* the first cycle; with no node the process logs `refused_to_start` and exits 1, no cycle ever runs, the
+ten-failure counter never moves, nothing is posted, and `Restart=on-failure` with no start-rate limit repeats
+that every 30 seconds. The `consecutive_cycle_failures` alert only exists for a node that answered at start-up
+and stopped answering later, so it is not rehearsed here. The operational consequence is the same fact from the
+other side: **a keeper that cannot start pages nothing.** Only the heartbeat monitor sees it, which is why the
+next paragraph is not optional.
 
 Do the heartbeat half too: stop the unit and confirm the dead-man's-switch monitor alerts you when the pings
 stop, then start it again. A heartbeat nobody is watching is a URL, not a monitor.
