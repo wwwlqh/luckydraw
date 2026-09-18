@@ -7,9 +7,9 @@
 # http_port_t (80, 443 and the HTTP alternates). Everything else the keeper needs is already allowed.
 #
 # Install (keeper/README.md, host setup step 6):
-#   checkmodule -M -m -o /tmp/luckydraw-keeper-https.mod keeper/deploy/luckydraw-keeper-https.te
-#   semodule_package -o /tmp/luckydraw-keeper-https.pp -m /tmp/luckydraw-keeper-https.mod
-#   sudo semodule -i /tmp/luckydraw-keeper-https.pp
+#   checkmodule -M -m -o /tmp/luckydraw_keeper_https.mod keeper/deploy/luckydraw-keeper-https.te
+#   semodule_package -o /tmp/luckydraw_keeper_https.pp -m /tmp/luckydraw_keeper_https.mod
+#   sudo semodule -i /tmp/luckydraw_keeper_https.pp
 # Remove: sudo semodule -r luckydraw_keeper_https
 module luckydraw_keeper_https 1.0;
 

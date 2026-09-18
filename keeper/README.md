@@ -403,9 +403,9 @@ journalctl -u luckydraw-keeper -f
 
 # 6. SELinux-enforcing hosts only: if the log says `AggregateError (EACCES)`, let systemd's init_t domain
 #    open outbound HTTPS (see the table below), then restart
-checkmodule -M -m -o /tmp/luckydraw-keeper-https.mod keeper/deploy/luckydraw-keeper-https.te
-semodule_package -o /tmp/luckydraw-keeper-https.pp -m /tmp/luckydraw-keeper-https.mod
-sudo semodule -i /tmp/luckydraw-keeper-https.pp
+checkmodule -M -m -o /tmp/luckydraw_keeper_https.mod keeper/deploy/luckydraw-keeper-https.te
+semodule_package -o /tmp/luckydraw_keeper_https.pp -m /tmp/luckydraw_keeper_https.mod
+sudo semodule -i /tmp/luckydraw_keeper_https.pp
 sudo systemctl restart luckydraw-keeper
 ```
 
