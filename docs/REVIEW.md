@@ -495,11 +495,23 @@ the deployed code carries the constructor's addresses; the before-equals-after c
 this change, and it holds. Contracts: 359 passed, 2 skipped; `forge fmt --check` clean.
 
 **The CI Slither run on the real tree is now the authoritative one.** The 2026-09-16 triage was taken on a scratch
-alias-free copy because the repository tree could not be parsed; that stand-in is retired. The
-`ERROR:ContractSolcParsing` guard in `.github/workflows/ci.yml` stays, now as a regression guard against
-reintroducing an alias, and `continue-on-error: true` with `fail_on: none` stays until condition (b) alone --
-every Medium finding fixed or accepted with a named owner -- is met. Note that the triage counts themselves are
-still stale under ADR 036, as the wave 7 ACCEPTANCE row records.
+alias-free copy because the repository tree could not be parsed; that stand-in is retired. The first CI run on
+Linux (run 35298031260, Slither 0.11.6 with solc 0.8.28) logs no `ERROR:` line of any kind and reports
+`. analyzed (25 contracts with 102 detectors), 35 result(s) found`: **0 High, 6 Medium, 14 Low, 15
+Informational**. By detector: Medium `reentrancy-no-eth` 4 and `uninitialized-local` 2; Low `timestamp` 9,
+`missing-zero-check` 2, `reentrancy-benign` 2 and `calls-loop` 1; Informational `naming-convention` 8,
+`unindexed-event-address` 4, `costly-loop` 1, `cyclomatic-complexity` 1 and `low-level-calls` 1. That is the
+post-ADR-036 source, so it supersedes the stale 8 Medium / 15 Low of the 2026-09-16 scratch run, and the
+per-finding triage of these 35 has **not** been redone; the ACCEPTANCE wave 7 row's "the Slither triage must be
+re-run" still stands and this run is the input to it, not the answer.
+
+That first run also caught a bug in the guard rather than in the contracts. The step grepped the log for
+`ERROR:ContractSolcParsing` unanchored, and Slither echoes every unknown configuration key back into the log,
+including `slither.config.json`'s `_comment`, which explains the guard by name: the grep matched its own
+documentation on an `INFO:Slither:` line and failed a clean run. It is now anchored to `^ERROR:ContractSolcParsing`,
+which is the shape of the real record. The guard stays, now as a regression guard against reintroducing an alias,
+and `continue-on-error: true` with `fail_on: none` stays until condition (b) alone -- every Medium finding fixed or
+accepted with a named owner -- is met.
 
 Separately, the web entries scan learned that a provider can answer "I no longer have those blocks". Measured on
 2026-09-18: publicnode (`https://bsc-testnet-rpc.publicnode.com`) prunes logs below a rolling height and answers

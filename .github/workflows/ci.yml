@@ -105,11 +105,16 @@ jobs:
         # hides the reentrancy and complexity findings the same run reports once the alias is gone. A run with this
         # line in it is not evidence of anything. src/ is alias-free today, so this step is a regression guard
         # against reintroducing one -- do not remove it.
+        #
+        # Anchored at the start of a line, and that is load-bearing. Slither echoes every unknown config key
+        # back into the log, and slither.config.json's own `_comment` explains this guard by name, so an
+        # unanchored grep matched its own documentation on an INFO line and failed a clean run (2026-09-18).
+        # The real thing is a log record whose level starts the line: `ERROR:ContractSolcParsing: ...`.
         if: always()
         run: |
-          if grep -q "ERROR:ContractSolcParsing" "$RUNNER_TEMP/slither.log"; then
+          if grep -qE "^ERROR:ContractSolcParsing" "$RUNNER_TEMP/slither.log"; then
             echo "::error::Slither could not parse part of the tree; the finding set is incomplete and must not be trusted."
-            grep "ERROR:ContractSolcParsing" "$RUNNER_TEMP/slither.log"
+            grep -E "^ERROR:ContractSolcParsing" "$RUNNER_TEMP/slither.log"
             exit 1
           fi
       - uses: actions/upload-artifact@v4
