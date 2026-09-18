@@ -11,7 +11,7 @@
 // other reference. The returned `Sender` exposes only a public address. In unlocked mode nothing resembling
 // a key exists at all: the node signs for `eth_sendTransaction`.
 
-import {type Provider, Wallet} from "ethers";
+import {NonceManager, type Provider, Wallet} from "ethers";
 import {
   type Address,
   asAddress,
@@ -85,12 +85,25 @@ export function createSender(
     throw new ConfigError(`the signing key from the ${config.signing.source} is not a usable private key`);
   }
   const address = asAddress(wallet.address.toLowerCase());
+  // One cycle can send several transactions back to back (a seed, a close, a request). A bare Wallet asks
+  // the node for the pending nonce before each one, and a public endpoint's pending count can lag the
+  // transaction it accepted a moment ago, so the second send reuses the nonce and is rejected as a
+  // "replacement fee too low" (seen on chain 97, 2026-09-18). NonceManager counts sends locally instead. It
+  // does not forget a send that failed, though - the delta stays incremented and every later send would sit
+  // behind a nonce gap - so any rejection resets it to the chain's view, which is what the next cycle should
+  // start from anyway.
+  const signer = new NonceManager(wallet);
   return {
     kind: "privateKey",
     address,
     async sendTransaction(tx) {
-      const sent = await wallet.sendTransaction({to: tx.to, data: tx.data, gasLimit: tx.gasLimit});
-      return asHex(sent.hash);
+      try {
+        const sent = await signer.sendTransaction({to: tx.to, data: tx.data, gasLimit: tx.gasLimit});
+        return asHex(sent.hash);
+      } catch (error) {
+        signer.reset();
+        throw error;
+      }
     },
   };
 }
