@@ -5,9 +5,26 @@ web app published on GitHub Pages at `https://<your-github-user>.github.io/lucky
 as a service on your own machine. Unlike `docs/runbooks/testnet-launch.md`, everything here is **real money**:
 real BNB, real entries from real people, real losses if something is wrong.
 
-There is no testnet stage. ADR 034 records that decision and its cost: the first real VRF fulfilment, the first
-real feed read and the first real finality behaviour are all observed **on mainnet, with your own funds**, in
-the private shakedown of section 5. That shakedown is not optional and no link is shared before it is recorded.
+ADR 035 put a BSC testnet trial first, and it happened: chain 97 has run the seven-kind build live since
+2026-09-18, one round settled through a real VRF fulfilment and one refunded. What it does not prove is chain
+56's own coordinator, feed and finality, so the private shakedown of section 5 is still where those are first
+observed **on mainnet, with your own funds**. That shakedown is not optional and no link is shared before it is
+recorded.
+
+**ADR 040 is the sequence this runbook follows.** It defers seven gates, each an operator-accepted risk you own
+the response and the funding for: the paid audit, the legal and jurisdiction determination, the §10.4 privacy
+controls U30–U37, Chainlink Automation upkeep registration and LINK funding, the archive-capable RPC or
+indexer, the ADR 037 Binance-Peg USDT admission, and the three-day soak. It also fixes what is **not** deferred,
+and this runbook is that list in order:
+
+| # | Mandatory before `release.customerLaunch` becomes true | Section |
+|---|---|---|
+| 1 | Safe configuration verified and the §10.5 recovery drill performed **on the real mainnet Safes, before `Deploy` is signed** | 1.2, 1.3 |
+| 2 | deploy → configure → finalize → verify → `validate:config`, with `Verify` exiting zero | 3, 4 |
+| 3 | The private shakedown: one settled round and one refund, with measured callback gas, request-to-fulfilment latency and cost per draw in `release.shakedown` | 5 |
+| 4 | The keeper on its host with `KEEPER_HEARTBEAT_URL` and `KEEPER_ALERT_WEBHOOK` set and **one alert actually received** | 7 |
+| 5 | One manual real-wallet MetaMask entry on the live web app (chain 97 before the flip, chain 56 straight after it) | 5c |
+| 6 | The flip itself, and nothing after it | 6 |
 
 Four rules that override anything below:
 
@@ -87,12 +104,31 @@ wallets reading the same false summary off one shared workstation is not indepen
 ### 1.3 The recovery drill, on these Safes, before anything is deployed
 
 SPEC §10.5 requires the drill on the **mainnet** Safes themselves, performed **before the contracts are
-deployed**. ADR 034 removed the testnet rehearsal, so the drill has no earlier stage to hide in. Three checks,
-run on each of the three Safes:
+deployed**. The chain 97 Safe of ADR 035 was driven from the command line by `TestnetSafe.s.sol` and proves
+nothing about these three, so the drill has no earlier stage to hide in. ADR 040 keeps it mandatory while it
+defers other gates: this is the one item that cannot be added to a running deployment afterwards.
 
-1. **One signer unavailable.** The remaining two independently verify and execute an authorized action.
-2. **One signer alone cannot act.** A single signature does not execute.
-3. **A lost signer can be replaced.** The remaining signers swap an owner and the Safe still meets threshold.
+Start from the configuration you read off the chain in section 1.2, not off the screen you created the Safes
+on. Write down, per Safe: the three owner addresses and which hardware device holds each, the threshold (**2**),
+the version, and that the module list is **empty** — a module is a second door into the Safe and there is no
+reason for one here. Three owners on three separate devices; a Safe whose three "signers" are three accounts in
+one wallet has a threshold of 2 and the security of 1.
+
+Then five checks, run **on each of the three Safes**:
+
+1. **A zero-value `execTransaction` executes.** Queue a transaction to the Safe's own address, value 0, empty
+   data. Collect both signatures and execute it. It moves nothing and costs only gas, and it proves the whole
+   path — proposing, signing on each device, collecting, executing — works before it is holding money. Keep the
+   transaction hash.
+2. **One signer unavailable.** The remaining two independently verify and execute an authorized action.
+3. **One signer alone cannot act.** A single signature does not execute.
+4. **A lost signer can be replaced.** Rehearse the loss: with one device set aside as "lost", the remaining two
+   send `swapOwner` to replace that owner with a fresh address, confirm `getOwners()` and `getThreshold()` on
+   chain afterwards, and then — if the "lost" device was only set aside — swap it back the same way. Doing it
+   twice is the point: the recovery path is the one you will use under stress, and the second swap proves it is
+   reversible rather than one-way.
+5. **The treasury Safe can pull money out of the Vault.** This one cannot be done yet; it is step 5 of
+   section 4, after the Vault exists, and it is what sets `treasuryWithdrawalProven`.
 
 Keep the transaction hashes and the date. You cannot write the record yet — it is keyed by the Draw address,
 which does not exist until section 3 — so keep the evidence and write the record straight after `Deploy`, in
@@ -560,7 +596,48 @@ evidence is a round that closes with fewer than two addresses in it:
 6. **Restore the seed**: `setSeedAmount(poolId, <the plan's seedAmount>)` from the owner Safe. Do this before
    `Verify`, which compares the live pool configuration with the manifest.
 
-### 5c. Record it
+### 5c. The manual MetaMask journey
+
+ADR 040 makes **one entry made by hand, from a real wallet, on the published web app** a gate of its own. Every
+test in this repository drives a fake EIP-1193 provider; none of them has ever seen MetaMask's own confirmation
+dialog, its chain-switch prompt, or what the page does while a real wallet is thinking.
+
+There is an ordering problem, and it is real rather than a documentation slip: `web/src/lib/build/releaseGate.ts`
+refuses **any** chain 56 build — including a local `pnpm build` and `preview` — while `release.customerLaunch`
+is false. So on chain 56 this journey cannot be taken before the flip. Take it in both places:
+
+- **Before the flip, on chain 97**, against the live testnet site. Same code, same wallet layer, same flows,
+  faucet money.
+- **Immediately after the flip, on chain 56**, before the link is given to anybody. If anything here is wrong,
+  you have a published page nobody has been sent yet, which is a recoverable position.
+
+The journey, in one sitting, on a desktop browser and then repeated on a phone in the MetaMask app's own
+browser:
+
+1. Open the site with the wallet **locked**. Browse the home page and a round page. Nothing should demand a
+   wallet to read.
+2. **Connect.** MetaMask appears in the list first. Accept.
+3. **Wrong network on purpose.** Switch MetaMask to some other chain. The app must refuse to sign and offer to
+   switch back; accept its prompt and confirm the chain id it lands on.
+4. **Quote and enter.** Type an amount under USD 1 and read the refusal. Then enter a real amount, read the
+   preview (gross, 3%, prize contribution), and send it. Watch the pending state, then the confirmed state.
+5. **Your entry appears** on the round page and in your positions, with the correct gross.
+6. **Withdraw** a balance, if you have one.
+7. **Reject something on purpose** — open a transaction and hit *Reject* in MetaMask. The app must return to a
+   usable state with a plain message, not a spinner that never ends.
+
+Screenshot, at full window, and keep them with the shakedown evidence: (a) the round page before connecting;
+(b) MetaMask's connect prompt with the site origin visible; (c) the wrong-network refusal; (d) the entry
+preview showing the amount, the 3% and the prize contribution; (e) MetaMask's own confirmation dialog for the
+entry, with the amount and the contract address visible; (f) the confirmed entry on the round page; (g) the
+rejected-transaction state; (h) the phone browser's version of (d) and (f). Redact nothing except your address
+if you would rather not publish it — these are evidence for you, not for the repository, and **no screenshot of
+a seed phrase, a private key or a keyed RPC URL ever goes anywhere**.
+
+Note the chain id and the date next to each set. Record in ACCEPTANCE which chain each journey was taken on;
+the chain 97 set is the evidence that exists before the flip, and the chain 56 set is taken straight after it.
+
+### 5d. Record it
 
 Add the `release` object to the manifest at `config/deployments/56/<lowercase draw address>.json`, keeping
 `customerLaunch` **false** for now:
@@ -595,7 +672,22 @@ date before the manifest's `createdAtUtc`. Record what you measured, not a place
 
 ## 6. Open it to customers
 
-Only now. The shakedown is recorded, the treasury withdrawal is proven, the recovery drill record validates.
+Only now, and the flip is the **last** thing on ADR 040's mandatory list. Everything else is already done, or
+this section does not start. Read the list back before you touch the manifest:
+
+- [ ] Three Safes on chain 56, configuration read off the chain, and the §10.5 drill of section 1.3 performed
+      on those Safes **before `Deploy` was signed** — including the zero-value `execTransaction` and the
+      signer-replacement rehearsal — with `custody.recoveryDrill` written and `treasuryWithdrawalProven: true`.
+- [ ] deploy → configure → finalize → verify → `validate:config`, with `Verify` exiting zero.
+- [ ] The shakedown of section 5: one settled round, one refund, and `release.shakedown` carrying the measured
+      `callbackGasUsed`, `requestToFulfilmentSeconds` and `costPerDrawNativeWei`.
+- [ ] The keeper under systemd with `KEEPER_HEARTBEAT_URL` and `KEEPER_ALERT_WEBHOOK` set, and **one alert seen
+      at its destination** (section 7), with the date recorded.
+- [ ] The manual MetaMask journey of section 5c taken on the live chain 97 site, screenshots kept.
+
+Because the chain 56 build refuses while `release.customerLaunch` is false, the flip and the publish are one
+motion: nothing below can be rehearsed against chain 56 beforehand, and the first thing after publishing is the
+same MetaMask journey again, on 56, before any link is shared.
 
 1. **Flip the switch.** Set `release.customerLaunch` to `true` in the manifest, re-run `npx pnpm@12.3.4
    validate:config`, and commit. Remember the warning in section 3: do not re-run `Configure` after this
@@ -650,6 +742,22 @@ Only now. The shakedown is recorded, the treasury withdrawal is proven, the reco
    Vault addresses, their code hashes and the BscScan links, read from the manifest the build was made from.
    Compare those addresses against your manifest by eye before you tell anyone the site is live.
    `/verify` also publishes the make-whole reserve and cap from the manifest, in BNB.
+
+7. **Check what the history says about itself.** ADR 040 defers the archive-capable RPC and the indexer, so the
+   app reads logs straight from the public endpoint in `LUCKYDRAW_RPC_URL`, and a public endpoint **prunes**:
+   it answers "I no longer have those blocks" for anything below a rolling height (measured on chain 97:
+   publicnode refuses ranges below a moving block with code `-32701`). Entry history older than that height is
+   not missing data, it is data this deployment cannot read today. `/entries` and the positions view must show
+   the labelled partial-history notice from the string catalog with the height below which history is
+   unavailable — SPEC §10.1 — and never silently show a shorter list as if it were complete. Scroll back far
+   enough on `/entries` to see that notice appear, on the published site, before you send anybody the link. If
+   it does not appear, that is a bug to fix before launch, not a cosmetic issue: a player whose entry has
+   scrolled out of the readable window must be told why, and every round's own state is read from contract
+   storage and stays correct regardless.
+
+8. **Repeat the MetaMask journey of section 5c, now on chain 56**, against the published site, with the
+   screenshots. This is the first use of the real thing, and it is still private: the link exists but nobody
+   has it. Only then, section 8.
 
 A local rehearsal of exactly the same build, before pushing:
 
@@ -706,15 +814,39 @@ The variables:
 | `KEEPER_RPC_URL` | your keyed operational endpoint |
 | `KEEPER_CHAIN_ID` | `56` |
 | `KEEPER_DRAW_ADDRESS` | the lowercase Draw address |
-| `KEEPER_HEARTBEAT_URL` | optional; pinged after each healthy cycle |
-| `KEEPER_ALERT_WEBHOOK` | optional; posted on the failure conditions below |
+| `KEEPER_HEARTBEAT_URL` | **required by ADR 040**; pinged after each healthy cycle |
+| `KEEPER_ALERT_WEBHOOK` | **required by ADR 040**; posted on the failure conditions below |
 
 
-Set both of the optional two. Nothing is sent anywhere unless you set them (SPEC §14), and both are redacted in
-logs like every other URL. The heartbeat goes to a dead-man's-switch monitor that alerts when the pings stop;
-the webhook receives the ten-consecutive-failure exit, `request_precheck_failed`, `SeedNotAuthorized`,
-`InsufficientSeedBalance` and the subscription-below-threshold signal. One alert channel you actually receive is
-a §12.1 MVP gate item; two channels you ignore are not.
+The code treats both as optional — nothing is sent anywhere unless you set them (SPEC §14) — and ADR 040 makes
+both mandatory for this launch, because they are the whole of the operational safety net that survived the
+deferrals. Both are redacted in logs like every other URL. The heartbeat goes to a dead-man's-switch monitor
+that alerts when the pings stop; the webhook receives the ten-consecutive-failure exit,
+`request_precheck_failed`, `SeedNotAuthorized`, `InsufficientSeedBalance` and the subscription-below-threshold
+signal. One alert channel you actually receive is a §12.1 MVP gate item; two channels you ignore are not.
+
+**Prove one alert actually arrives.** Configured is not received: a webhook with a typo, a monitor that silently
+drops unauthenticated POSTs and a chat app that never showed you the message all look identical from this side.
+Do this once, deliberately, on the running service, and keep the timestamps:
+
+1. Note the time, and watch with `journalctl -u luckydraw-keeper -f`.
+2. Break the node the keeper talks to, for one fault only: edit `/etc/luckydraw/keeper.env` and point
+   `KEEPER_RPC_URL` at a host that does not answer (a closed port on localhost, `http://127.0.0.1:1`, is the
+   cleanest — it fails instantly and reaches nobody else's server), then `systemctl restart luckydraw-keeper`.
+3. Every cycle now fails. After ten of them — about 2.5 minutes at the 15-second interval — the log shows
+   `cycle_failed` ten times, then `event=alert_sent cause=consecutive_cycle_failures`, then `fatal`, and the
+   unit exits non-zero. systemd restarts it 30 seconds later and it pages again, which is exactly the behaviour
+   `keeper/README.md` warns about; that is your cue to stop, not a second incident.
+4. **Look at the destination.** The alert must be visible where you would see it at 03:00 — the chat channel on
+   your phone, not a webhook log you would have to go looking for. If nothing arrived, the gate is not met; fix
+   the URL and repeat.
+5. Restore the real `KEEPER_RPC_URL`, restart, and confirm healthy cycles and a heartbeat ping.
+6. Record it: the date, the cause (`consecutive_cycle_failures`), the delay between the first `cycle_failed` and
+   the alert appearing at the destination, and where it appeared. That line is the §14 "alerts received"
+   evidence and belongs in ACCEPTANCE.
+
+Do the heartbeat half too: stop the unit and confirm the dead-man's-switch monitor alerts you when the pings
+stop, then start it again. A heartbeat nobody is watching is a URL, not a monitor.
 
 On start-up the keeper asserts `eth_chainId == 56` against the node itself and refuses any manifest asset
 flagged `isMock`, on top of the existing gates (manifest identity, `verifyDeployment`, exactly one signing
@@ -769,16 +901,24 @@ public.
 ## 9. What this deliberately does not include
 
 An MVP, not a finished product. None of the following is built, and the absence is a decision (SPEC §12.1
-"after the MVP"), not an oversight. Say so plainly to anyone who asks:
+"after the MVP" and **ADR 040**, which names the deferred gates and records you as the owner of the risk and
+the funding for each), not an oversight. Say so plainly to anyone who asks:
 
-- **No indexer, no API, no database.** The app reads the chain directly. There is no `/activity` and no
-  `/leaderboard`, and history beyond what a direct read gives is labelled as degraded rather than shown.
+- **No indexer, no API, no database, and no archive RPC.** The app reads the chain directly, and the public
+  endpoint prunes old logs, so entry history below its rolling height is labelled as unreadable rather than
+  shown. There is no `/activity` and no `/leaderboard`.
+- **No legal or jurisdiction determination.** Deferred per ADR 040. The published jurisdiction sentence is
+  yours, not an adviser's, and deferring the determination does not create permission (SPEC §14).
+- **No privacy or origin-isolation controls (U30–U37), and no three-day soak evidence.** Deferred per ADR 040.
 - **No `/admin`.** Owner actions are done from the Safe by hand, as in section 4.
-- **No Chainlink Automation upkeep and no backup keeper.** One process on one machine. If it stops, rounds
-  stall until systemd restarts it, you restart it, or somebody calls the public lifecycle methods themselves.
+- **No registered Chainlink Automation upkeep and no backup keeper.** The upkeep contract of ADR 039 is built
+  and deployable, but registering and funding it with LINK is deferred per ADR 040, so it is one process on one
+  machine. If it stops, rounds stall until systemd restarts it, you restart it, or somebody calls the public
+  lifecycle methods themselves — every one of them is public to every address.
 - **No second RPC provider.** One endpoint; if it fails, the keeper's cycles fail and the site's reads fail.
-- **No external audit.** The test suites pass, Slither is triaged and the diff was reviewed. That is not an
-  audit, and this runbook does not claim it is.
+- **No external audit.** Deferred per ADR 040. The test suites pass, the Slither triage on the real tree has no
+  untriaged medium-or-higher finding, and the diff was reviewed. That is not an audit, and this runbook does
+  not claim it is.
 - **No production hosting.** GitHub Pages serves the files and sends none of the §9.6 response headers, so
   `frame-ancestors` and `X-Frame-Options` are absent. No static origin from CI, no release manifest, no tamper
   canary, no IPFS mirror, no off-host logs.
