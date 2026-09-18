@@ -5,7 +5,7 @@
 // code hash, both bindings — against a node that is entirely under the test's control.
 
 import {type DeploymentManifest, parseManifest} from "@luckydraw/client";
-import {type RenderResult, render} from "@testing-library/react";
+import {type RenderResult, render, waitFor} from "@testing-library/react";
 import {AbiCoder, type JsonRpcProvider, keccak256} from "ethers";
 import type {ReactNode} from "react";
 import localManifestJson from "../../../config/deployments/31337/0x610178da211fef7d417bc0e6fed39f05609ad788.json";
@@ -171,6 +171,11 @@ export class FakeWallet implements Eip1193Provider {
     for (const listener of this.listeners.get(event) ?? []) listener(...args);
   }
 
+  /** How many listeners the app currently has attached for an event. See `waitForWalletListeners`. */
+  listenerCount(event: string): number {
+    return this.listeners.get(event)?.size ?? 0;
+  }
+
   /** Changes the account and fires the event, the way a wallet does. */
   setAccounts(accounts: string[]): void {
     this.accounts = accounts;
@@ -181,6 +186,24 @@ export class FakeWallet implements Eip1193Provider {
     this.chainId = chainId;
     this.emit("chainChanged", `0x${chainId.toString(16)}`);
   }
+}
+
+/**
+ * Waits until the app has subscribed to a fake wallet's events, and must be awaited before any test fires
+ * one with `setAccounts` or `setChain`.
+ *
+ * React commits "connected" to the DOM before it flushes the passive effect that attaches the provider's
+ * listeners, so a test that fires an event the moment the chip changes can fire it into a wallet with no
+ * listeners at all — and an EIP-1193 event nobody heard is simply gone, with no re-validation, no error and
+ * an account chip still showing the old address. That race, not anything the app does with the answer, is
+ * what made the account-change tests fail roughly once in twenty under a loaded parallel run.
+ */
+export async function waitForWalletListeners(wallet: FakeWallet): Promise<void> {
+  await waitFor(() => {
+    if (wallet.listenerCount("accountsChanged") === 0) {
+      throw new Error("the app has not subscribed to the wallet's events yet");
+    }
+  });
 }
 
 /** Announces a wallet the way EIP-6963 does. */

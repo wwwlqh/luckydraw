@@ -100,6 +100,10 @@ export function WalletProvider({children, target, environment, storage, intentSt
   /** The provider object the live session was established with. Nothing else may be signed through. */
   const sessionProvider = useRef<Eip1193Provider | null>(null);
   const lastAccount = useRef<Address | null>(null);
+  /** True while a provider-event re-validation is in flight, so a re-subscription can tell it was dropped. */
+  const revalidating = useRef(false);
+  /** True when a re-validation is owed: one was dropped, and no live listener will ever answer it. */
+  const revalidationOwed = useRef(false);
 
   const store = useMemo<WalletProviderProps["storage"]>(
     () => storage ?? (typeof window === "undefined" ? undefined : window.localStorage),
@@ -122,6 +126,9 @@ export function WalletProvider({children, target, environment, storage, intentSt
   const clearSession = useCallback(() => {
     sessionProvider.current = null;
     lastAccount.current = null;
+    // Nothing is owed to a session that no longer exists.
+    revalidating.current = false;
+    revalidationOwed.current = false;
     clearIntent(intents ?? null);
     setStatus("disconnected");
     setAccount(null);
@@ -217,6 +224,13 @@ export function WalletProvider({children, target, environment, storage, intentSt
 
   // Provider events. The payload is never trusted: every event triggers a fresh read, which is what
   // "re-validates within one second" means in practice.
+  //
+  // This effect re-subscribes whenever its connector's identity changes, and the connector list is rebuilt by
+  // anything that changes `details` or the environment — a wallet announcing itself a moment later, a
+  // re-rendered provider stack. When that happened while a re-validation was in flight, the cleanup's `live`
+  // flag discarded the answer and nothing ever re-read: the account chip kept the previous address with no
+  // error, which is exactly the stale account §9.2 forbids. So a dropped read is remembered in a ref and
+  // re-run by the next subscription rather than lost.
   useEffect(() => {
     const provider = connector?.provider ?? null;
     if (provider === null || provider.on === undefined || provider.removeListener === undefined) return;
@@ -224,13 +238,18 @@ export function WalletProvider({children, target, environment, storage, intentSt
     let live = true;
 
     const revalidate = (): void => {
+      revalidating.current = true;
+      revalidationOwed.current = false;
       void readSession(provider)
         .then((session) => {
           if (!live) return;
+          revalidating.current = false;
           applySession(session, id, provider);
         })
         .catch(() => {
-          if (live) clearSession();
+          if (!live) return;
+          revalidating.current = false;
+          clearSession();
         });
     };
     const onAccountsChanged = (...args: readonly unknown[]): void => {
@@ -259,8 +278,12 @@ export function WalletProvider({children, target, environment, storage, intentSt
     provider.on("accountsChanged", onAccountsChanged);
     provider.on("chainChanged", onChainChanged);
     provider.on("disconnect", onDisconnect);
+    // A read the previous subscription started and could no longer apply is re-run here, once.
+    if (revalidationOwed.current) revalidate();
     return () => {
       live = false;
+      if (revalidating.current) revalidationOwed.current = true;
+      revalidating.current = false;
       provider.removeListener?.("accountsChanged", onAccountsChanged);
       provider.removeListener?.("chainChanged", onChainChanged);
       provider.removeListener?.("disconnect", onDisconnect);

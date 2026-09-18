@@ -10,14 +10,43 @@ import {
   Providers,
   renderWithProviders,
   testDeploymentBase,
+  waitForWalletListeners,
 } from "../../test/harness.tsx";
 import {INTENT_STORAGE_KEY, type PendingIntent} from "../tx/intent.ts";
 import {type ConnectorEnvironment, GENERIC_INJECTED_ID} from "./connectors.ts";
+import type {Eip1193RequestArgs} from "./types.ts";
 import {useWriteGate} from "./useWriteGate.ts";
 import {CONNECTOR_STORAGE_KEY, useWallet} from "./WalletProvider.tsx";
 
 const ACCOUNT_A = "0xF39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
 const ACCOUNT_B = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
+
+/**
+ * A wallet that can hold its next `eth_accounts` answer, so a test can re-render the provider stack — and so
+ * make the provider-events effect re-subscribe — while a re-validation is still in flight.
+ */
+class GatedWallet extends FakeWallet {
+  /** Set before the event: the next `eth_accounts` read waits until `releaseAccounts()` is called. */
+  holdAccounts = false;
+  private readonly held: (() => void)[] = [];
+
+  /** How many `eth_accounts` reads are waiting. */
+  get heldReads(): number {
+    return this.held.length;
+  }
+
+  override request(args: Eip1193RequestArgs): Promise<unknown> {
+    if (args.method !== "eth_accounts" || !this.holdAccounts) return super.request(args);
+    this.holdAccounts = false;
+    return new Promise<void>((resolve) => {
+      this.held.push(resolve);
+    }).then(() => super.request(args));
+  }
+
+  releaseAccounts(): void {
+    for (const resolve of this.held.splice(0)) resolve();
+  }
+}
 
 function Probe() {
   const wallet = useWallet();
@@ -73,6 +102,9 @@ async function mountConnected(wallet: FakeWallet) {
   await waitFor(() => expect(screen.getByTestId("gate").textContent).not.toBe("deploymentVerifying"));
   fireEvent.click(screen.getByText("connect"));
   await waitFor(() => expect(screen.getByTestId("status").textContent).toBe("connected"));
+  // "connected" in the DOM is one commit ahead of the effect that subscribes to the wallet's events, and an
+  // event fired into a wallet with no listeners is lost outright.
+  await waitForWalletListeners(wallet);
 }
 
 describe("WalletProvider", () => {
@@ -101,6 +133,56 @@ describe("WalletProvider", () => {
     expect(Number(screen.getByTestId("epoch").textContent)).toBeGreaterThan(before);
     // The payload was not trusted: a fresh eth_accounts read followed the event.
     expect(wallet.calls.filter((call) => call.method === "eth_accounts").length).toBeGreaterThan(0);
+  });
+
+  it("retries a re-validation that an effect re-subscription dropped", async () => {
+    // The provider-events effect re-subscribes whenever its connector's identity changes — a fresh
+    // announcement, a new environment object, anything that rebuilds the connector list. Its cleanup used to
+    // drop whatever `eth_accounts` read was in flight and nothing re-read, so the account chip kept the old
+    // address with no error: a stale account, which §9.2 forbids. The dropped read is now re-run on the next
+    // subscription instead.
+    const base = testDeploymentBase();
+    const wallet = new GatedWallet([ACCOUNT_A]);
+    // A new object every time, with the same contents: only the identity changes, never the provider.
+    const freshEnvironment = (): ConnectorEnvironment => ({...NO_INJECTED});
+    const {rerender} = render(
+      <Providers base={base} environment={freshEnvironment()}>
+        <Probe />
+      </Providers>,
+    );
+    await act(async () => {
+      announce("MetaMask", "io.metamask", wallet);
+    });
+    await waitFor(() => expect(screen.getByTestId("gate").textContent).not.toBe("deploymentVerifying"));
+    fireEvent.click(screen.getByText("connect"));
+    await waitFor(() => expect(screen.getByTestId("status").textContent).toBe("connected"));
+    await waitForWalletListeners(wallet);
+
+    // The wallet moves to another account and holds its answer, so the re-validation stays in flight.
+    wallet.holdAccounts = true;
+    await act(async () => {
+      wallet.setAccounts([ACCOUNT_B]);
+    });
+    expect(wallet.heldReads).toBe(1);
+    expect(screen.getByTestId("account").textContent).toBe(ACCOUNT_A.toLowerCase());
+
+    await act(async () => {
+      rerender(
+        <Providers base={base} environment={freshEnvironment()}>
+          <Probe />
+        </Providers>,
+      );
+    });
+    await act(async () => {
+      wallet.releaseAccounts();
+    });
+
+    await waitFor(() => expect(screen.getByTestId("account").textContent).toBe(ACCOUNT_B.toLowerCase()), {
+      timeout: 2_000,
+    });
+    expect(screen.getByTestId("status").textContent).toBe("connected");
+    // Still a fresh read rather than the event payload, and the session kept its own provider.
+    expect(wallet.calls.filter((call) => call.method === "eth_accounts").length).toBeGreaterThan(1);
   });
 
   it("closes the write gate with a reason when the wallet moves to another chain", async () => {
@@ -281,12 +363,11 @@ describe("WalletProvider", () => {
 
     // `accountsChanged` is answered with a fresh `eth_accounts` read and no timer, so the new account is
     // already rendered when the `act` above returns; nothing here waits for a debounce. The wait is kept for
-    // the same reason its neighbours keep theirs, and its budget is raised past the 1,000 ms default because
-    // the deadline is wall-clock: under the full parallel run a starved worker thread once let it expire on
-    // work that was not slow, only descheduled. The assertion is unchanged.
-    await waitFor(() => expect(screen.getByTestId("account").textContent).toBe(ACCOUNT_B.toLowerCase()), {
-      timeout: 5_000,
-    });
+    // the same reason its neighbours keep theirs. Its budget was once raised to 5,000 ms on the theory that a
+    // starved worker thread let the default expire; the real cause was an event fired before the app had
+    // subscribed, which `mountConnected` now waits out, so the default budget is back — and 5,000 ms was in
+    // any case the test timeout itself, which reported "test timed out" instead of the assertion.
+    await waitFor(() => expect(screen.getByTestId("account").textContent).toBe(ACCOUNT_B.toLowerCase()));
     expect(window.sessionStorage.getItem(INTENT_STORAGE_KEY)).toBeNull();
   });
 

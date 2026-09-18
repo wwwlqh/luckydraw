@@ -29,7 +29,15 @@ import {ThemeProvider} from "../../lib/theme/ThemeProvider.tsx";
 import type {TxRuntime} from "../../lib/tx/machine.ts";
 import type {TxReceiptLike, TxRequest} from "../../lib/tx/types.ts";
 import {useWallet, WalletProvider, type WalletTarget} from "../../lib/wallet/WalletProvider.tsx";
-import {announce, DRAW_CODE, FakeWallet, fakeNode, testManifest, VAULT_CODE} from "../../test/harness.tsx";
+import {
+  announce,
+  DRAW_CODE,
+  FakeWallet,
+  fakeNode,
+  testManifest,
+  VAULT_CODE,
+  waitForWalletListeners,
+} from "../../test/harness.tsx";
 
 export const ACCOUNT = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266" as Address;
 export const NATIVE = "0x0000000000000000000000000000000000000000" as Address;
@@ -352,6 +360,9 @@ export async function connectTestWallet(accounts: readonly string[] = [ACCOUNT])
   await waitFor(() => expect(screen.getByText("test-connect")).toBeInTheDocument());
   fireEvent.click(screen.getByText("test-connect"));
   await waitFor(() => expect(screen.queryByText("test-connect")).not.toBeNull());
+  // Not cosmetic: a caller that fires `setAccounts` the moment this returns would otherwise race the passive
+  // effect that subscribes to the wallet, and lose the event (see `waitForWalletListeners`).
+  await waitForWalletListeners(wallet);
   return wallet;
 }
 
