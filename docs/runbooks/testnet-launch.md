@@ -357,6 +357,64 @@ amount debited on withdrawal, and whether your wallet needed one `approve` or tw
 
 ---
 
+## 4b. Registering the upkeep
+
+Optional, and independent of everything above: the Chainlink Automation upkeep is a **third executor** beside your
+keeper (SPEC §10.3, ADR 039). It does not replace the keeper and nothing breaks without it. What it buys you is
+that the lifecycle keeps running when your keeper host is down, rebooting or out of gas — a round still closes, a
+draw is still requested, an unrequested round still expires into refunds, and a Ready round is still settled.
+
+`LuckyDrawUpkeep` holds no funds, has no owner and has no role on the Draw. It calls exactly four public Draw
+methods that any address may already call. Deploying it changes nothing about custody, so it is safe to run after
+the Safe handover of section 4.
+
+1. **Deploy it.** From `contracts/`, with the manifest you finished in section 4 (or 4a):
+
+   ```bash
+   LUCKYDRAW_MANIFEST=../config/deployments/97/<lowercase draw address>.json      forge script script/DeployUpkeep.s.sol:DeployUpkeep --rpc-url "$LUCKYDRAW_RPC_URL"      --broadcast --account <your signer>
+   ```
+
+   It refuses a manifest whose chain, environment or Draw code hash does not match the chain you are connected
+   to, and it refuses to run twice. It writes `contracts.upkeep` into the manifest with the executor's address
+   and code hash, and leaves `registry` and `upkeepId` null: those are yours to fill in below.
+
+2. **Correct the deployment block and transaction hash.** A script cannot see its own creation, so
+   `contracts.upkeep.deployBlock` is the simulation block and `deployTx` is null. Take both from the broadcast
+   receipt (`contracts/broadcast/DeployUpkeep.s.sol/97/run-latest.json`, or the explorer) and edit them into the
+   manifest. `Verify` checks them against the chain's own receipt.
+
+3. **Look up the registry address for chain 97.** Chainlink publishes the Automation registry and registrar
+   addresses per chain in its own documentation (`docs.chain.link`, Automation → Supported Networks). **Read it
+   from there and copy it.** Nothing in this repository knows the address and no value here should be taken on
+   trust; a wrong registry address is an upkeep that never runs.
+
+4. **Register a custom-logic upkeep.** Go to `automation.chain.link`, connect the wallet that will own the
+   upkeep, choose **Register new upkeep → Custom logic**, and give it:
+
+   - **Target contract address**: the `contracts.upkeep.address` from step 1.
+   - **Gas limit**: 500,000 is comfortable. The most expensive single action is `closeRound` on a round that has
+     to open its successor; `performUpkeep` performs exactly one action, so this is not a batch budget.
+   - **Check data**: leave it empty. Empty means "the first 16 pools and the newest 256 round ids", which covers
+     this deployment several times over. A deployment with more than 16 pools registers a second upkeep with
+     `checkData` set to `abi.encode(poolCursor, poolLimit, roundCursor, roundLimit)` for the next page.
+   - **Starting balance**: LINK. You need testnet LINK on chain 97 from `faucets.chain.link`, and the upkeep is
+     funded in LINK even though the Draw's VRF subscription is billed in native BNB. These are two separate
+     balances: draining one does not touch the other.
+
+5. **Record what registration produced.** Put the registry address in `contracts.upkeep.registry` and the
+   registry's upkeep id in `contracts.upkeep.upkeepId` (a decimal string). The validator's rule `D28` requires
+   both or neither, so a half-filled record fails section 5.
+
+6. **Check it.** Re-run `Verify` (section 3) and watch the upkeep's history in the Automation app. With the
+   keeper also running, most actions will be the keeper's: the two race and the loser reverts with a named error,
+   which costs gas and nothing else. Seeing the upkeep perform occasionally is the point; seeing it perform
+   *every* action means your keeper is not running.
+
+Keep an eye on the LINK balance. An upkeep that runs out of LINK stops silently, and its only job is to be there
+when the keeper is not.
+
+---
+
 ## 5. Validate the configuration
 
 From the repository root:

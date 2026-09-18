@@ -185,6 +185,7 @@ in `scripts/validate_config.ts`, each with a rule tag that appears in its error 
 | `D16` | Accepted ownership leaves both contracts owned by `finalOwner` with nothing pending |
 | `D17`/`D25` | Deploy blocks are at or above `startBlock`; Vault and Draw are distinct |
 | `D22` | A mainnet deployment has a registered VRF consumer |
+| `D28` | The optional `contracts.upkeep` (Chainlink Automation executor, SPEC §10.3, ADR 039) names `contracts.draw.address` as its `draw`, is neither the Vault nor the Draw nor any of the three privileged roles, sits at or above `chain.startBlock`, and carries `registry` and `upkeepId` together or not at all. Absent is valid: the executor is a third executor, not a dependency |
 | `D26` | `release.customerLaunch` is true on mainnet only once `release.shakedown.performed` is true (SPEC §14) |
 | `D27` | A performed shakedown records its date, round ids, callback gas, request-to-fulfilment latency and cost per draw, and each is a value a real fulfilment could produce: `0 < callbackGasUsed <= vrf.callbackGasLimit`, `requestToFulfilmentSeconds >= 1`, `costPerDrawNativeWei != "0"`, and `date` at or after the manifest's `createdAtUtc` |
 | `O1`/`O2w` | Mainnet needs three distinct Safes; testnet may share one (SPEC §12.1) |

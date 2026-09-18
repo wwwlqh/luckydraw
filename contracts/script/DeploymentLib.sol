@@ -195,6 +195,22 @@ library DeploymentLib {
         address pendingOwner;
     }
 
+    /// @notice The optional Chainlink Automation executor (`contracts/src/LuckyDrawUpkeep.sol`, ADR 039).
+    /// @dev `addr == address(0)` means the manifest records no upkeep, which is the normal state of a deployment
+    ///      whose lifecycle is driven by the operator keeper alone. It carries no owner or pending owner because
+    ///      the contract has neither. `registry` and `upkeepId` are operator facts from the Chainlink Automation
+    ///      app, not chain state this repository can derive: the registry address for a chain must be looked up by
+    ///      the operator and recorded, never guessed, and the upkeep id only exists after registration.
+    struct UpkeepRecord {
+        address addr;
+        bytes32 codeHash;
+        uint256 deployBlock;
+        bytes32 deployTx;
+        address draw;
+        address registry;
+        string upkeepId;
+    }
+
     /// @notice The nine constructor arguments of `LuckyDraw`, recorded so a rebuild can be reproduced byte for byte.
     /// @dev Written as `constructorArgs`: a key named `constructor` collides with `Object.prototype` in JavaScript
     ///      consumers.
@@ -222,6 +238,7 @@ library DeploymentLib {
         Toolchain toolchain;
         ContractRecord vault;
         ContractRecord draw;
+        UpkeepRecord upkeep;
         DrawConstructor drawConstructor;
         VrfSpec vrf;
         OwnershipSpec ownership;
@@ -326,6 +343,7 @@ library DeploymentLib {
 
         m.vault = _readContract(json, ".contracts.vault");
         m.draw = _readContract(json, ".contracts.draw");
+        m.upkeep = _readUpkeep(json);
         m.drawConstructor = DrawConstructor({
             vault: _addr(json, ".contracts.draw.constructorArgs.vault"),
             coordinator: _addr(json, ".contracts.draw.constructorArgs.coordinator"),
@@ -660,6 +678,19 @@ library DeploymentLib {
         r.pendingOwner = _addr(json, string.concat(at, ".pendingOwner"));
     }
 
+    /// @dev Reads the optional `contracts.upkeep` record. Absent leaves every field zero, which is how every
+    ///      writer and checker recognises "no upkeep is recorded".
+    function _readUpkeep(string memory json) private view returns (UpkeepRecord memory r) {
+        if (!VM.keyExistsJson(json, ".contracts.upkeep")) return r;
+        r.addr = _addr(json, ".contracts.upkeep.address");
+        r.codeHash = _b32(json, ".contracts.upkeep.codeHash");
+        r.deployBlock = _uint(json, ".contracts.upkeep.deployBlock", 0);
+        r.deployTx = _b32(json, ".contracts.upkeep.deployTx");
+        r.draw = _addr(json, ".contracts.upkeep.draw");
+        r.registry = _addr(json, ".contracts.upkeep.registry");
+        r.upkeepId = _str(json, ".contracts.upkeep.upkeepId");
+    }
+
     /// @dev Reads one `assets[i]` record. `listed`, `pool.poolId` and `pool.firstRoundIds` are absent from a plan.
     function _readAsset(string memory json, string memory at) private view returns (AssetSpec memory a) {
         a.asset = _addr(json, string.concat(at, ".asset"));
@@ -831,6 +862,19 @@ library DeploymentLib {
         string memory out = "{";
         out = _put(out, "vault", _contractJson(m.vault, ""));
         out = _put(out, "draw", _contractJson(m.draw, _constructorJson(m.drawConstructor)));
+        if (m.upkeep.addr != address(0)) out = _put(out, "upkeep", _upkeepJson(m.upkeep));
+        return string.concat(out, "}");
+    }
+
+    function _upkeepJson(UpkeepRecord memory r) private pure returns (string memory) {
+        string memory out = "{";
+        out = _put(out, "address", _addrJson(r.addr));
+        out = _put(out, "codeHash", _b32Json(r.codeHash));
+        out = _put(out, "deployBlock", _num(r.deployBlock));
+        out = _put(out, "deployTx", _nullableB32(r.deployTx));
+        out = _put(out, "draw", _addrJson(r.draw));
+        out = _put(out, "registry", _addrJson(r.registry));
+        out = _put(out, "upkeepId", _nullableStr(r.upkeepId));
         return string.concat(out, "}");
     }
 

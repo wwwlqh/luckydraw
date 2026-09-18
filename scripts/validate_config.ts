@@ -868,6 +868,59 @@ function checkDeployment(doc: Doc, cls: Classification, sink: Sink): void {
     }
   }
 
+  // D28: the optional Automation executor (SPEC 10.3, ADR 039) is bound to this manifest's Draw, is its own
+  // contract, and holds none of the three privileged roles. The whole safety argument for an unattended executor
+  // is that it is an ordinary address with four public calls, so a manifest that claims otherwise is refused.
+  const upkeep = contracts !== null && isObject(contracts.upkeep) ? (contracts.upkeep as Doc) : null;
+  if (upkeep !== null) {
+    if (draw !== null && upkeep.draw !== draw.address) {
+      fail(
+        sink,
+        "D28",
+        `contracts.upkeep.draw is ${upkeep.draw} but contracts.draw.address is ${draw.address}; the executor is bound to another Draw`,
+      );
+    }
+    if (draw !== null && upkeep.address === draw.address) {
+      fail(sink, "D28", `contracts.upkeep.address is the Draw itself`);
+    }
+    if (vault !== null && upkeep.address === vault.address) {
+      fail(sink, "D28", `contracts.upkeep.address is the Vault itself`);
+    }
+    if (isObject(doc.ownership)) {
+      const ownership = doc.ownership as Doc;
+      for (const role of ["finalOwner", "feeAccount", "seedAccount"] as const) {
+        if (upkeep.address === ownership[role]) {
+          fail(
+            sink,
+            "D28",
+            `contracts.upkeep.address is also ownership.${role}; the Automation executor holds no privileged role (SPEC 10.3)`,
+          );
+        }
+      }
+    }
+    if (
+      chain !== null &&
+      typeof chain.startBlock === "number" &&
+      typeof upkeep.deployBlock === "number" &&
+      upkeep.deployBlock < chain.startBlock
+    ) {
+      fail(
+        sink,
+        "D28",
+        `contracts.upkeep.deployBlock (${upkeep.deployBlock}) is below chain.startBlock (${chain.startBlock})`,
+      );
+    }
+    const registered = typeof upkeep.registry === "string" && upkeep.registry !== ZERO_ADDRESS;
+    const hasId = typeof upkeep.upkeepId === "string" && upkeep.upkeepId.length > 0;
+    if (registered !== hasId) {
+      fail(
+        sink,
+        "D28",
+        `contracts.upkeep records ${registered ? "a registry without an upkeepId" : "an upkeepId without a registry"}; registration produces both or neither`,
+      );
+    }
+  }
+
   // D25: Vault and Draw are separate contracts (SPEC ADR 002).
   if (vault !== null && draw !== null && vault.address === draw.address) {
     fail(sink, "D25", `contracts.vault.address and contracts.draw.address are the same address`);

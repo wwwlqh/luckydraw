@@ -30,6 +30,32 @@
       "required": ["address", "codeHash", "deployBlock", "deployTx", "owner", "pendingOwner"],
       "additionalProperties": false
     },
+    "upkeepRecord": {
+      "type": "object",
+      "description": "The optional Chainlink Automation executor (contracts/src/LuckyDrawUpkeep.sol, SPEC section 10.3, ADR 039). Absent means the deployment's lifecycle is driven by the operator keeper alone, which is a valid deployment. The contract has no owner and no pending owner, so this record carries neither. Registration and LINK funding are operator steps in the Chainlink Automation app: `registry` and `upkeepId` stay null until they are done, and the registry address for a chain is looked up by the operator, never guessed.",
+      "properties": {
+        "address": { "$ref": "common.schema.json#/$defs/address" },
+        "codeHash": { "$ref": "common.schema.json#/$defs/bytes32" },
+        "deployBlock": { "$ref": "common.schema.json#/$defs/blockNumber" },
+        "deployTx": {
+          "anyOf": [{ "$ref": "common.schema.json#/$defs/txHash" }, { "type": "null" }]
+        },
+        "draw": {
+          "$ref": "common.schema.json#/$defs/address",
+          "description": "The immutable DRAW the executor is bound to. Rule D28 requires it to equal contracts.draw.address."
+        },
+        "registry": {
+          "anyOf": [{ "$ref": "common.schema.json#/$defs/address" }, { "type": "null" }],
+          "description": "The Chainlink Automation registry this upkeep is registered with, recorded by the operator from the registration receipt. Null, or the zero address, until registration."
+        },
+        "upkeepId": {
+          "anyOf": [{ "$ref": "common.schema.json#/$defs/uint256String" }, { "type": "null" }],
+          "description": "The registry's upkeep id as a decimal string. Null until registration."
+        }
+      },
+      "required": ["address", "codeHash", "deployBlock", "deployTx", "draw"],
+      "additionalProperties": false
+    },
     "drawConstructor": {
       "type": "object",
       "description": "The exact LuckyDraw constructor arguments (contracts/src/LuckyDraw.sol). Every VRF parameter is constructor-fixed; the validator checks each against the vrf record.",
@@ -137,7 +163,8 @@
           "properties": {
             "constructorArgs": { "$comment": "Constrained in $defs/contractRecord; named here only so \"required\" refers to a defined property." }
           }
-        }
+        },
+        "upkeep": { "$ref": "#/$defs/upkeepRecord" }
       },
       "required": ["vault", "draw"],
       "additionalProperties": false

@@ -26,6 +26,20 @@ abstract contract HistoryRpcFixture is Script {
         m.draw.deployTx = keccak256(abi.encode(m.draw.addr));
         _seedReceipt(m.vault);
         _seedReceipt(m.draw);
+        // The optional Automation executor (ADR 039) is verified from a creation receipt like the other two.
+        if (m.upkeep.addr != address(0)) {
+            m.upkeep.deployTx = keccak256(abi.encode(m.upkeep.addr));
+            _seedReceipt(
+                DeploymentLib.ContractRecord({
+                    addr: m.upkeep.addr,
+                    codeHash: m.upkeep.codeHash,
+                    deployBlock: m.upkeep.deployBlock,
+                    deployTx: m.upkeep.deployTx,
+                    owner: address(0),
+                    pendingOwner: address(0)
+                })
+            );
+        }
         DeploymentLib.writeDocument(m, path, false);
     }
 

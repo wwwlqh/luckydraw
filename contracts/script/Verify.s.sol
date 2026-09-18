@@ -6,6 +6,7 @@ import {console2} from "forge-std/console2.sol";
 import {ILuckyDraw} from "../src/interfaces/ILuckyDraw.sol";
 import {ILuckyVault} from "../src/interfaces/ILuckyVault.sol";
 import {LuckyDraw} from "../src/LuckyDraw.sol";
+import {LuckyDrawUpkeep} from "../src/LuckyDrawUpkeep.sol";
 import {LuckyVault} from "../src/LuckyVault.sol";
 import {KIND_COUNT, Kind, PricingConfig} from "../src/Types.sol";
 import {DeploymentLib} from "./DeploymentLib.sol";
@@ -61,6 +62,7 @@ abstract contract VerifyBase is DeploymentScript, DeploymentHistory {
         _checkAddr(vault.draw(), m.draw.addr, "Vault.draw() is the manifest Draw");
         _checkAddr(address(draw.VAULT()), m.vault.addr, "Draw.VAULT() is the manifest Vault");
 
+        _checkUpkeep(m);
         _checkImmutables(draw, m);
         _checkOwners(vault, draw, m);
         _checkVrf(m);
@@ -102,6 +104,37 @@ abstract contract VerifyBase is DeploymentScript, DeploymentHistory {
                 !DeploymentLib.referencesMocks(m),
                 string.concat("environment '", m.environment, "' references no mock artifact")
             );
+        }
+    }
+
+    /// @dev The optional Automation executor (ADR 039). Absent is a valid manifest: the upkeep is a third
+    ///      executor, not a dependency. When it is recorded, it must be the contract this repository builds, bound
+    ///      to this manifest's Draw, and it must hold no role and no money -- the whole claim the design rests on.
+    ///      Registration and LINK funding are operator facts the chain does not expose here, so `registry` and
+    ///      `upkeepId` are reported, not asserted.
+    function _checkUpkeep(DeploymentLib.Manifest memory m) private {
+        if (m.upkeep.addr == address(0)) {
+            console2.log("Verify: NOTICE the manifest records no Automation upkeep (SPEC 10.3 third executor)");
+            return;
+        }
+        _check(m.upkeep.addr.code.length > 0, "the Automation upkeep has deployed code");
+        _checkB32(m.upkeep.addr.codehash, m.upkeep.codeHash, "upkeep extcodehash matches the manifest");
+        _checkAddr(m.upkeep.draw, m.draw.addr, "contracts.upkeep.draw is the manifest Draw");
+        _checkAddr(address(LuckyDrawUpkeep(m.upkeep.addr).DRAW()), m.draw.addr, "LuckyDrawUpkeep.DRAW()");
+        _checkUint(m.upkeep.addr.balance, 0, "the upkeep holds no native balance (it has no payable path)");
+        _check(
+            m.upkeep.addr != m.vault.addr && m.upkeep.addr != m.draw.addr,
+            "the upkeep is a separate contract from the Vault and the Draw"
+        );
+        _check(m.upkeep.addr != m.ownership.finalOwner, "the upkeep is not the owner");
+        _check(m.upkeep.addr != m.ownership.feeAccount, "the upkeep is not the treasury");
+        _check(m.upkeep.addr != m.ownership.seedAccount, "the upkeep is not the seed account");
+        _checkUint(m.upkeep.deployBlock, _creationBlock(m.upkeep.addr, m.upkeep.deployTx), "upkeep deployBlock");
+        if (m.upkeep.registry == address(0)) {
+            console2.log("Verify: NOTICE contracts.upkeep.registry is unset: the upkeep is deployed but unregistered");
+        } else {
+            _check(m.upkeep.registry.code.length > 0, "contracts.upkeep.registry has deployed code");
+            _check(bytes(m.upkeep.upkeepId).length > 0, "contracts.upkeep.upkeepId is recorded beside the registry");
         }
     }
 

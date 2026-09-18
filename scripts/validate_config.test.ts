@@ -1114,6 +1114,74 @@ describe("chain identity behind a mainnet release", () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+
+describe("the optional Automation upkeep (SPEC 10.3, ADR 039)", () => {
+  const upkeepOf = (doc: Record<string, any>): Record<string, any> => ({
+    address: "0xcccccccccccccccccccccccccccccccccccccccc",
+    codeHash: "0x" + "11".repeat(32),
+    deployBlock: doc.contracts.draw.deployBlock,
+    deployTx: null,
+    draw: doc.contracts.draw.address,
+    registry: null,
+    upkeepId: null,
+  });
+
+  it("a manifest with no upkeep record passes: the executor is optional", () => {
+    const result = caseFor("valid-mainnet", MAINNET_MANIFEST, () => {});
+    assertRules(result, []);
+  });
+
+  it("a deployed but unregistered upkeep passes", () => {
+    const result = caseFor("valid-mainnet", MAINNET_MANIFEST, (doc) => {
+      doc.contracts.upkeep = upkeepOf(doc);
+    });
+    assertRules(result, []);
+  });
+
+  it("a registered upkeep with both registry and id passes", () => {
+    const result = caseFor("valid-mainnet", MAINNET_MANIFEST, (doc) => {
+      doc.contracts.upkeep = {
+        ...upkeepOf(doc),
+        registry: "0xdddddddddddddddddddddddddddddddddddddddd",
+        upkeepId: "1234567890",
+      };
+    });
+    assertRules(result, []);
+  });
+
+  it("D28: an upkeep bound to another Draw is rejected", () => {
+    const result = caseFor("valid-mainnet", MAINNET_MANIFEST, (doc) => {
+      doc.contracts.upkeep = {...upkeepOf(doc), draw: "0x1111111111111111111111111111111111111111"};
+    });
+    assertRules(result, ["D28"]);
+    assert.match(result.errors[0], /bound to another Draw/);
+  });
+
+  it("D28: an upkeep that is also a privileged role is rejected", () => {
+    const result = caseFor("valid-mainnet", MAINNET_MANIFEST, (doc) => {
+      doc.contracts.upkeep = {...upkeepOf(doc), address: doc.ownership.feeAccount};
+    });
+    assertRules(result, ["D28"]);
+    assert.match(result.errors[0], /holds no privileged role/);
+  });
+
+  it("D28: a registry without an upkeep id is rejected", () => {
+    const result = caseFor("valid-mainnet", MAINNET_MANIFEST, (doc) => {
+      doc.contracts.upkeep = {...upkeepOf(doc), registry: "0xdddddddddddddddddddddddddddddddddddddddd"};
+    });
+    assertRules(result, ["D28"]);
+    assert.match(result.errors[0], /registry without an upkeepId/);
+  });
+
+  it("schema: an unknown key under contracts.upkeep is rejected", () => {
+    const result = caseFor("valid-mainnet", MAINNET_MANIFEST, (doc) => {
+      doc.contracts.upkeep = {...upkeepOf(doc), owner: doc.ownership.finalOwner};
+    });
+    assertRules(result, ["schema"]);
+  });
+});
+
 describe("the command line entry point", () => {
   it("exits 0 on a clean tree and prints one line per document", () => {
     const run = spawnSync(process.execPath, [VALIDATOR, join(FIXTURES, "valid-local")], {encoding: "utf8"});
