@@ -31,7 +31,13 @@ import {
 import {type KeeperConfig, loadConfig, REPO_ROOT} from "./config.ts";
 import type {CostMeter} from "./costs.ts";
 import type {ActionKind} from "./decide.ts";
-import {createKeeper, IN_FLIGHT_MS, SUBSCRIPTION_CHECK_MS} from "./keeper.ts";
+import {
+  createKeeper,
+  DISCOVERY_EVERY_CYCLES,
+  DISCOVERY_PAGE_SIZE,
+  IN_FLIGHT_MS,
+  SUBSCRIPTION_CHECK_MS,
+} from "./keeper.ts";
 import {createLogger} from "./log.ts";
 import type {AlertCause, Notifier} from "./notify.ts";
 import type {LogQuery} from "./refunds.ts";
@@ -127,6 +133,14 @@ function nodeWith(options: {
   balances: ReadonlyMap<string, bigint>;
   current: ReadonlyMap<string, bigint>;
   rounds: readonly RoundView[];
+  /**
+   * `roundCount()`, the upper bound of the historical discovery scan.
+   *
+   * Zero by default, which is the "nothing to rediscover" answer: the scan finds no ids and the test stays
+   * about the pool pointers it named. A test about discovery sets it and answers `getRound` for every id
+   * from 1 up to it.
+   */
+  roundCount?: bigint;
 }): FakeProvider {
   const verified = deployment();
   const head = {number: 4_242, hash: `0x${"cd".repeat(32)}`, timestamp: NOW};
@@ -139,6 +153,10 @@ function nodeWith(options: {
   provider.answer(verified.draw, drawInterface.encodeFunctionData("getPools", [0n, 100n]), {
     ok: true,
     data: drawInterface.encodeFunctionResult("getPools", [options.pools, BigInt(options.pools.length)]),
+  });
+  provider.answer(verified.draw, drawInterface.encodeFunctionData("roundCount", []), {
+    ok: true,
+    data: drawInterface.encodeFunctionResult("roundCount", [options.roundCount ?? 0n]),
   });
   provider.answer(verified.draw, drawInterface.encodeFunctionData("getSeedAccount", []), {
     ok: true,
@@ -1323,5 +1341,226 @@ test("a throttled log scan retries the same range and then fails by naming the R
   assert.ok(
     !failure.includes("limit exceeded") && !failure.includes("coalesce"),
     "the node's own words are not the operator's error message (SPEC §9.7)",
+  );
+});
+
+// Historical discovery (SPEC §10.2): every round of `1..roundCount` that is not terminal, whether or not any
+// pool still points at it. Without it a round closed while no keeper was watching is named by nothing and
+// expires into refunds with the keeper running - chain 97 round 1, 2026-09-18.
+
+/** A pool that asks for nothing: no seed, one named kind, and whatever rounds the test wants below it. */
+function discoveryNode(options: {
+  roundCount: bigint;
+  current: bigint;
+  rounds: readonly RoundView[];
+}): FakeProvider {
+  const pool = poolFixture({id: 1n, enabled: true, seedAmount: 0n});
+  return nodeWith({
+    pools: [pool],
+    seedAccount: ZERO_ADDRESS,
+    caps: new Map(),
+    balances: new Map(),
+    current: new Map([[`1|${Kind.Day100}`, options.current]]),
+    rounds: options.rounds,
+    roundCount: options.roundCount,
+  });
+}
+
+/** An Open round nothing can be done to: seeded, and a day from its cutoff. */
+function inertRound(id: bigint): RoundView {
+  return roundFixture({id, poolId: 1n, state: State.Open, seeded: true, closesAt: BigInt(NOW) + 86_400n});
+}
+
+function discoveryKeeper(provider: FakeProvider): {
+  keeper: ReturnType<typeof createKeeper>;
+  sent: PreparedWrite[];
+  lines: string[];
+} {
+  const {dispatcher, sent} = recordingDispatcher();
+  const lines: string[] = [];
+  const keeper = createKeeper({
+    config: config(),
+    deployment: deployment(),
+    provider,
+    dispatcher,
+    logQuery: noLogs,
+    logger: createLogger({write: (line) => void lines.push(line)}),
+  });
+  return {keeper, sent, lines};
+}
+
+test("a fresh keeper requests a round closed before it started", async () => {
+  // Exactly chain 97: the operator closed round 1 with `closeRound`, which advanced `current` to round 2 in
+  // the same transaction, and every later cycle of a fresh process saw only round 2.
+  const provider = discoveryNode({
+    roundCount: 2n,
+    current: 2n,
+    rounds: [
+      roundFixture({
+        id: 1n,
+        poolId: 1n,
+        state: State.AwaitingRequest,
+        closedAt: BigInt(NOW) - 100n,
+        requestDeadline: BigInt(NOW) + 86_300n,
+      }),
+      inertRound(2n),
+    ],
+  });
+  const {keeper, sent, lines} = discoveryKeeper(provider);
+
+  await keeper.runCycle();
+
+  assert.deepStrictEqual(
+    sent.map((write) => write.function),
+    ["requestDraw"],
+    "the round no pool points at is the one that needed an action",
+  );
+  assert.strictEqual(sent[0]?.summary.roundId, 1n);
+  assert.deepStrictEqual(named(keeper.tracked), [2n, 1n]);
+  assert.ok(
+    lines.some((line) => line.includes("event=discovered_round") && line.includes("state=AwaitingRequest")),
+    "the rediscovery is a named log line, not a silent addition",
+  );
+  assert.ok(
+    lines.some((line) => line.includes("event=discovery") && line.includes("from=1 to=2")),
+    "and the pass says what it walked",
+  );
+});
+
+test("a Ready round below current is settled by the first cycle", async () => {
+  const provider = discoveryNode({
+    roundCount: 4n,
+    current: 4n,
+    rounds: [
+      roundFixture({id: 1n, poolId: 1n, state: State.Settled}),
+      roundFixture({id: 2n, poolId: 1n, state: State.Void}),
+      roundFixture({id: 3n, poolId: 1n, state: State.Ready}),
+      inertRound(4n),
+    ],
+  });
+  const {keeper, sent} = discoveryKeeper(provider);
+
+  await keeper.runCycle();
+
+  assert.deepStrictEqual(
+    sent.map((write) => write.function),
+    ["settle"],
+  );
+  assert.strictEqual(sent[0]?.summary.roundId, 3n);
+});
+
+test("a Settled or Void round below current is examined once and never tracked", async () => {
+  const provider = discoveryNode({
+    roundCount: 3n,
+    current: 3n,
+    rounds: [
+      roundFixture({id: 1n, poolId: 1n, state: State.Settled}),
+      roundFixture({id: 2n, poolId: 1n, state: State.Void}),
+      inertRound(3n),
+    ],
+  });
+  const {keeper, sent, lines} = discoveryKeeper(provider);
+
+  await keeper.runCycle();
+
+  assert.deepStrictEqual(sent, [], "a terminal round asks for nothing");
+  assert.deepStrictEqual(named(keeper.tracked), [3n], "and is not carried for the life of the process");
+  assert.ok(
+    lines.some((line) => line.includes("event=discovery") && line.includes("examined=3 added=0")),
+    "the pass says it looked and found nothing to add",
+  );
+  const getRound1 = drawInterface.encodeFunctionData("getRound", [1n]);
+  const before = provider.calls.filter((call) => call.data === getRound1).length;
+  await keeper.runCycle();
+  assert.strictEqual(
+    provider.calls.filter((call) => call.data === getRound1).length,
+    before,
+    "SPEC §6.2: Settled never transitions, so the next cycle does not read it again",
+  );
+});
+
+test("the periodic pass picks up a round that became unresolved after start-up", async () => {
+  const provider = discoveryNode({
+    roundCount: 4n,
+    current: 5n,
+    rounds: [
+      roundFixture({id: 1n, poolId: 1n, state: State.Settled}),
+      roundFixture({id: 2n, poolId: 1n, state: State.Settled}),
+      roundFixture({id: 3n, poolId: 1n, state: State.Settled}),
+      roundFixture({id: 4n, poolId: 1n, state: State.Settled}),
+      inertRound(5n),
+    ],
+  });
+  const {keeper, sent, lines} = discoveryKeeper(provider);
+
+  await keeper.runCycle();
+  assert.strictEqual(sent.length, 0, "nothing outstanding at start-up");
+
+  // Somebody else - the app, or the operator - closed round 6 and left it Ready between two passes.
+  provider.answer(deployment().draw, drawInterface.encodeFunctionData("roundCount", []), {
+    ok: true,
+    data: drawInterface.encodeFunctionResult("roundCount", [6n]),
+  });
+  provider.answer(deployment().draw, drawInterface.encodeFunctionData("getRound", [6n]), {
+    ok: true,
+    data: drawInterface.encodeFunctionResult("getRound", [
+      roundFixture({id: 6n, poolId: 1n, state: State.Ready}),
+    ]),
+  });
+
+  for (let cycle = 1; cycle < DISCOVERY_EVERY_CYCLES; cycle += 1) await keeper.runCycle();
+  assert.strictEqual(sent.length, 0, "the pass is periodic, not every cycle");
+
+  await keeper.runCycle();
+
+  assert.deepStrictEqual(
+    sent.map((write) => write.function),
+    ["settle"],
+  );
+  assert.strictEqual(sent[0]?.summary.roundId, 6n);
+  const passes = lines.filter((line) => line.includes("event=discovery "));
+  assert.strictEqual(passes.length, 2, "one pass at start-up, one after the interval");
+  assert.ok(
+    passes[1]?.includes("from=5 to=6"),
+    "the second pass resumes above the highest id it already judged, not at 1",
+  );
+});
+
+test("a large roundCount is walked in bounded pages, once", async () => {
+  const total = BigInt(DISCOVERY_PAGE_SIZE) * 2n + 20n;
+  const rounds: RoundView[] = [];
+  for (let id = 1n; id < total; id += 1n) {
+    rounds.push(roundFixture({id, poolId: 1n, state: State.Settled}));
+  }
+  rounds.push(inertRound(total));
+  const provider = discoveryNode({roundCount: total, current: total, rounds});
+  const {dispatcher, sent} = recordingDispatcher();
+  const lines: string[] = [];
+  const keeper = createKeeper({
+    config: config(),
+    deployment: deployment(),
+    provider,
+    dispatcher,
+    logQuery: noLogs,
+    logger: createLogger({write: (line) => void lines.push(line)}),
+    multicall3: MULTICALL3,
+  });
+
+  await keeper.runCycle();
+  const first = provider.calls.filter((call) => call.to === MULTICALL3).length;
+  await keeper.runCycle();
+  const second = provider.calls.filter((call) => call.to === MULTICALL3).length - first;
+
+  assert.deepStrictEqual(sent, [], "every round below the current one is terminal: nothing to do");
+  assert.deepStrictEqual(named(keeper.tracked), [total]);
+  assert.strictEqual(second, 3, "a cycle without a pass is the three read stages");
+  assert.strictEqual(
+    first - second,
+    4,
+    `the scan cost one roundCount read plus three pages of ${DISCOVERY_PAGE_SIZE}`,
+  );
+  assert.ok(
+    lines.some((line) => line.includes("event=discovery") && line.includes(`examined=${total}`)),
+    "and every id was judged",
   );
 });

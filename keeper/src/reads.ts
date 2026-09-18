@@ -166,6 +166,18 @@ export async function readCycleHead(
   return {pools: page.page, seedAccount};
 }
 
+/**
+ * `roundCount()`: how many rounds the Draw has ever created. Round identifiers are `1..roundCount`.
+ *
+ * This is the upper bound of the start-up discovery scan in `keeper.ts`, which is the only thing that can
+ * find a round closed while no keeper was watching - `closeRound` advances `current` past it in the same
+ * transaction, so the pool pointers of stage 2 never name it again.
+ */
+export async function readRoundCount(ctx: BatchContext): Promise<bigint> {
+  const outcomes = await run(ctx, [encode(DRAW, ctx.deployment.draw, "roundCount", [])]);
+  return decodeOne(DRAW, "roundCount", outcomeAt(outcomes, 0)) as bigint;
+}
+
 /** One pool's stage-2 facts. `seed` is null for a pool the caller did not ask a seed question about. */
 export type PoolFacts = {
   seed: {cap: bigint; balance: bigint} | null;

@@ -7,10 +7,19 @@
 // What it tracks: the current round of every enabled pool and kind, plus every round it has already seen that
 // has not reached a terminal state. The second half is necessary, not extra: `closeRound` advances `current`
 // to the successor in the same transaction, so a round the keeper must still request, settle or refund stops
-// being current the moment it closes. This is the in-memory version of the persisted "round IDs seen in
-// RoundOpened that have not reached Settled or Void" of SPEC §10.2; a restart rediscovers the current rounds
-// and loses sight of older unresolved ones, which is one of the reasons this keeper is not the production one
-// (see README "Deferred").
+// being current the moment it closes.
+//
+// That alone only holds for a round this process watched while it was still current. A round closed before
+// the process started - by the operator, by the app, or by the keeper itself before a restart - is named by
+// no pool pointer and appeared in no cycle, so it would sit in AwaitingRequest until its 24-hour deadline and
+// expire into refunds while a keeper was running (observed on chain 97, round 1, 2026-09-18). So the first
+// cycle, and every `DISCOVERY_EVERY_CYCLES` after it, walks `1..roundCount()` in pages and tracks every round
+// that is not terminal. The walk is bounded twice: by the page size, and by `highestExamined` - a round that
+// was Settled, Void or fully refunded when it was examined can never become unresolved again (SPEC §6.2:
+// "Settled/Void never transition"), so the periodic pass only looks at ids created since the last one. This
+// is the in-memory version of the persisted "round IDs seen in RoundOpened that have not reached Settled or
+// Void" of SPEC §10.2, rebuilt from `getRound` rather than from a store, which is what SPEC §10.2 means by
+// "keeper state is fully reconstructible from chain".
 //
 // What it also tracks, for the same reason, is what it has already sent. A cycle is 15 seconds and inclusion
 // is not instant, so without an in-flight set every action would be re-derived from unchanged chain state and
@@ -53,6 +62,7 @@ import {
   type PoolFacts,
   readCycleHead,
   readPoolFacts,
+  readRoundCount,
   readRounds,
 } from "./reads.ts";
 import {discoverBuyers, type LogQuery, RefundTracker} from "./refunds.ts";
@@ -98,6 +108,26 @@ export const IN_FLIGHT_MS = 120_000;
 
 /** Consecutive whole-cycle RPC failures after which the process exits non-zero. */
 export const MAX_CONSECUTIVE_FAILURES = 10;
+
+/**
+ * Round ids per `getRound` batch during the historical discovery scan.
+ *
+ * With Multicall3 one page is one `eth_call`; without it, one page is this many. A deployment with thousands
+ * of settled rounds is therefore walked in bounded steps rather than in one request a public BSC endpoint
+ * would refuse - and only once, because `highestExamined` never looks at a terminal id twice.
+ */
+export const DISCOVERY_PAGE_SIZE = 50;
+
+/**
+ * Cycles between historical discovery passes. The first pass is the first cycle.
+ *
+ * Every round the keeper itself opens, closes or sees as current is tracked without any of this, so the
+ * periodic pass exists for the rounds somebody else moved - the app, or the operator - while this process was
+ * between cycles. Twenty cycles is five minutes at the default interval, well inside the 24-hour request
+ * deadline the scan protects and inside SPEC §10.3's 10-minute "keeper action overdue" warning for a round
+ * that was closed by somebody else and is already past its cutoff.
+ */
+export const DISCOVERY_EVERY_CYCLES = 20;
 
 /**
  * How often the VRF subscription's native balance is read (SPEC §10.3 "subscription balance" signal).
@@ -205,6 +235,11 @@ export function createKeeper(deps: KeeperDeps): Keeper {
   const inFlightSends = new Map<string, InFlightSend>();
   /** The same, for the one action that names a pool and a kind rather than a round. */
   const ensureCurrentSends = new Map<string, number>();
+
+  /** The highest round id every id below which has been examined by a discovery pass and judged. */
+  let highestExamined = 0n;
+  /** Cycles left before the next discovery pass; zero on the first cycle, so start-up always scans. */
+  let cyclesUntilDiscovery = 0;
 
   let lastSubscriptionCheckAt: number | null = null;
   let stopped = false;
@@ -449,6 +484,85 @@ export function createKeeper(deps: KeeperDeps): Keeper {
     }
   }
 
+  /**
+   * Every round of `1..roundCount()` that is not terminal, added to the tracked set (SPEC §10.2).
+   *
+   * Terminality is not a second state table: it is `decide` itself returning `done`, so a round is dropped
+   * here on exactly the condition the cycle drops it on - Settled, Void, or Refunding with nothing
+   * outstanding - and the §6.2 table stays in one file. The seed facts handed to `decide` are the empty ones
+   * because this asks a yes/no question about the round, never what to do with it; what to do is decided in
+   * the cycle below, against that pool's real budget.
+   *
+   * Contained like the refund scan: a node that fails a page is a warning and an unchanged `highestExamined`,
+   * never a failed cycle. The pass is an addition to the tracked set, so losing one costs nothing that the
+   * next one does not recover, and a round already tracked would be acted on anyway.
+   */
+  async function discoverHistorical(batch: BatchContext, now: bigint): Promise<void> {
+    if (cyclesUntilDiscovery > 0) {
+      cyclesUntilDiscovery -= 1;
+      return;
+    }
+    cyclesUntilDiscovery = DISCOVERY_EVERY_CYCLES - 1;
+    let total: bigint;
+    try {
+      total = await readRoundCount(batch);
+    } catch (error) {
+      logger.warn("discovery_failed", {
+        from: highestExamined + 1n,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return;
+    }
+    const from = highestExamined + 1n;
+    if (total < from) return; // Nothing has been created since the last pass.
+    let examined = 0;
+    let added = 0;
+    const page = BigInt(DISCOVERY_PAGE_SIZE);
+    for (let start = from; start <= total; start += page) {
+      const end = start + page - 1n < total ? start + page - 1n : total;
+      const ids: bigint[] = [];
+      for (let id = start; id <= end; id += 1n) ids.push(id);
+      let outcomes: Awaited<ReturnType<typeof readRounds>>;
+      try {
+        outcomes = await readRounds(batch, ids);
+      } catch (error) {
+        // `highestExamined` is left where the last complete page put it, so the next pass resumes here
+        // rather than skipping the ids this page would have judged.
+        logger.warn("discovery_failed", {
+          from: start,
+          to: end,
+          error: error instanceof Error ? error.message : String(error),
+        });
+        break;
+      }
+      let completed = true;
+      for (const [index, id] of ids.entries()) {
+        let round: RoundView;
+        try {
+          round = decodeRound(outcomes, index);
+        } catch (error) {
+          // Ids `1..roundCount` all exist, so this is a node fault rather than a missing round: do not
+          // record it as examined, and stop the pass so the next one asks again from here.
+          logger.warn("discovery_round_failed", {
+            round: id,
+            error: error instanceof Error ? error.message : String(error),
+          });
+          completed = false;
+          break;
+        }
+        examined += 1;
+        highestExamined = id;
+        if (decide({round, now, seed: NO_SEED}).kind === "done") continue;
+        if (tracked.has(id)) continue;
+        added += 1;
+        tracked.add(id);
+        logger.info("discovered_round", {round: id, state: stateName(round.state)});
+      }
+      if (!completed) break;
+    }
+    logger.info("discovery", {from, to: total, examined, added, highestExamined});
+  }
+
   async function runCycle(): Promise<void> {
     const block = await resolveSnapshotBlock(provider, {tag: "latest"});
     // One snapshot for the whole cycle, in two shapes: `ctx` for the refund path's per-account `getPosition`,
@@ -527,6 +641,9 @@ export function createKeeper(deps: KeeperDeps): Keeper {
         tracked.add(current);
       }
     }
+
+    // Before stage 3, so a round discovered now is acted on in this same cycle rather than in the next one.
+    await discoverHistorical(batch, now);
 
     // Stage 3: every tracked round in one batch, decoded one at a time. Decoding here rather than in
     // `readRounds` is what keeps a single reverting round from costing every later round its turn.

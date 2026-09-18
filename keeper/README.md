@@ -34,6 +34,23 @@ round advances `current` to its successor in the same transaction (SPEC §6.1), 
 requested, settled or refunded is no longer current. A round is dropped when it reaches `Settled`, `Void`, or
 `Refunding` with `refundedGross == grossTotal`.
 
+That covers a round this process watched while it was current. A round closed **before** it started — by the
+operator, by the app, or by the keeper itself before a restart — is named by no pointer and appeared in no
+cycle, so it would sit in `AwaitingRequest` until its 24-hour deadline and expire into refunds with a keeper
+running (observed on chain 97, round 1, 2026-09-18). So the **first cycle**, and every
+`DISCOVERY_EVERY_CYCLES` (20, five minutes at the default interval) after it, walks round ids
+`1..roundCount()` through `getRound` in pages of `DISCOVERY_PAGE_SIZE` (50) and tracks every round that is
+not terminal, logging `event=discovered_round` per round and one `event=discovery` per pass. Terminality is
+not a second state table: it is `decide` returning `done`, so exactly the rounds the cycle drops are the
+rounds the scan skips. The work is bounded twice — by the page size, and by the highest id already judged,
+because SPEC §6.2's "Settled/Void never transition" means a terminal round can never become unresolved again,
+so a periodic pass only reads ids created since the last one. A failed page is
+`event=discovery_failed`/`discovery_round_failed` at warn level and an unchanged high-water mark, never a
+failed cycle: the pass only ever adds to the tracked set, and the next one resumes where this one stopped.
+This is the in-memory form of SPEC §10.2's persisted "round IDs seen in `RoundOpened` that have not reached
+Settled or Void", rebuilt from `getRound` rather than from a store — which is what SPEC §10.2 means by
+"keeper state is fully reconstructible from chain".
+
 At most **one transaction per round per cycle**, and every call is simulated with `eth_estimateGas` first
 (SPEC §10.2: "before each send the keeper simulates the call ... and skips it on revert"). A failed
 simulation is a logged skip with the contract's own decoded custom-error name; nothing is sent.
@@ -312,6 +329,9 @@ one per adapter (`src/reads.ts`):
 | 2 | per pool: `seedMaxPerRound` and `balanceOf` for its asset, and `getCurrent` for the seven kinds |
 | 3 | `getRound` for every tracked round |
 
+The discovery pass adds, on the cycles it runs, one batch for `roundCount()` and one per page of
+`DISCOVERY_PAGE_SIZE` `getRound` calls.
+
 Grouping is the whole point of the address: a one-item `aggregate3` is one `eth_call`, so a cycle built from
 the client's per-call adapters would send the same number of requests with Multicall3 as without it. Measured
 on the two-pool, six-round fixture in `src/keeper.test.ts`, one cycle is **8 requests with Multicall3 against
@@ -461,9 +481,9 @@ it is scheduled here.
   keeps a 20-action-per-cycle budget with fair round-robin scheduling across pools so no pool starves.
 * **Restart and reorg handling.** A persisted cursor and in-flight transaction set, reconciliation of persisted
   hashes against receipts and the pending nonce before any send, never reusing a nonce whose outcome is
-  unknown, and consecutive nonces sent without awaiting receipts. This keeper keeps everything in memory, so a
-  restart rediscovers only the pools' current rounds and loses sight of older unresolved ones until someone
-  (or the app) acts on them; its in-flight set is memory too, so a restart can re-send an action whose first
+  unknown, and consecutive nonces sent without awaiting receipts. This keeper keeps everything in memory. It
+  no longer loses sight of older unresolved rounds across a restart — the discovery scan above rebuilds that
+  set from `roundCount()` and `getRound` — but its in-flight set is memory, so a restart can re-send an action whose first
   transaction is still pending (the duplicate reverts, costing gas, never funds), and it holds no transaction
   hashes to reconcile against receipts. It also awaits each send, so it is slower under load.
 * **Extra cycle at 00:00:01 UTC**, and the 30-day gas budget with refill-on-alert. (The systemd unit with
