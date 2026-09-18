@@ -5,6 +5,14 @@ web app published on GitHub Pages at `https://<your-github-user>.github.io/lucky
 as a service on your own machine. Unlike `docs/runbooks/testnet-launch.md`, everything here is **real money**:
 real BNB, real entries from real people, real losses if something is wrong.
 
+> **If you only want the steps that need your key or your Safe, read
+> [`mainnet-operator-checklist.md`](mainnet-operator-checklist.md).** It is this runbook's twenty signing steps
+> in order, each with the exact command, the output line to expect and the section here it comes from, plus the
+> balance each account must hold. The read-only prerequisites of sections 1.5 to 1.7 and the deployment plan of
+> section 2 are already done and committed — `config/chains/56.json`, `config/assets/56/bnb.json` and
+> `config/deployments/56/mainnet.plan.json`, whose five remaining placeholders the checklist lists. Read the
+> sections below for why each step is what it is; the checklist does not repeat the reasoning.
+
 ADR 035 put a BSC testnet trial first, and it happened: chain 97 has run the seven-kind build live since
 2026-09-18, one round settled through a real VRF fulfilment and one refunded. What it does not prove is chain
 56's own coordinator, feed and finality, so the private shakedown of section 5 is still where those are first
@@ -314,15 +322,23 @@ They are review work, not deployment steps, but they come first.
 
 ## 2. Fill in the deployment plan
 
-There is no mainnet plan template. Copy the testnet form and convert it — that is deliberate, so the chain
-facts pass through your hands:
+**This is already done**: `config/deployments/56/mainnet.plan.json` exists, filled in on 2026-09-18 from values
+read against the live chain through two public endpoints, with the five fields only you can supply left as the
+documented placeholders (`config/README.md`, "Placeholders for values only the operator can supply"; rule
+`PL9w` prints them). Step 5 of `mainnet-operator-checklist.md` is the short version: replace the three Safe
+addresses and the subscription id, confirm the make-whole and seed figures, fill `ownership.safes[]`, re-run
+`validate:config` and check the `PL9w` line is gone. The rest of this section is what is in that file and why,
+and it is worth reading before you sign `Deploy`, because every one of these values is frozen at construction.
+
+To start again from a blank form instead — the mainnet template, or the testnet one converted by hand so the
+chain facts pass through your own hands:
 
 ```bash
 mkdir -p config/deployments/56
-cp contracts/script/templates/testnet.plan.example.json config/deployments/56/mainnet.plan.json
+cp contracts/script/templates/mainnet.plan.example.json config/deployments/56/mainnet.plan.json
 ```
 
-Then edit `config/deployments/56/mainnet.plan.json`:
+Either way, in `config/deployments/56/mainnet.plan.json`:
 
 - delete the `"template": true` line — every script and the validator refuse a document while it is there;
 - `"name"` must equal the file name without `.plan.json`, so `"name": "mainnet"` for the path above;
